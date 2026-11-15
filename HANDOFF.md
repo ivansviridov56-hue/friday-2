@@ -6,7 +6,7 @@
 4. At the end of the session, update PROGRESS.md and this file.
 
 ## Current state
-Stage 0 (foundation) in progress. Venv, pytest and git are set up.
+Stage 0 done. Repo is public on GitHub, CI is green. Starting Stage 1.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
