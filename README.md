@@ -18,3 +18,5 @@ An open-source, test-driven voice assistant for Windows, written in Python.
     pytest
 
 Русская версия: [README.ru.md](README.ru.md). License: MIT.
+
+Unofficial fan project. Not affiliated with Marvel or Disney.

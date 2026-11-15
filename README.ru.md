@@ -8,3 +8,5 @@
 `.venv\Scripts\Activate.ps1`, затем `pip install pytest` и `pytest`.
 
 Лицензия: MIT.
+
+Неофициальный фанатский проект, не связан с Marvel и Disney.
