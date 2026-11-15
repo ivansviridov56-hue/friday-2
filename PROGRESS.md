@@ -11,6 +11,7 @@
     - [x] Free LLM sources reachable from Belarus without VPN: Cloudflare Workers AI
       (460-800 ms), OpenRouter free models (limited daily quota)
     - [x] Not available: Groq, Cerebras, NVIDIA (phone check), Mistral (paid), Gemini (no VPN)
+- [x] Stage 1b: Russian quality bench; chain: Cloudflare mistral-small-3.1 → llama-3.3-70b → OpenRouter free
 
 ## Next
 Stage 1b: quality test of Russian answers on 3 Cloudflare models
