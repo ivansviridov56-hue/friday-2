@@ -5,7 +5,7 @@
 **Статус:** ранняя разработка (этап 0). Пока не готов к использованию.
 
 Запуск тестов: создать окружение `py -3.11 -m venv .venv`, активировать
-`.venv\Scripts\Activate.ps1`, затем `pip install pytest` и `pytest`.
+`.venv\Scripts\Activate.ps1`, затем `pip install -r requirements-local.txt` и `pytest`.
 
 Лицензия: MIT.
 

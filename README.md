@@ -14,7 +14,7 @@ An open-source, test-driven voice assistant for Windows, written in Python.
 
     py -3.11 -m venv .venv
     .venv\Scripts\Activate.ps1
-    pip install pytest
+    pip install -r requirements-local.txt
     pytest
 
 Русская версия: [README.ru.md](README.ru.md). License: MIT.
