@@ -58,7 +58,6 @@
   forms; Whisper hears "Пятница" as "Бэтни" and similar.
 
 ## Next
-Stage 4b: quality polish. Persona: always feminine forms, say "not sure" instead of
-inventing facts. STT: initial_prompt with the name "Пятница" (and "Яндекс Музыка").
-Then: PyWebView window, wake word "Пятница", Yandex Music, screen vision,
-long-term memory.
+Stage 5: PyWebView window. Later: wake word "Пятница", Yandex Music, screen vision,
+long-term memory. Skipped for now (user's decision): quality polish of persona and
+STT hints (feminine forms, "not sure" instead of invented facts, "Пятница" prompt).

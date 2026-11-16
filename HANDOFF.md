@@ -9,7 +9,7 @@
 Stages 0-4 done: persona, LLM client with fallback chain, TTS (with retry), STT,
 microphone capture, push-to-talk on mouse side button X2, dialogue memory,
 conversation loop. Run it with `python -m friday.voice`.
-Repo is public on GitHub, CI should be green. Next: quality polish (persona, STT hints).
+Repo is public on GitHub, CI should be green. Next: PyWebView window.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
