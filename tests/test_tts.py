@@ -8,8 +8,9 @@ from friday.tts import (
     clean_for_speech,
     speak_async,
     split_sentences,
-    synthesize,
     split_for_speech,
+    synthesize,
+    synthesize_with_retry,
 )
 
 
@@ -119,3 +120,52 @@ def test_parallel_synthesis_is_limited():
     )
     assert count == 5 and len(played) == 5
     assert SlowCommunicate.peak <= 2
+
+
+@pytest.fixture(autouse=True)
+def no_retry_delay(monkeypatch):
+    monkeypatch.setattr("friday.tts.RETRY_DELAY", 0)
+
+
+def make_flaky(fail_times: int):
+    class Flaky:
+        calls = 0
+
+        def __init__(self, text, voice, rate, pitch):
+            self.text = text
+
+        async def stream(self):
+            Flaky.calls += 1
+            if Flaky.calls <= fail_times:
+                raise ConnectionError("service dropped the request")
+            yield {"type": "audio", "data": self.text.encode()}
+
+    return Flaky
+
+
+def test_retry_succeeds_after_transient_failures():
+    flaky = make_flaky(fail_times=2)
+    audio = asyncio.run(synthesize_with_retry("Раз", communicate=flaky, attempts=3))
+    assert audio == "Раз".encode()
+    assert flaky.calls == 3
+
+
+def test_retry_gives_up_after_all_attempts():
+    flaky = make_flaky(fail_times=10)
+    with pytest.raises(ConnectionError):
+        asyncio.run(synthesize_with_retry("Раз", communicate=flaky, attempts=3))
+    assert flaky.calls == 3
+
+
+def test_retry_also_covers_empty_audio():
+    with pytest.raises(TtsError):
+        asyncio.run(
+            synthesize_with_retry("fail", communicate=FakeCommunicate, attempts=2)
+        )
+
+
+def test_speak_recovers_a_chunk_that_fails_once():
+    flaky = make_flaky(fail_times=1)
+    played = []
+    count = asyncio.run(speak_async("Раз. Два. Три.", played.append, communicate=flaky))
+    assert count == 3

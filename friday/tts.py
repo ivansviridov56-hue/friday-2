@@ -16,6 +16,8 @@ _CLAUSE_BREAK = re.compile(r"(?<=[,;:])\s+")
 FIRST_CHUNK_MAX = 50
 CHUNK_MAX = 90
 MAX_PARALLEL = 2
+RETRY_ATTEMPTS = 3
+RETRY_DELAY = 0.4  # seconds, multiplied by the attempt number
 
 
 class TtsError(Exception):
@@ -90,6 +92,30 @@ async def synthesize(
     return b"".join(chunks)
 
 
+async def synthesize_with_retry(
+    text: str,
+    settings: TtsSettings = TtsSettings(),
+    communicate=None,
+    attempts: int = RETRY_ATTEMPTS,
+) -> bytes:
+    """Edge sometimes answers with no audio; a short pause and retry fixes most."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return await synthesize(text, settings, communicate)
+        except Exception as exc:
+            if attempt == attempts:
+                raise
+            log.warning(
+                "tts attempt %d/%d failed for %r: %s",
+                attempt,
+                attempts,
+                text[:30],
+                type(exc).__name__,
+            )
+            await asyncio.sleep(RETRY_DELAY * attempt)
+    raise TtsError("unreachable")  # keeps type checkers happy
+
+
 async def speak_async(
     text: str, play, settings: TtsSettings = TtsSettings(), communicate=None
 ) -> int:
@@ -99,7 +125,7 @@ async def speak_async(
 
     async def render(chunk: str) -> bytes:
         async with gate:
-            return await synthesize(chunk, settings, communicate)
+            return await synthesize_with_retry(chunk, settings, communicate)
 
     begun = time.perf_counter()
     tasks = [asyncio.create_task(render(chunk)) for chunk in chunks]

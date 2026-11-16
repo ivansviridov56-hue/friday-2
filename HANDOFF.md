@@ -1,14 +1,15 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 91 passed).
+2. Ask the user to run `pytest` and paste the result (expect 112 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
 ## Current state
-Stages 0-3c done: persona, LLM client with fallback chain, TTS, STT,
-microphone capture, push-to-talk on mouse side button X2.
-Repo is public on GitHub, CI is green. Next module: the conversation loop.
+Stages 0-4 done: persona, LLM client with fallback chain, TTS (with retry), STT,
+microphone capture, push-to-talk on mouse side button X2, dialogue memory,
+conversation loop. Run it with `python -m friday.voice`.
+Repo is public on GitHub, CI should be green. Next: quality polish (persona, STT hints).
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -24,3 +25,5 @@ Repo is public on GitHub, CI is green. Next module: the conversation loop.
 - Not wanted: voice cloning (XTTS).
 - Dependencies: requirements.txt is light (CI); requirements-local.txt has
   faster-whisper, sounddevice and CUDA packages for the user's machine.
+- Dialogue memory: last 5 exchanges. First version: a new phrase is ignored while
+  the assistant is answering (no interruption, no queue).

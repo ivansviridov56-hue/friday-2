@@ -20,7 +20,7 @@ class PushToTalk:
     def __init__(
         self,
         recorder: AudioRecorder,
-        on_audio: Callable[[np.ndarray], None],
+        on_audio: Callable[[np.ndarray], object],
         min_duration: float = 0.3,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:

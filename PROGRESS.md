@@ -25,6 +25,16 @@
   - friday/mouse_trigger.py (global hook via pynput, swallows X2 so the browser
     does not go "forward"; callbacks run in a worker thread, not in the hook)
   - Checked by voice: first word is not cut off, short clicks are discarded
+- [x] Stage 4: conversation loop, console version, 112 tests
+  - friday/history.py (last 5 exchanges, an exchange is stored only after a successful reply)
+  - friday/assistant.py (one turn: audio -> STT -> LLM -> TTS; spoken failure phrase
+    if all providers fail; a broken speaker does not kill the loop)
+  - friday/turn_runner.py (one turn at a time in a background thread, so the mouse
+    hook thread never blocks; new audio during an answer is dropped and logged)
+  - friday/voice.py: `python -m friday.voice`, glue only, checked live (no unit tests)
+  - TTS: retry with a short pause when Edge returns no audio (3 attempts)
+  - Checked by voice: dialogue memory works, phrase during an answer is ignored,
+    the assistant answers again afterwards, Ctrl+C exits
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -38,8 +48,17 @@
   the assistant runs. Needed later for the wake word "Пятница" anyway.
 - Windows ignores a global hook for windows that run as administrator, unless
   the assistant also runs as administrator.
+- Edge TTS sometimes returns NoAudioReceived; retry fixed it in live runs. Synthesis
+  speed varies from 1.3 s to 4 s per chunk (service side). If it bothers us, try
+  MAX_PARALLEL = 1.
+- On Windows `threading.Event().wait()` blocks Ctrl+C; wait in a loop with a timeout.
+- chat.py still has its own history (trim_history); it is a manual tool, not migrated
+  to ConversationHistory.
+- Known quality issues: the free LLM sometimes invents facts and slips into masculine
+  forms; Whisper hears "Пятница" as "Бэтни" and similar.
 
 ## Next
-Stage 4: conversation loop: push-to-talk -> STT -> LLM (persona) -> TTS.
-Console first, then the PyWebView window. Later: wake word "Пятница",
-Yandex Music, screen vision, long-term memory.
+Stage 4b: quality polish. Persona: always feminine forms, say "not sure" instead of
+inventing facts. STT: initial_prompt with the name "Пятница" (and "Яндекс Музыка").
+Then: PyWebView window, wake word "Пятница", Yandex Music, screen vision,
+long-term memory.
