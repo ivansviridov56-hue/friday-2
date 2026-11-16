@@ -1,0 +1,5 @@
+-r requirements.txt
+faster-whisper
+sounddevice
+nvidia-cublas-cu12; sys_platform == "win32"
+nvidia-cudnn-cu12==9.*; sys_platform == "win32"
