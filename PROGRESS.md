@@ -35,6 +35,16 @@
   - TTS: retry with a short pause when Edge returns no audio (3 attempts)
   - Checked by voice: dialogue memory works, phrase during an answer is ignored,
     the assistant answers again afterwards, Ctrl+C exits
+- [x] Stage 5: PyWebView window, 129 tests
+  - friday/ui_events.py (thread-safe event bus: StateChanged, MessageAdded)
+  - friday/assistant.py publishes events (THINKING, messages, SPEAKING, IDLE)
+  - friday/ui_bridge.py (events -> JS calls, queued until the page has loaded)
+  - friday/listening_indicator.py (LISTENING only when free; back to IDLE on a short or dropped press)
+  - friday/ui/index.html (dark theme, chat bubbles, state dot), friday/window.py (live-checked, no unit tests)
+  - friday/voice.py: window on the main thread, assistant in a background thread,
+    closing the window stops everything
+  - Checked by voice: states change in the right order, short click blinks and returns
+    to idle, phrase during an answer is ignored, closing the window exits cleanly
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -56,8 +66,11 @@
   to ConversationHistory.
 - Known quality issues: the free LLM sometimes invents facts and slips into masculine
   forms; Whisper hears "Пятница" as "Бэтни" and similar.
+- PyWebView must run on the main thread. pywebview is in requirements-local.txt only (CI stays light).
+- While Whisper warms up (~4 s) the window shows "Готова", but the button does not work yet.
+  Idea: a "loading" state.
 
 ## Next
-Stage 5: PyWebView window. Later: wake word "Пятница", Yandex Music, screen vision,
-long-term memory. Skipped for now (user's decision): quality polish of persona and
-STT hints (feminine forms, "not sure" instead of invented facts, "Пятница" prompt).
+Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music control,
+screen vision, long-term memory, a "loading" state in the window. Skipped for now
+(user's decision): quality polish of persona and STT hints.

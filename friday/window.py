@@ -1,0 +1,64 @@
+"""Desktop window (PyWebView). Glue only; checked live, no unit tests.
+
+`python -m friday.window` opens the window with a short demo dialogue.
+"""
+
+from __future__ import annotations
+
+import logging
+import threading
+import time
+from pathlib import Path
+
+from friday.ui_bridge import UiBridge
+from friday.ui_events import MessageAdded, State, StateChanged, UiEventBus
+
+logger = logging.getLogger(__name__)
+
+HTML_PATH = Path(__file__).resolve().parent / "ui" / "index.html"
+
+
+def run_window(bus: UiEventBus) -> None:
+    """Show the window and block until it is closed. Must run on the main thread."""
+    import webview
+
+    window = webview.create_window(
+        "Пятница",
+        url=str(HTML_PATH),
+        width=420,
+        height=640,
+        background_color="#14161a",
+    )
+    if window is None:
+        raise RuntimeError("could not create the window")
+    bridge = UiBridge(window.evaluate_js)
+    bus.subscribe(bridge.on_event)
+    window.events.loaded += bridge.mark_ready
+    try:
+        webview.start()
+    finally:
+        bus.unsubscribe(bridge.on_event)
+
+
+def _demo(bus: UiEventBus) -> None:
+    time.sleep(1.5)
+    bus.publish(StateChanged(State.LISTENING))
+    time.sleep(1.5)
+    bus.publish(StateChanged(State.THINKING))
+    bus.publish(MessageAdded("user", "Привет, как дела?"))
+    time.sleep(1.5)
+    bus.publish(MessageAdded("assistant", "Привет! Всё хорошо, а у тебя?"))
+    bus.publish(StateChanged(State.SPEAKING))
+    time.sleep(2)
+    bus.publish(StateChanged(State.IDLE))
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO)
+    bus = UiEventBus()
+    threading.Thread(target=_demo, args=(bus,), daemon=True).start()
+    run_window(bus)
+
+
+if __name__ == "__main__":
+    main()
