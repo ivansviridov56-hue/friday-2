@@ -19,6 +19,12 @@
   - friday/stt.py (SpeechToText, lazy load, background warm-up), friday/cuda_dlls.py
   - Checked by voice: ~0.5 s per 5 s of audio, warm-up ~4 s, silence returns ""
   - CI installs only requirements.txt (light); heavy deps live in requirements-local.txt
+- [x] Stage 3c: push-to-talk on mouse side button X2, 91 tests
+  - friday/recorder.py (mic stream stays open, audio kept only while recording)
+  - friday/push_to_talk.py (press/release logic, presses under 0.3 s discarded)
+  - friday/mouse_trigger.py (global hook via pynput, swallows X2 so the browser
+    does not go "forward"; callbacks run in a worker thread, not in the hook)
+  - Checked by voice: first word is not cut off, short clicks are discarded
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -28,8 +34,12 @@
   Match commands by word stems ("яндекс", "музык"), not exact phrases.
 - Rare Whisper slips on long phrases (one wrong word in 8 tries): fine for chat,
   keep in mind for commands.
+- The always-open microphone keeps the Windows "mic in use" indicator on while
+  the assistant runs. Needed later for the wake word "Пятница" anyway.
+- Windows ignores a global hook for windows that run as administrator, unless
+  the assistant also runs as administrator.
 
 ## Next
-Stage 3c: microphone capture + push-to-talk hotkey (record while the key is held,
-return mono float32 16 kHz audio for SpeechToText). Wake word "Пятница" comes later.
-Then: conversation loop (listen -> LLM -> speak).
+Stage 4: conversation loop: push-to-talk -> STT -> LLM (persona) -> TTS.
+Console first, then the PyWebView window. Later: wake word "Пятница",
+Yandex Music, screen vision, long-term memory.

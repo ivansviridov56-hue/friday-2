@@ -1,13 +1,14 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 63 passed).
+2. Ask the user to run `pytest` and paste the result (expect 91 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
 ## Current state
-Stages 0-3b done: persona, LLM client with fallback chain, TTS, STT.
-Repo is public on GitHub, CI is green. Next module: microphone capture + hotkey.
+Stages 0-3c done: persona, LLM client with fallback chain, TTS, STT,
+microphone capture, push-to-talk on mouse side button X2.
+Repo is public on GitHub, CI is green. Next module: the conversation loop.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -15,7 +16,8 @@ Repo is public on GitHub, CI is green. Next module: microphone capture + hotkey.
   free providers and fallback (no single provider, no VPN if possible).
 - Ears: local faster-whisper large-v3-turbo on the GPU (RTX 5050, 8 GB).
   Cloudflare Whisper is a possible fallback, not needed so far.
-- Activation: push-to-talk hotkey first, wake word "Пятница" later.
+- Activation: push-to-talk on mouse side button X2 (swallowed so the browser
+  ignores it); wake word "Пятница" later.
 - Free speech, not only short commands: the user wants to talk freely.
 - Features to port from the old assistant: Yandex Music control, screen
   vision (describe a selected area), long-term memory.
