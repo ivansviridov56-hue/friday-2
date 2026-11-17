@@ -96,21 +96,47 @@ class UiaTrackPanel:
         self._button.invoke()
 
 
+def _key(element):
+    try:
+        return tuple(element.element_info.runtime_id)
+    except Exception:
+        return id(element)  # unknown identity: nothing matches, so we fail safe
+
+
+def _own_plays(container) -> list:
+    """Play buttons of a container, not counting rows of nested lists."""
+    plays = [
+        b for b in _descendants(container, "Button") if _label(b).lower() == PLAY_NAME
+    ]
+    in_lists = {
+        _key(b)
+        for lst in _descendants(container, "List")
+        for b in _descendants(lst, "Button")
+        if _label(b).lower() == PLAY_NAME
+    }
+    return [b for b in plays if _key(b) not in in_lists]
+
+
 def _panel_around(button) -> UiaTrackPanel | None:
+    me = _key(button)
     node = button
     for _ in range(MAX_LEVELS):
         try:
             node = node.parent()
         except Exception:
             return None
-        buttons = _descendants(node, "Button")
-        plays = [b for b in buttons if _label(b).lower() == PLAY_NAME]
-        if len(plays) > 1:
+        if node is None:
+            return None
+        own = _own_plays(node)
+        if len(own) > 1:
             return None  # too high: the album button is inside as well
+        buttons = _descendants(node, "Button")
         has_close = any(_label(b).lower() == CLOSE_NAME for b in buttons)
         title = _title_after_mark(node)
         if has_close and title:
-            return UiaTrackPanel(button, title)
+            if len(own) == 1 and _key(own[0]) == me:
+                return UiaTrackPanel(button, title)
+            return None  # this is a panel, but the button is not its own
     return None
 
 
@@ -130,4 +156,9 @@ def open_link(uri: str) -> None:
 
 
 def build_launcher() -> TrackLauncher:
-    return TrackLauncher(open_link, find_panel, make_is_playing(list_sessions))
+    return TrackLauncher(
+        open_link,
+        find_panel,
+        make_is_playing(list_sessions),
+        panel_timeout=15.0,
+    )

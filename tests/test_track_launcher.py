@@ -148,7 +148,7 @@ def test_find_panel_error_is_retried():
 
 def test_playing_check_error_counts_as_not_playing():
     panel = FakePanel()
-    launcher, _, _ = make(lambda: panel, sequence(RuntimeError("smtc"), True))
+    launcher, _, _ = make(lambda: panel, sequence(RuntimeError("smtc"), False, True))
     assert launcher.launch("link", "Song").status is LaunchStatus.STARTED
     assert panel.presses == 1
 
@@ -156,13 +156,16 @@ def test_playing_check_error_counts_as_not_playing():
 def test_link_is_opened_before_panel_search():
     events: list[str] = []
     panel = FakePanel()
+    answers = iter([False, False, True])
 
     def find_panel():
         events.append("find")
         return panel
 
     launcher, _, _ = make(
-        find_panel, lambda title: True, open_link=lambda link: events.append("open")
+        find_panel,
+        lambda title: next(answers, True),
+        open_link=lambda link: events.append("open"),
     )
     launcher.launch("link", "Song")
     assert events[0] == "open"
@@ -175,3 +178,15 @@ def test_link_is_opened_before_panel_search():
 )
 def test_normalize(raw, expected):
     assert normalize(raw) == expected
+
+
+def test_already_playing_skips_link_and_panel():
+    events = []
+    launcher = TrackLauncher(
+        lambda link: events.append("open"),
+        lambda: events.append("find"),
+        lambda title: True,
+    )
+    result = launcher.launch("link", "Song")
+    assert result.status is LaunchStatus.ALREADY_PLAYING
+    assert events == []

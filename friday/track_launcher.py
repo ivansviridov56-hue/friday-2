@@ -67,6 +67,8 @@ class TrackLauncher:
         self._interval = poll_interval
 
     def launch(self, link: str, title: str) -> LaunchResult:
+        if self._safe_playing(title):
+            return LaunchResult(LaunchStatus.ALREADY_PLAYING, title)
         try:
             self._open_link(link)
         except Exception as error:
