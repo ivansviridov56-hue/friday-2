@@ -3,6 +3,7 @@ faster-whisper
 sounddevice
 pynput
 pywebview
+yandex-music
 nvidia-cublas-cu12; sys_platform == "win32"
 nvidia-cudnn-cu12==9.*; sys_platform == "win32"
 winsdk; sys_platform == "win32"

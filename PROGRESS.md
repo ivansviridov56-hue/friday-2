@@ -120,6 +120,12 @@
 - The panel button toggles: check SMTC first, do not click if the track already plays.
 - Console noise (ERR_FAILED, "Unable to move the cache") comes from the second app launch
   done by `os.startfile`; it is harmless, hide it in the module.
+- Yandex Music search (yandex-music 3.2.2, YM_TOKEN in .env) works from Belarus without a VPN.
+  `client.search(text, type_="track")` returns up to 20 tracks. The first result was the
+  right track for "Полетели Киркоров", "Till I Collapse Eminem" and the Whisper-style
+  "тил ай коллапс эминем" (Yandex handles transliteration). Second hit can be an
+  "Instrumental" version, so skip those. `artist.name` can be None. The same track id can
+  come with different album ids; link: `yandexmusic://album/<album_id>/track/<track_id>`.
 
 ## Next
 Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),

@@ -34,3 +34,9 @@ Yandex Music control by voice (pause, play, next, previous, what’s playing)
 - Yandex Music is controlled through its own Windows media session (SMTC, winsdk),
   never through global media keys: those also hit browsers and other players.
   Local commands skip the LLM and are not stored in dialogue memory. Success confirmations of music commands are not spoken (window only); errors and “what’s playing” are spoken.
+- Yandex Music by name: search needs `YM_TOKEN` in `.env` (variant A). The core (stage 6
+  commands) works without a token. Without a token Friday says a token is needed.
+  First phrases: "включи [track]" and "включи [artist] [track]"; whole artist later.
+  A track is started through the link plus UI Automation invoke() on the track panel's
+  button (found by structure, never by name or size alone), and success is confirmed via
+  SMTC before Friday says "Включаю".
