@@ -7,12 +7,12 @@ from friday.music_search import SearchStatus, TrackSearch
 
 
 def raw(
-    track_id,
-    title="Song",
-    artists=("Artist",),
-    album_id=7,
-    version=None,
-    available=True,
+    track_id: int,
+    title: str = "Song",
+    artists: tuple[str | None, ...] = ("Artist",),
+    album_id: int | None = 7,
+    version: str | None = None,
+    available: bool = True,
 ):
     return SimpleNamespace(
         id=track_id,
@@ -51,12 +51,18 @@ def make_search(client, token="tok"):
     return TrackSearch(token, factory), created
 
 
-def test_picks_first_playable_track():
-    search, _ = make_search(FakeClient(response(raw(1, "First"), raw(2, "Second"))))
-    result = search.find("song")
+def found(search: TrackSearch, query: str):
+    result = search.find(query)
     assert result.status is SearchStatus.FOUND
-    assert result.track.track_id == "1"
-    assert result.track.album_id == "7"
+    assert result.track is not None
+    return result.track
+
+
+def test_picks_first_playable_track():
+    search, _ = make_search(FakeClient(response(raw(1), raw(2))))
+    track = found(search, "song")
+    assert track.track_id == "1"
+    assert track.album_id == "7"
 
 
 def test_skips_instrumental_version():
@@ -65,12 +71,12 @@ def test_skips_instrumental_version():
         raw(2, "Till I Collapse", version="from the film"),
     )
     search, _ = make_search(FakeClient(tracks))
-    assert search.find("till i collapse").track.track_id == "2"
+    assert found(search, "till i collapse").track_id == "2"
 
 
 def test_falls_back_when_only_unwanted_versions_exist():
     search, _ = make_search(FakeClient(response(raw(1, "Song", version="Karaoke"))))
-    assert search.find("song").track.track_id == "1"
+    assert found(search, "song").track_id == "1"
 
 
 @pytest.mark.parametrize(
@@ -79,31 +85,31 @@ def test_falls_back_when_only_unwanted_versions_exist():
 def test_keeps_unwanted_version_when_asked(query):
     tracks = response(raw(1, "Song", version="Instrumental"), raw(2, "Song"))
     search, _ = make_search(FakeClient(tracks))
-    assert search.find(query).track.track_id == "1"
+    assert found(search, query).track_id == "1"
 
 
 def test_skips_unavailable_track():
     tracks = response(raw(1, available=False), raw(2))
     search, _ = make_search(FakeClient(tracks))
-    assert search.find("song").track.track_id == "2"
+    assert found(search, "song").track_id == "2"
 
 
 def test_skips_track_without_album():
     tracks = response(raw(1, album_id=None), raw(2))
     search, _ = make_search(FakeClient(tracks))
-    assert search.find("song").track.track_id == "2"
+    assert found(search, "song").track_id == "2"
 
 
 def test_artist_without_name_is_ignored():
     search, _ = make_search(FakeClient(response(raw(1, artists=(None, "Real")))))
-    assert search.find("song").track.artists == "Real"
+    assert found(search, "song").artists == "Real"
 
 
 def test_link_and_display_name():
     search, _ = make_search(
         FakeClient(response(raw(5, "Title", artists=("A", "B"), album_id=9)))
     )
-    track = search.find("title").track
+    track = found(search, "title")
     assert track.link == "yandexmusic://album/9/track/5"
     assert track.display_name == "A, B, Title"
 
