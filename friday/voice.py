@@ -14,6 +14,9 @@ from friday.audio import PygamePlayer
 from friday.listening_indicator import ListeningIndicator
 from friday.llm import LLMClient
 from friday.mouse_trigger import XBUTTON2, SideButtonTrigger
+from friday.music import MusicController
+from friday.music_handler import make_music_handler
+from friday.smtc import list_sessions
 from friday.persona import build_system_prompt
 from friday.push_to_talk import PushToTalk
 from friday.recorder import Recorder
@@ -30,7 +33,9 @@ def _show(turn: Turn | None) -> None:
     if turn is None:
         return
     print(f"Вы: {turn.heard}")
-    if turn.reply is None:
+    if turn.local_reply is not None:
+        print(f"Пятница [команда]: {turn.local_reply}")
+    elif turn.reply is None:
         print("Пятница: [нейросеть недоступна]")
     else:
         print(
@@ -55,6 +60,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             lambda text: speak_text(text, player.play),
             system_prompt=build_system_prompt(),
             events=bus,
+            commands=make_music_handler(MusicController(list_sessions)),
         )
         runner = TurnRunner(lambda audio: _show(assistant.handle_audio(audio)))
         indicator = ListeningIndicator(bus, lambda: runner.is_busy)

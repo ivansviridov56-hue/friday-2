@@ -61,6 +61,17 @@
     (the assistant thread can publish before the window subscribes)
   - Checked live: loading -> idle after Whisper warm-up, then normal dialogue
 
+- [x] Stage 6: Yandex Music control, 187 tests
+  - friday/smtc.py (the only module that imports winsdk; live-checked), friday/music.py
+    (MusicController: a command goes only to the Yandex Music media session, never to
+    a browser or another player), friday/ym_probe.py (diagnostic: lists media sessions)
+  - friday/music_commands.py (word-stem parser; needs a music word and a short phrase,
+    so free conversation is not hijacked), friday/music_handler.py (glue)
+  - Assistant takes an optional `commands` handler: a command is answered locally,
+    skips the LLM and is not stored in dialogue memory
+  - Checked by voice: pause / play / next / previous / what's playing; Music closed ->
+    Friday says she cannot see it; ordinary speech still goes to the LLM
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -84,8 +95,16 @@
 - PyWebView must run on the main thread. pywebview is in requirements-local.txt only (CI stays light).
 - If the assistant crashes during loading, the window stays on "Загружаюсь…" and the
   reason is only in the console log. Idea: an "error" state.
+- "Previous" in Yandex Music first rewinds the current track to the start; repeat the
+  command to go to the previous one (app behaviour, left as is by the user's decision).
+- Music command stems in music_commands.py are tuned for Whisper output. If a phrase
+  misfires or is missed, the log has "music command X from '...'" and the "Вы:" line.
+- While a spoken answer is playing a new phrase is dropped, so quick repeated music
+  commands get lost (decision pending: do not speak successful music commands).
+- Not done: playing a specific track and "My Wave". Needs a decision (yandex-music
+  token vs window automation). The old project has both: D:\Project\Friday\music\yandex.py.
 
 ## Next
-Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music control,
+Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),
 screen vision, long-term memory, an "error" state in the window. Skipped for now
 (user's decision): quality polish of persona and STT hints.

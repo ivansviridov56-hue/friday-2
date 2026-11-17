@@ -20,6 +20,7 @@ product yet.
 - Spoken answers (Edge TTS)
 - Short dialogue memory
 - Desktop window (PyWebView) with the chat and a state indicator
+- Yandex Music control by voice (pause, play, next, previous, what's playing)
 
 ## Development
 

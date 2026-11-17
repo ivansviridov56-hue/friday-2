@@ -26,9 +26,18 @@ class Brain(Protocol):
 
 
 @dataclass(frozen=True)
+class CommandReply:
+    """Answer of a local command. `spoken=False`: show it in the window only."""
+
+    text: str
+    spoken: bool = True
+
+
+@dataclass(frozen=True)
 class Turn:
     heard: str
-    reply: Reply | None  # None when every LLM provider failed
+    reply: Reply | None  # None when every LLM provider failed or a command answered
+    local_reply: str | None = None  # answer of a local command (no LLM involved)
 
 
 class Assistant:
@@ -41,6 +50,7 @@ class Assistant:
         history: ConversationHistory | None = None,
         failure_phrase: str = FAILURE_PHRASE,
         events: UiEventBus | None = None,
+        commands: Callable[[str], CommandReply | None] | None = None,
     ) -> None:
         self._stt = stt
         self._llm = llm
@@ -49,6 +59,7 @@ class Assistant:
         self._history = history or ConversationHistory()
         self._failure_phrase = failure_phrase
         self._events = events or UiEventBus()
+        self._commands = commands
 
     def handle_audio(self, audio: np.ndarray) -> Turn | None:
         """Run one turn. Returns None if nothing was heard."""
@@ -64,6 +75,12 @@ class Assistant:
             log.info("nothing heard")
             return None
         self._events.publish(MessageAdded("user", heard))
+        local = self._try_command(heard)
+        if local is not None:
+            self._events.publish(MessageAdded("assistant", local.text))
+            if local.spoken:
+                self._say(local.text)
+            return Turn(heard, None, local_reply=local.text)
 
         messages = [{"role": "system", "content": self._system_prompt}]
         messages += self._history.messages_with(heard)
@@ -80,6 +97,15 @@ class Assistant:
         self._events.publish(MessageAdded("assistant", reply.text))
         self._say(reply.text)
         return Turn(heard, reply)
+
+    def _try_command(self, heard: str) -> CommandReply | None:
+        if self._commands is None:
+            return None
+        try:
+            return self._commands(heard)
+        except Exception:  # a broken command must not kill the turn
+            log.exception("command handler failed")
+            return None
 
     def _say(self, text: str) -> None:
         self._set_state(State.SPEAKING)
