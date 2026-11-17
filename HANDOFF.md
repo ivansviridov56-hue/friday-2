@@ -40,3 +40,8 @@ Yandex Music control by voice (pause, play, next, previous, what’s playing)
   A track is started through the link plus UI Automation invoke() on the track panel's
   button (found by structure, never by name or size alone), and success is confirmed via
   SMTC before Friday says "Включаю".
+- Track choice: first search result that is available; versions like Instrumental / Karaoke /
+  Acapella are skipped unless the phrase itself asks for them. If only such versions exist, the
+  first available one is used.
+- Voice feedback: commands with a search are spoken ("Включаю <artist>, <title>") once Music
+  confirms playback, so a wrong match is heard at once. pause / play / next / previous stay silent.
