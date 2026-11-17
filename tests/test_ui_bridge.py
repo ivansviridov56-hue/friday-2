@@ -47,3 +47,11 @@ def test_failing_window_does_not_raise():
     bridge = UiBridge(broken)
     bridge.mark_ready()
     bridge.on_event(StateChanged(State.IDLE))
+
+
+def test_error_state_reaches_the_page():
+    scripts = []
+    bridge = UiBridge(scripts.append)
+    bridge.mark_ready()
+    bridge.on_event(StateChanged(State.ERROR))
+    assert scripts == [state_js("error")]

@@ -72,6 +72,10 @@
   - Checked by voice: pause / play / next / previous / what's playing; Music closed ->
     Friday says she cannot see it; ordinary speech still goes to the LLM
 
+  - [x] Stage 6b: "error" state in the window, 199 tests
+  - State.ERROR; if the assistant crashes while loading, the window turns red with
+    "Ошибка запуска. Подробности в консоли." (details stay in the console log)
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -93,8 +97,6 @@
 - Known quality issues: the free LLM sometimes invents facts and slips into masculine
   forms; Whisper hears "Пятница" as "Бэтни" and similar.
 - PyWebView must run on the main thread. pywebview is in requirements-local.txt only (CI stays light).
-- If the assistant crashes during loading, the window stays on "Загружаюсь…" and the
-  reason is only in the console log. Idea: an "error" state.
 - "Previous" in Yandex Music first rewinds the current track to the start; repeat the
   command to go to the previous one (app behaviour, left as is by the user's decision).
 - Music command stems in music_commands.py are tuned for Whisper output. If a phrase
@@ -107,5 +109,5 @@
 
 ## Next
 Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),
-screen vision, long-term memory, an "error" state in the window. Skipped for now
+screen vision, long-term memory. Skipped for now
 (user's decision): quality polish of persona and STT hints.

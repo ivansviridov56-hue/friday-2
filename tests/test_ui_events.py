@@ -55,3 +55,7 @@ def test_late_subscriber_does_not_get_old_messages():
 
 def test_loading_state_value_for_the_page():
     assert State.LOADING.value == "loading"
+
+
+def test_error_state_value_for_the_page():
+    assert State.ERROR.value == "error"

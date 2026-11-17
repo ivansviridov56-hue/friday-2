@@ -8,6 +8,7 @@
     --bg: #14161a; --panel: #1d2026; --text: #e6e8eb; --muted: #8b919a;
     --user: #2b3a55; --idle: #5b616b; --listening: #4fb36b;
     --thinking: #e0a93b; --speaking: #4f8fe0;
+    --error: #d9534f;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -27,6 +28,7 @@
   #dot.listening { background: var(--listening); }
   #dot.thinking { background: var(--thinking); }
   #dot.speaking { background: var(--speaking); }
+  #dot.error { background: var(--error); }
   #dot.loading { background: var(--thinking); animation: pulse 1s infinite; }
   @keyframes pulse { 50% { opacity: 0.3; } }
   #status { color: var(--muted); font-size: 14px; }
@@ -53,6 +55,7 @@
     loading: "Загружаюсь…",
     idle: "Готова", listening: "Слушаю…",
     thinking: "Думаю…", speaking: "Говорю…",
+    error: "Ошибка запуска. Подробности в консоли.",
   };
   const dot = document.getElementById("dot");
   const status = document.getElementById("status");

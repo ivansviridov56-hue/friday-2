@@ -92,6 +92,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             pass
     except Exception:
         log.exception("assistant crashed")
+        bus.publish(StateChanged(State.ERROR))
     finally:
         if trigger is not None:
             trigger.stop()

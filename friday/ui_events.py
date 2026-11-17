@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class State(str, Enum):
     LOADING = "loading"
+    ERROR = "error"
     IDLE = "idle"
     LISTENING = "listening"
     THINKING = "thinking"
