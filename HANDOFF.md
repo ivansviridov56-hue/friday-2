@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 187 passed).
+2. Ask the user to run `pytest` and paste the result (expect 197 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -33,4 +33,4 @@ Yandex Music control by voice (pause, play, next, previous, what’s playing)
   thinking / speaking), dark theme. No buttons, text input or settings yet.
 - Yandex Music is controlled through its own Windows media session (SMTC, winsdk),
   never through global media keys: those also hit browsers and other players.
-  Local commands skip the LLM and are not stored in dialogue memory.
+  Local commands skip the LLM and are not stored in dialogue memory. Success confirmations of music commands are not spoken (window only); errors and “what’s playing” are spoken.

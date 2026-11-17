@@ -61,7 +61,7 @@
     (the assistant thread can publish before the window subscribes)
   - Checked live: loading -> idle after Whisper warm-up, then normal dialogue
 
-- [x] Stage 6: Yandex Music control, 187 tests
+- [x] Stage 6: Yandex Music control, 197 tests
   - friday/smtc.py (the only module that imports winsdk; live-checked), friday/music.py
     (MusicController: a command goes only to the Yandex Music media session, never to
     a browser or another player), friday/ym_probe.py (diagnostic: lists media sessions)
@@ -99,8 +99,9 @@
   command to go to the previous one (app behaviour, left as is by the user's decision).
 - Music command stems in music_commands.py are tuned for Whisper output. If a phrase
   misfires or is missed, the log has "music command X from '...'" and the "Вы:" line.
-- While a spoken answer is playing a new phrase is dropped, so quick repeated music
-  commands get lost (decision pending: do not speak successful music commands).
+- Successful play / pause / next / previous answers are shown in the window but not
+  spoken (so quick repeated commands are not lost while she talks). Errors and
+  "what's playing" are spoken.
 - Not done: playing a specific track and "My Wave". Needs a decision (yandex-music
   token vs window automation). The old project has both: D:\Project\Friday\music\yandex.py.
 

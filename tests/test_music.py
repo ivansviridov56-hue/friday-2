@@ -125,3 +125,9 @@ def test_now_playing_without_title():
     empty = NowPlaying("", "", PlaybackStatus.OTHER)
     music = FakeSession("yandexmusic", now=empty)
     assert controller(music).now_playing() == NOTHING_PLAYING
+
+
+def test_now_playing_does_not_double_the_punctuation():
+    track = NowPlaying("До скорой встречи!", "Звери", PlaybackStatus.PLAYING)
+    music = FakeSession("yandexmusic", now=track)
+    assert controller(music).now_playing() == "Сейчас играет Звери, До скорой встречи!"

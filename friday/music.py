@@ -58,6 +58,11 @@ class MediaSession(Protocol):
 SessionLister = Callable[[], Awaitable[Sequence[MediaSession]]]
 
 
+def _sentence(text: str) -> str:
+    """Add a final period unless the text already ends with punctuation."""
+    return text if text.endswith((".", "!", "?", "…")) else text + "."
+
+
 class MusicController:
     """Sync facade: every method returns a phrase the assistant can speak."""
 
@@ -114,8 +119,8 @@ class MusicController:
             return NOTHING_PLAYING
         who = f"{info.artist}, {info.title}" if info.artist else info.title
         if info.status is PlaybackStatus.PAUSED:
-            return f"На паузе: {who}."
-        return f"Сейчас играет {who}."
+            return f"На паузе: {_sentence(who)}"
+        return f"Сейчас играет {_sentence(who)}"
 
 
 def main(argv: list[str] | None = None) -> None:
