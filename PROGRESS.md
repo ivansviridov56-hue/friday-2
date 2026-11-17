@@ -76,6 +76,12 @@
   - State.ERROR; if the assistant crashes while loading, the window turns red with
     "Ошибка запуска. Подробности в консоли." (details stay in the console log)
 
+  - [x] Stage 7a-7b: Yandex Music track search, 220 tests
+  - friday/ym_search_probe.py (diagnostic, live-checked), friday/music_search.py
+    (TrackSearch: phrase -> one track or a status FOUND / NOT_FOUND / NO_TOKEN / ERROR;
+    the token is never logged; client is created lazily and retried after an error)
+  - Next: 7c (start the track), 7d (voice command "включи ...")
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
