@@ -106,6 +106,20 @@
   "what's playing" are spoken.
 - Not done: playing a specific track and "My Wave". Needs a decision (yandex-music
   token vs window automation). The old project has both: D:\Project\Friday\music\yandex.py.
+- Yandex Music tracks: the link `yandexmusic://album/<id>/track/<id>` (from a share link)
+  only opens the track page, it does not play. UI Automation `invoke()` on the track
+  panel's "Воспроизведение" button starts the track without mouse movement. The page has
+  two big identical buttons (album vs track panel; all have name "Воспроизведение" and
+  empty id), so never pick one by name or size alone.
+- Reliable anchor for the track panel button: the container (Custom) that holds a
+  "Закрыть" button, a "Трек" text and the track title text; the right button is the
+  "Воспроизведение" inside it. Compare the title with the requested track before clicking.
+- Window visibility: opening the link brings the window to the front by itself, also when
+  it was fully covered or minimized. A half-covered window still exposes its elements.
+  A window that stays fully covered gives 0 candidates, so always open the link first.
+- The panel button toggles: check SMTC first, do not click if the track already plays.
+- Console noise (ERR_FAILED, "Unable to move the cache") comes from the second app launch
+  done by `os.startfile`; it is harmless, hide it in the module.
 
 ## Next
 Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),
