@@ -34,3 +34,24 @@ def test_unsubscribe_stops_delivery():
     bus.unsubscribe(got.append)
     bus.publish(StateChanged(State.SPEAKING))
     assert got == []
+
+
+def test_late_subscriber_gets_the_last_state():
+    bus = UiEventBus()
+    bus.publish(StateChanged(State.LOADING))
+    bus.publish(StateChanged(State.IDLE))
+    got = []
+    bus.subscribe(got.append)
+    assert got == [StateChanged(State.IDLE)]
+
+
+def test_late_subscriber_does_not_get_old_messages():
+    bus = UiEventBus()
+    bus.publish(MessageAdded("user", "привет"))
+    got = []
+    bus.subscribe(got.append)
+    assert got == []
+
+
+def test_loading_state_value_for_the_page():
+    assert State.LOADING.value == "loading"

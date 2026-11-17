@@ -1,20 +1,26 @@
 # Progress
 
 ## Done
+
 - [x] Stage 0: foundation
   - Python 3.11.9, git, VS Code, .venv, pytest
   - Skeleton + smoke tests (2 passed)
   - CLAUDE.md, HANDOFF.md, PROGRESS.md, README (en/ru), LICENSE (MIT)
   - Public repo: https://github.com/ivansviridov56-hue/friday-2
   - GitHub Actions runs pytest on every push (green)
+
 - [x] Stage 1a: probe tools (probe.py, scan.py, catalog.py, cf_probe.py), 19 tests
   - [x] Free LLM sources reachable from Belarus without VPN: Cloudflare Workers AI
     (460-800 ms), OpenRouter free models (limited daily quota)
   - [x] Not available: Groq, Cerebras, NVIDIA (phone check), Mistral (paid), Gemini (no VPN)
+
 - [x] Stage 1b: Russian quality bench; chain: Cloudflare mistral-small-3.1 -> llama-3.3-70b -> OpenRouter free
+
 - [x] Stage 2: persona (feminine, informal) + LLM client with fallback chain, 37 tests
+
 - [x] Stage 3a: TTS (Edge, voice Svetlana +30%), chunked + prefetched playback,
       first sound in ~1.2-1.9 s, 55 tests
+
 - [x] Stage 3b: STT (faster-whisper large-v3-turbo, float16 on RTX 5050), 63 tests
   - friday/stt.py (SpeechToText, lazy load, background warm-up), friday/cuda_dlls.py
   - Checked by voice: ~0.5 s per 5 s of audio, warm-up ~4 s, silence returns ""
@@ -25,6 +31,7 @@
   - friday/mouse_trigger.py (global hook via pynput, swallows X2 so the browser
     does not go "forward"; callbacks run in a worker thread, not in the hook)
   - Checked by voice: first word is not cut off, short clicks are discarded
+
 - [x] Stage 4: conversation loop, console version, 112 tests
   - friday/history.py (last 5 exchanges, an exchange is stored only after a successful reply)
   - friday/assistant.py (one turn: audio -> STT -> LLM -> TTS; spoken failure phrase
@@ -35,6 +42,7 @@
   - TTS: retry with a short pause when Edge returns no audio (3 attempts)
   - Checked by voice: dialogue memory works, phrase during an answer is ignored,
     the assistant answers again afterwards, Ctrl+C exits
+
 - [x] Stage 5: PyWebView window, 129 tests
   - friday/ui_events.py (thread-safe event bus: StateChanged, MessageAdded)
   - friday/assistant.py publishes events (THINKING, messages, SPEAKING, IDLE)
@@ -45,6 +53,13 @@
     closing the window stops everything
   - Checked by voice: states change in the right order, short click blinks and returns
     to idle, phrase during an answer is ignored, closing the window exits cleanly
+
+- [x] Stage 5b: "loading" state in the window, 132 tests
+  - State.LOADING; the window shows a pulsing dot and "Загружаюсь…" until the
+    assistant is ready (microphone and mouse trigger started)
+  - UiEventBus remembers the last state and gives it to a late subscriber
+    (the assistant thread can publish before the window subscribes)
+  - Checked live: loading -> idle after Whisper warm-up, then normal dialogue
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -67,10 +82,10 @@
 - Known quality issues: the free LLM sometimes invents facts and slips into masculine
   forms; Whisper hears "Пятница" as "Бэтни" and similar.
 - PyWebView must run on the main thread. pywebview is in requirements-local.txt only (CI stays light).
-- While Whisper warms up (~4 s) the window shows "Готова", but the button does not work yet.
-  Idea: a "loading" state.
+- If the assistant crashes during loading, the window stays on "Загружаюсь…" and the
+  reason is only in the console log. Idea: an "error" state.
 
 ## Next
 Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music control,
-screen vision, long-term memory, a "loading" state in the window. Skipped for now
+screen vision, long-term memory, an "error" state in the window. Skipped for now
 (user's decision): quality polish of persona and STT hints.

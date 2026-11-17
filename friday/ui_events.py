@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class State(str, Enum):
+    LOADING = "loading"
     IDLE = "idle"
     LISTENING = "listening"
     THINKING = "thinking"
@@ -37,15 +38,23 @@ Listener = Callable[[UiEvent], None]
 
 
 class UiEventBus:
-    """Thread-safe publish/subscribe. A failing listener never breaks others."""
+    """Thread-safe publish/subscribe. A failing listener never breaks others.
+
+    Remembers the last state: a listener that subscribes late gets it at once,
+    so it never misses a state published before it joined.
+    """
 
     def __init__(self) -> None:
         self._listeners: list[Listener] = []
+        self._last_state: StateChanged | None = None
         self._lock = threading.Lock()
 
     def subscribe(self, listener: Listener) -> None:
         with self._lock:
             self._listeners.append(listener)
+            last = self._last_state
+        if last is not None:
+            self._deliver(listener, last)
 
     def unsubscribe(self, listener: Listener) -> None:
         with self._lock:
@@ -54,9 +63,15 @@ class UiEventBus:
 
     def publish(self, event: UiEvent) -> None:
         with self._lock:
+            if isinstance(event, StateChanged):
+                self._last_state = event
             listeners = list(self._listeners)
         for listener in listeners:
-            try:
-                listener(event)
-            except Exception:
-                logger.exception("UI listener failed on %r", event)
+            self._deliver(listener, event)
+
+    @staticmethod
+    def _deliver(listener: Listener, event: UiEvent) -> None:
+        try:
+            listener(event)
+        except Exception:
+            logger.exception("UI listener failed on %r", event)

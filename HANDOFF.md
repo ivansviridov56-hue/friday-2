@@ -1,14 +1,14 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 129 passed).
+2. Ask the user to run `pytest` and paste the result (expect 132 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
 ## Current state
 Stages 0-5 done: persona, LLM client with fallback chain, TTS (with retry), STT,
 microphone capture, push-to-talk on mouse side button X2, dialogue memory,
-conversation loop, desktop window (PyWebView, dark theme, chat + state indicator).
+conversation loop, desktop window (PyWebView, dark theme, chat + state indicator with a loading state).
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Next stage is not chosen yet.
 

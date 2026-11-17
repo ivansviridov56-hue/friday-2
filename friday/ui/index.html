@@ -27,6 +27,8 @@
   #dot.listening { background: var(--listening); }
   #dot.thinking { background: var(--thinking); }
   #dot.speaking { background: var(--speaking); }
+  #dot.loading { background: var(--thinking); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
   #status { color: var(--muted); font-size: 14px; }
   #chat {
     flex: 1; overflow-y: auto; padding: 16px;
@@ -42,12 +44,13 @@
 </head>
 <body>
 <header>
-  <div id="dot"></div>
-  <div id="status">Готова</div>
+  <div id="dot" class="loading"></div>
+  <div id="status">Загружаюсь…</div>
 </header>
 <div id="chat"></div>
 <script>
   const LABELS = {
+    loading: "Загружаюсь…",
     idle: "Готова", listening: "Слушаю…",
     thinking: "Думаю…", speaking: "Говорю…",
   };

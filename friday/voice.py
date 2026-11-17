@@ -20,7 +20,7 @@ from friday.recorder import Recorder
 from friday.stt import SpeechToText
 from friday.tts import speak_text
 from friday.turn_runner import TurnRunner
-from friday.ui_events import UiEventBus
+from friday.ui_events import State, StateChanged, UiEventBus
 from friday.window import run_window
 
 log = logging.getLogger(__name__)
@@ -43,6 +43,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
     trigger = None
     recorder = None
     try:
+        bus.publish(StateChanged(State.LOADING))
         stt = SpeechToText()
         print("Прогреваю распознавание речи...")
         stt.warm_up_async().join()
@@ -77,6 +78,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
 
         trigger = SideButtonTrigger(XBUTTON2, press, release)
         trigger.start()
+        bus.publish(StateChanged(State.IDLE))
         print(
             "Пятница готова. Зажми боковую кнопку мыши X2 и говори. Закрой окно: выход."
         )
