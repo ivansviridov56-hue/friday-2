@@ -94,6 +94,30 @@
     paused -> STARTED, Music closed (cold start) -> STARTED in ~11 s
   - Next: 7d (voice command "включи ...")
 
+- [x] Stage 7d: voice command "включи песню ...", 276 tests
+  - friday/play_request.py (strict parser: play verb first, then песня / трек / композиция,
+    the rest is the search query; "включи свет" is not a request; "включи песню" without
+    a name stays the old "продолжить")
+  - friday/play_handler.py (search -> launch -> spoken answer; never returns None for a
+    recognized request; chain_handlers: play handler first, then music handler)
+  - friday/voice.py wires TrackSearch(YM_TOKEN) + ym_ui.build_launcher()
+  - Checked by voice: new track from closed Music (cold start) -> "Включаю ...",
+    same again -> "Этот трек уже играет", "включи песню" -> "Продолжаю",
+    "включи свет" -> LLM, pause / next / what's playing as before
+
+- [x] Stage 7e: play a whole artist by voice, 315 tests
+  - friday/artist_request.py (strict parser: play verb, then исполнитель / артист /
+    певец / группа, then the name, up to 5 words)
+  - friday/artist_search.py (ArtistSearch, same statuses as TrackSearch),
+    friday/artist_playback.py (is this artist playing, via SMTC: the name is among
+    the artists of the current track), friday/artist_handler.py (search -> launch ->
+    spoken answer; chain order: play handler, artist handler, music handler)
+  - friday/ym_artist_ui.py (UI Automation; live-checked, no tests), reuses TrackLauncher
+  - friday/ym_artist_launch_probe.py (live check: search + start)
+  - Checked live: other artist playing -> started, same again -> already_playing,
+    page of another artist open -> started, Music closed (cold start) -> started,
+    a track panel left open does not break it
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -156,8 +180,25 @@
 - Known weak spot: SMTC only reports the title, so another track with the same title
   counts as ALREADY_PLAYING.
 - Console output of ym_* probes with `> file` is cp866 (mojibake in the file only).
+- Track launch runs in the TurnRunner worker thread; UI Automation and SMTC work there.
+- Whisper adds commas and stray words ("полетели и Киркоров"); Yandex search tolerates it.
+- A bare "Дальше." (no music word) is not a command and goes to the LLM, by design.
+- Artist page in the UI tree: the page title in the Document and the big name heading
+  are NOT reliable (the title can stay "Яндекс Музыка — ..."). The artist is identified
+  by the most frequent "Артист <name>" link in the container; a tie means unknown.
+- The container with the "Исполнитель" mark holds two play buttons once the new release
+  is out (yellow "Слушать" first in tree order, release cover button after it); before the
+  release the cover button is named "Для воспроизведения нужно дождаться предстоящего
+  релиза". ym_artist_ui takes the first own button and checks its position.
+- While an artist plays, the button is named "Пауза": ask SMTC first (artist name is
+  matched as a substring of the track's artists).
+- Whisper mistakes lead to a similar-sounding artist ("дурак дураком" -> "дурак"); the
+  spoken "Включаю <name>" lets the user notice. A track panel opened on top of the
+  artist page used to be a worry, it is not.
+- A play phrase for an artist needs a marker word (исполнитель / артист / группа);
+  bare "включи Киркорова" is not a command, by design.
+- ArtistLauncher.launch(link, title) keeps the parameter name "title" to match the
+  Launcher protocol; there "title" is the artist name.
 
 ## Next
-Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),
-screen vision, long-term memory. Skipped for now
-(user's decision): quality polish of persona and STT hints.
+Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: My Wave, screen vision, long-term memory.

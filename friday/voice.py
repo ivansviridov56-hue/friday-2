@@ -29,6 +29,9 @@ from friday.window import run_window
 from friday.music_search import TrackSearch
 from friday.play_handler import chain_handlers, make_play_handler
 from friday.ym_ui import build_launcher
+from friday.artist_handler import make_artist_handler
+from friday.artist_search import ArtistSearch
+from friday.ym_artist_ui import build_artist_launcher
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +61,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         stt.warm_up_async().join()
 
         player = PygamePlayer()
+        token = os.environ.get("YM_TOKEN")
         assistant = Assistant(
             stt,
             LLMClient(),
@@ -65,9 +69,8 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             system_prompt=build_system_prompt(),
             events=bus,
             commands=chain_handlers(
-                make_play_handler(
-                    TrackSearch(os.environ.get("YM_TOKEN")), build_launcher()
-                ),
+                make_play_handler(TrackSearch(token), build_launcher()),
+                make_artist_handler(ArtistSearch(token), build_artist_launcher()),
                 make_music_handler(MusicController(list_sessions)),
             ),
         )

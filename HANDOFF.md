@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 244 passed).
+2. Ask the user to run `pytest` and paste the result (expect 315 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -12,6 +12,8 @@ conversation loop, desktop window (PyWebView, dark theme, chat + state indicator
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Next stage is not chosen yet.
 Stage 7a-7c: track search and start by link done; 7d (voice command) next
+Stages 0-7 done (Yandex Music: control, search, play a song by name)
+Stages 0-7e done (Yandex Music: control, play a song by name, play an artist by name)
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -45,3 +47,6 @@ Stage 7a-7c: track search and start by link done; 7d (voice command) next
   first available one is used.
 - Voice feedback: commands with a search are spoken ("Включаю <artist>, <title>") once Music
   confirms playback, so a wrong match is heard at once. pause / play / next / previous stay silent.
+- Play by name: only phrases with a play verb plus песня / трек / композиция (variant A, chosen by Claude on the user’s "делай как лучше"); "включи свет" and similar are not hijacked. Spoken confirmation "Включаю <artist>, <title>“ after SMTC confirms playback
+- Stage 7e chosen by Claude on the user’s "выбери сам": play a whole artist by voice
+- Stage 7e (play an artist) was chosen by Claude on the user’s "выбери сам"; marker word required (исполнитель / артист / группа)
