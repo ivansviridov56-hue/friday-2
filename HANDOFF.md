@@ -13,7 +13,7 @@ with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Stage 10 (screen vision) done. Stage 11 (wake word "Пятница") chosen: next is 11a, a probe of how Whisper hears the name (friday/wake_probe.py), no assistant changes yet.
+Stage 10 (screen vision) done. Stage 11a (wake word probe) done: Whisper hears "Пятница" in 10 of 12 clips (misses: "Ветница", "Пятенца"). Next: the user picks how to listen continuously (A Whisper on chunks, B small keyword model, C no wake word), then 11b fuzzy match.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

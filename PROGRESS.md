@@ -228,6 +228,16 @@
   - Next: pick the next stage.
   - Stage 10 is done: privacy note added to both readmes.
 
+- [x] Stage 11a: wake word probe, 556 tests
+  - friday/wake_probe.py (live probe: 12 short clips with the name said six ways, then 45 s
+    of speech without it; heard_name matches by the stem "пятниц"; Recorder and SpeechToText reused)
+  - Results: name found in 10 of 12 clips. Misses: "Ветница" (quiet, lost first letter) and
+    "Пятенца" (normal voice); both when the name stood alone. 6 of 6 with the name inside a
+    phrase (start, middle, end). No false alarm on 45 s of ordinary speech.
+  - Conclusion: stem match is not enough; fuzzy matching is needed. Open question for 11b: how to
+    listen continuously (A: Whisper on short chunks with a voice detector; B: a small dedicated
+    keyword model; C: keep only push-to-talk).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
