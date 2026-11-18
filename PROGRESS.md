@@ -237,6 +237,13 @@
   - Conclusion: stem match is not enough; fuzzy matching is needed. Open question for 11b: how to
     listen continuously (A: Whisper on short chunks with a voice detector; B: a small dedicated
     keyword model; C: keep only push-to-talk).
+  - Decision (user, "ну наверное пока вариант А"): listen continuously with Whisper on short chunks
+    plus a voice detector; the user expects to revisit this later (GPU load, privacy: everything
+    the microphone hears is transcribed locally, only the phrase after the name goes to the cloud).
+  - 11b: friday/wake_word.py (fuzzy match: similarity >= 0.7 and word length 5-9; "Ветница" and
+    "Пятенца" match, "пятнадцать", "пятно", "пятка" do not).
+  - Next: 11c continuous listener (chunking, voice detector, cut the phrase by a pause), then
+    11d wiring into voice.py and the window indicator. X2 push-to-talk stays.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
