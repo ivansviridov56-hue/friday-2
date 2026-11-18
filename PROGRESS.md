@@ -118,7 +118,7 @@
     page of another artist open -> started, Music closed (cold start) -> started,
     a track panel left open does not break it
 
-  - [x] Stage 8a-8c: long-term memory by voice commands, 419 tests
+- [x] Stage 8a-8c: long-term memory by voice commands, 419 tests
   - friday/memory_store.py (MemoryStore: facts in data/memory/facts.json, atomic save,
     broken file kept as .bad-<time>, limits 100 facts / 300 chars, fact texts never logged;
     forget matches by word stems, so "кошку" finds "кошка")
@@ -128,6 +128,14 @@
     recognized request; first in the command chain in voice.py)
   - Checked by voice: remember, repeat -> "Это я уже знаю", recall, forget, facts survive
     a restart, ordinary speech still goes to the LLM
+
+- [x] Stage 8d: saved facts go to the LLM system prompt, 428 tests
+  - friday/memory_prompt.py (with_facts: facts appended to the persona prompt as data,
+    not instructions; newest kept when over 2000 chars)
+  - Assistant accepts system_prompt as a string or a function called every turn, so a fact
+    saved by voice works at once (voice.py passes a lambda with memory.facts())
+  - Checked by voice: name from memory, a new fact works without restart, small talk does
+    not recite the facts, unknown facts are not invented
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -213,10 +221,12 @@
 - Whisper can spell a place or name differently from the user ("Мозыр" -> "Мозер"). A fact is
   stored as heard, so "забудь про Мозыр" will not find it; recall first, then forget by a
   word that was heard correctly.
+- Facts are sent to the cloud LLM providers inside the system prompt on every turn. They stay
+  in data/memory/facts.json locally (git-ignored); do not dictate secrets to Friday.
+- "Забудь" removes a fact from the long-term memory, but the last 5 dialogue exchanges can
+  still contain the old answer (see the open decision in the stage 8 notes).
 
 ## Next
-Stage 8d: use the saved facts in conversation. The facts must reach the LLM system prompt
-(all facts, rebuilt every turn, because they change while the assistant runs). Needs a look
-at friday/persona.py and at how Assistant passes system_prompt to the LLM.
-After that: update README (feature list), then other candidates: wake word "Пятница",
-Yandex Music "My Wave", screen vision.
+Open decision: should "забудь" also clear the short dialogue history (A) or not (B)?
+Then: update README (memory in the feature list, privacy note), and pick the next stage:
+wake word "Пятница", Yandex Music "My Wave", screen vision.

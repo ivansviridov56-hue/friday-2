@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-7 done). It already works as a voice
+**Status:** early development (stages 0-8 done). It already works as a voice
 chat that can also control Yandex Music: hold the mouse side button X2, speak,
 hear the answer. Not a finished product yet.
 
@@ -22,6 +22,13 @@ hear the answer. Not a finished product yet.
 - Desktop window (PyWebView) with the chat and a state indicator
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
 - Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
+- Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
+
+## Privacy
+
+Saved facts live only in `data/memory/facts.json` on your machine (git-ignored). They are
+sent to the cloud LLM providers as part of the prompt on every turn, so do not tell the
+assistant anything you do not want to share with them.
 
 ## Development
 
