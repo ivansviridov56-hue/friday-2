@@ -191,3 +191,44 @@ def test_len_counts_facts(path: Path) -> None:
     store.add("a")
     store.add("b")
     assert len(store) == 2
+
+
+@pytest.mark.parametrize("query", ["кошку", "кошкой", "кошки", "кошка"])
+def test_forget_matches_inflected_words(path: Path, query: str) -> None:
+    store = MemoryStore(path)
+    store.add("у меня есть кошка")
+    assert store.forget(query) == ["у меня есть кошка"]
+
+
+def test_forget_needs_every_query_word_to_match(path: Path) -> None:
+    store = MemoryStore(path)
+    store.add("люблю кофе")
+    assert store.forget("люблю чай") == []
+    assert store.facts() == ["люблю кофе"]
+
+
+def test_forget_ignores_word_order(path: Path) -> None:
+    store = MemoryStore(path)
+    store.add("люблю кофе")
+    assert store.forget("кофе люблю") == ["люблю кофе"]
+
+
+def test_forget_matches_a_whole_phrase_with_endings(path: Path) -> None:
+    store = MemoryStore(path)
+    store.add("мой день рождения 5 мая")
+    assert store.forget("моего дня рождения") == []  # "моего" is not "мой": stays safe
+    assert store.forget("мой день рождения") == ["мой день рождения 5 мая"]
+
+
+def test_forget_short_words_must_match_exactly(path: Path) -> None:
+    store = MemoryStore(path)
+    store.add("ежедневно пью воду")
+    assert store.forget("еж") == []
+    assert store.facts() == ["ежедневно пью воду"]
+
+
+def test_forget_does_not_match_a_longer_unrelated_word(path: Path) -> None:
+    store = MemoryStore(path)
+    store.add("потерял кошелёк")  # "кошелек" shares only "кош" with "кошку"
+    assert store.forget("кошку") == []
+    assert store.facts() == ["потерял кошелёк"]

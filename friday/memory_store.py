@@ -41,6 +41,26 @@ def normalize(text: str) -> str:
     return _NON_WORD.sub(" ", lowered).strip()
 
 
+def _word_matcher(word: str):  # noqa: ANN202
+    """Match a spoken word against a stored one, tolerating Russian endings.
+
+    Short words must match exactly, so "еж" never hits "ежедневно". Longer words
+    lose 0-2 letters ("кошку" -> "кошк") and match by prefix.
+    """
+    if len(word) <= 3:
+        return lambda other: other == word
+    stem = word if len(word) == 4 else word[: -1 if len(word) == 5 else -2]
+    return lambda other: other.startswith(stem)
+
+
+def _matches(query_words: list[str], fact: str) -> bool:
+    """True if every query word matches some word of the fact."""
+    fact_words = normalize(fact).split()
+    return all(
+        any(_word_matcher(word)(other) for other in fact_words) for word in query_words
+    )
+
+
 class MemoryStore:
     """Facts about the user, persisted to a JSON file."""
 
@@ -85,12 +105,16 @@ class MemoryStore:
         return AddStatus.ADDED
 
     def forget(self, query: str) -> list[str]:
-        """Remove every fact that contains the query. Returns the removed facts."""
-        key = normalize(query)
-        if not key:
+        """Remove every fact that matches the query. Returns the removed facts.
+
+        Every word of the query must match a word of the fact, ignoring case, "ё",
+        word order and common Russian endings (see `_word_matcher`).
+        """
+        query_words = normalize(query).split()
+        if not query_words:
             return []
         with self._lock:
-            removed = [f for f in self._facts if key in normalize(f)]
+            removed = [f for f in self._facts if _matches(query_words, f)]
             if not removed:
                 return []
             kept = [f for f in self._facts if f not in removed]
