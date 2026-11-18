@@ -12,6 +12,9 @@ import threading
 
 from pathlib import Path
 
+from friday.screen_capture import capture_screen
+from friday.screen_handler import make_screen_handler
+from friday.vision import build_vision_client, describe
 from friday.wave_handler import make_wave_handler
 from friday.wave_ui import build_launcher as build_wave_launcher
 from friday.history import ConversationHistory
@@ -72,19 +75,28 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         stt.warm_up_async().join()
 
         player = PygamePlayer()
+
+        def speak(text: str) -> None:
+            speak_text(text, player.play)
+
+        vision_client = build_vision_client()
         token = os.environ.get("YM_TOKEN")
         memory = MemoryStore(MEMORY_FILE)
         history = ConversationHistory()
         assistant = Assistant(
             stt,
             LLMClient(),
-            lambda text: speak_text(text, player.play),
+            speak,
             system_prompt=lambda: with_facts(build_system_prompt(), memory.facts()),
             events=bus,
             history=history,
             commands=chain_handlers(
-                make_wave_handler(build_wave_launcher()),
                 make_memory_handler(memory, on_forgotten=history.clear),
+                make_screen_handler(
+                    capture_screen,
+                    lambda shot, question: describe(vision_client, shot, question),
+                    announce=speak,
+                ),
                 make_play_handler(TrackSearch(token), build_launcher()),
                 make_artist_handler(ArtistSearch(token), build_artist_launcher()),
                 make_music_handler(MusicController(list_sessions)),
