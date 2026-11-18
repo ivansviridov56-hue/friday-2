@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 434 passed).
+2. Ask the user to run `pytest` and paste the result (expect 470 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -11,8 +11,9 @@ microphone capture, push-to-talk on mouse side button X2, dialogue memory,
 conversation loop, desktop window (PyWebView, dark theme, chat + state indicator
 with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
+Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Next stage: choose (wake word, My Wave, screen vision)
+Next stage: choose (wake word, screen vision, My Wave extras)
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -58,3 +59,9 @@ Next stage: choose (wake word, My Wave, screen vision)
   data/memory/facts.json (git-ignored), memory commands are local (no LLM, not stored in
   dialogue memory), all facts go to the system prompt (8d).
   ”забудь" that really removed facts also clears the dialogue history (8e, chosen by Claude on the user’s "как хочешь")
+- My Wave: "включи мою волну" starts the wave through the wave player block (found by structure,
+  pressed only if the middle button is named "Воспроизведение", confirmed via SMTC). If the wave
+  page is not open, Friday says so; opening it via the menu is a later stage (variant A, chosen
+  by Claude on the user's "выбери сам"). Only the plain command; "by mood" and similar are not
+  hijacked. NOT_CONFIRMED has its own spoken answer, ERROR a generic one (chosen by Claude on
+  the user's "делай как лучше").

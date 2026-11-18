@@ -148,6 +148,22 @@
     Now `history if history is not None else ...`
   - Checked by voice: remember name -> forget -> "не знаю" without a restart
 
+- [x] Stage 9: "включи мою волну" by voice, 470 tests
+  - friday/wave_request.py (strict parser: the word "моя/мою" + "волна", a play verb unless
+    the phrase is just "моя волна"; "по настроению", "для тренировки", "что такое моя волна"
+    are not hijacked)
+  - friday/wave_launcher.py (pure logic: SMTC check first -> ALREADY_PLAYING; otherwise find
+    the wave player, press, confirm via SMTC; statuses STARTED / ALREADY_PLAYING / NO_PLAYER /
+    NOT_CONFIRMED / ERROR), playback_check.make_is_any_playing (is anything playing in Music)
+  - friday/wave_ui.py (UI Automation; live-checked, no tests), probes ym_wave_probe.py and
+    ym_wave_press_probe.py
+  - friday/wave_handler.py (status -> spoken answer; never None for a recognized request);
+    voice.py chain order: memory, wave, play, artist, music
+  - Decision (variant A, "выбери сам"): if the wave page is not open, Friday only says so
+    ("Открой Мою волну в приложении"); opening it through the menu is a separate later stage
+  - Checked by voice: started, already playing, "Моя коллекция" -> not found and nothing
+    pressed, "включи свет" goes to the LLM, song / next / pause as before
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -234,7 +250,15 @@
   word that was heard correctly.
 - Facts are sent to the cloud LLM providers inside the system prompt on every turn. They stay
   in data/memory/facts.json locally (git-ignored); do not dictate secrets to Friday.
+- My Wave player block: a Group whose direct children hold exactly two Sliders and at least
+  three Buttons, middle of the last three = Play. Structure alone is NOT enough: on "Моя
+  коллекция" the bottom bar matches too (queue / sound settings / mute), and one live run
+  pressed "Настройки звука". So wave_ui presses only a middle button named "Воспроизведение".
+  While music plays the button is named "Пауза": ask SMTC first, never press.
+- Wave not confirmed through the menu path: "Моя волна" menu item (Hyperlink, 240x60 in the
+  "Главное меню" group) would need a name lookup, which conflicts with the structure-first rule.
 
 
 ## Next
-Pick the next stage: wake word "Пятница", Yandex Music "My Wave", screen vision.
+Pick the next stage: wake word "Пятница", screen vision, or My Wave extras (open the wave
+page through the menu, wave by mood / for an activity).
