@@ -80,7 +80,15 @@ class LLMClient:
         self._clock = clock
         self._blocked_until: dict[str, float] = {}
 
-    def ask(self, messages: list[dict]) -> Reply:
+    def ask(
+        self,
+        messages: list[dict],
+        *,
+        timeout: float | None = None,
+        max_tokens: int | None = None,
+    ) -> Reply:
+        timeout = TIMEOUT_S if timeout is None else timeout
+        max_tokens = MAX_TOKENS if max_tokens is None else max_tokens
         reasons: dict[str, str] = {}
         ready = []
         for endpoint in self._chain:
@@ -93,7 +101,7 @@ class LLMClient:
         now = self._clock()
         active = [e for e in ready if self._blocked_until.get(e.name, 0.0) <= now]
         for endpoint in active or ready:
-            outcome = self._try(endpoint, messages)
+            outcome = self._try(endpoint, messages, timeout, max_tokens)
             if isinstance(outcome, Reply):
                 return outcome
             reasons[endpoint.name] = outcome
@@ -111,7 +119,13 @@ class LLMClient:
             return "account id not set"
         return ""
 
-    def _try(self, endpoint: Endpoint, messages: list[dict]) -> Reply | str:
+    def _try(
+        self,
+        endpoint: Endpoint,
+        messages: list[dict],
+        timeout: float,
+        max_tokens: int,
+    ) -> Reply | str:
         url = endpoint.url.replace(
             "{account_id}", self._env.get("CLOUDFLARE_ACCOUNT_ID", "").strip()
         )
@@ -124,9 +138,9 @@ class LLMClient:
                 json={
                     "model": endpoint.model,
                     "messages": messages,
-                    "max_tokens": MAX_TOKENS,
+                    "max_tokens": max_tokens,
                 },
-                timeout=TIMEOUT_S,
+                timeout=timeout,
             )
             if response.status_code != 200:
                 return f"HTTP {response.status_code}"

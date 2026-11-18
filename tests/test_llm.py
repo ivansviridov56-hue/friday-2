@@ -1,6 +1,12 @@
 import requests
 
-from friday.llm import AllProvidersFailed, LLMClient, trim_history
+from friday.llm import (
+    MAX_TOKENS,
+    TIMEOUT_S,
+    AllProvidersFailed,
+    LLMClient,
+    trim_history,
+)
 
 ENV = {
     "CLOUDFLARE_ACCOUNT_ID": "ACC",
@@ -29,9 +35,11 @@ class Script:
     def __init__(self, *outcomes):
         self.outcomes = list(outcomes)
         self.models = []
+        self.calls = []
 
     def __call__(self, url, **kwargs):
         self.models.append(kwargs["json"]["model"])
+        self.calls.append(kwargs)
         outcome = self.outcomes.pop(0)
         if isinstance(outcome, Exception):
             raise outcome
@@ -115,3 +123,24 @@ def test_trim_history_keeps_system_and_latest():
     trimmed = trim_history(messages, keep=20)
     assert len(trimmed) == 21
     assert trimmed[0]["role"] == "system" and trimmed[-1]["content"] == "29"
+
+
+def test_default_timeout_and_max_tokens():
+    script = Script(ok())
+    LLMClient(env=ENV, post=script).ask(MSGS)
+    assert script.calls[0]["timeout"] == TIMEOUT_S
+    assert script.calls[0]["json"]["max_tokens"] == MAX_TOKENS
+
+
+def test_custom_timeout_and_max_tokens():
+    script = Script(ok())
+    LLMClient(env=ENV, post=script).ask(MSGS, timeout=30, max_tokens=400)
+    assert script.calls[0]["timeout"] == 30
+    assert script.calls[0]["json"]["max_tokens"] == 400
+
+
+def test_custom_limits_apply_to_fallback_too():
+    script = Script(FakeResponse(429), ok())
+    LLMClient(env=ENV, post=script).ask(MSGS, timeout=30, max_tokens=400)
+    assert [c["timeout"] for c in script.calls] == [30, 30]
+    assert [c["json"]["max_tokens"] for c in script.calls] == [400, 400]
