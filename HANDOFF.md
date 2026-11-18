@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 470 passed).
+2. Ask the user to run `pytest` and paste the result (expect 490 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -13,7 +13,7 @@ with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Next stage: choose (wake word, screen vision, My Wave extras)
+Stage 10 (screen vision) in progress: 10a done (probes). Next: 10b screen capture (full screen).
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

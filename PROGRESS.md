@@ -164,6 +164,22 @@
   - Checked by voice: started, already playing, "Моя коллекция" -> not found and nothing
     pressed, "включи свет" goes to the LLM, song / next / pause as before
 
+- [x] Stage 10a: vision probes, 490 tests
+  - friday/vision_probe.py (does a provider accept an image: solid red PNG, "what color"),
+    friday/vision_shot_probe.py (real screenshot, 3 widths, 3 Cloudflare models; Pillow is
+    imported lazily)
+  - Live results (Belarus, no VPN): cf-mistral reads the screen well, 4.1 / 5.0 / 6.3 s at
+    1024 / 1536 / 1920 px. cf-llama4-scout reads it too but takes 21-32 s and adds markdown and
+    LaTeX; at 1024 px it misread small URL-bar text ("neuromachine" vs "neuromachina"), at 1536
+    it was right. cf-gemma4 returns empty content at every size (cause not checked, probably it
+    spends the token budget on reasoning). OpenRouter free gemma: HTTP 429 every time.
+  - Decisions: full screen first (user's choice), capture takes an optional target (rectangle,
+    window) later; screenshot downscaled to width 1536, JPEG q85 (~190 KB), configurable; chain
+    cf-mistral -> cf-llama4-scout -> OpenRouter, gemma4 excluded; the voice prompt asks for a
+    short plain-text answer, no markdown. Screenshots go to the cloud: add a privacy note to the
+    readmes when the stage is done.
+  - Next: 10b screen capture, 10c vision client, 10d voice command ("что на экране")
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
