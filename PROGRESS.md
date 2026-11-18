@@ -194,6 +194,17 @@
   - Next: 10c vision client (chain cf-mistral -> cf-llama4-scout -> OpenRouter, longer
     timeout than text, plain-text prompt), then 10d voice command "что на экране".
 
+- [x] Stage 10c: vision client, 510 tests
+  - friday/llm.py: ask() takes optional keyword-only timeout and max_tokens (defaults stay 15 s / 300,
+    so the text chain is unchanged); the limits apply to every provider in the fallback.
+  - friday/vision.py: VISION_CHAIN (cf-mistral -> cf-llama4-scout -> or-gemma, gemma4 on Cloudflare
+    excluded), build_messages (system prompt asks for 2-3 short plain-text sentences in Russian, no
+    markdown; screenshot goes as a data URL), describe(client, screenshot, question) with a 30 s timeout
+    and 400 tokens, build_vision_client(). describe() accepts any object with ask() (Asker protocol).
+  - Not checked live yet: the whole path (capture -> describe) on a real screen.
+  - Next: live check of 10c, then 10d voice command "что на экране" (say "Смотрю экран" first,
+    the answer takes 6-23 s; ask the user), then privacy note in both readmes.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
