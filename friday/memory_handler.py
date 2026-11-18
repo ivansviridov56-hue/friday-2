@@ -48,31 +48,42 @@ class Store(Protocol):
     def facts(self) -> list[str]: ...
 
 
-def make_memory_handler(store: Store) -> Handler:
+def make_memory_handler(
+    store: Store, on_forgotten: Callable[[], None] | None = None
+) -> Handler:
+    """on_forgotten is called only when a forget request really removed facts."""
+
     def handle(text: str) -> CommandReply | None:
         request = parse_memory_request(text)
         if request is None:
             return None
         try:
-            answer = _answer(store, request)
+            answer, removed = _answer(store, request)
         except Exception:
             logger.exception("memory request failed")
-            answer = _UNEXPECTED
+            return CommandReply(_UNEXPECTED, spoken=True)
+        if removed and on_forgotten is not None:
+            try:
+                on_forgotten()
+            except Exception:
+                logger.exception("on_forgotten callback failed")
         return CommandReply(answer, spoken=True)
 
     return handle
 
 
-def _answer(store: Store, request: MemoryRequest) -> str:
+def _answer(store: Store, request: MemoryRequest) -> tuple[str, bool]:
+    """Spoken answer plus a flag: did this request remove any facts."""
     if request.action is MemoryAction.REMEMBER:
         if not request.text:
-            return _ASK_REMEMBER
-        return _ADD_ANSWERS.get(store.add(request.text), _UNEXPECTED)
+            return _ASK_REMEMBER, False
+        return _ADD_ANSWERS.get(store.add(request.text), _UNEXPECTED), False
     if request.action is MemoryAction.FORGET:
         if not request.text:
-            return _ASK_FORGET
-        return _forgot(store.forget(request.text))
-    return _recalled(store.facts())
+            return _ASK_FORGET, False
+        removed = store.forget(request.text)
+        return _forgot(removed), bool(removed)
+    return _recalled(store.facts()), False
 
 
 def _forgot(removed: list[str]) -> str:

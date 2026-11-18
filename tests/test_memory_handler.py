@@ -156,3 +156,37 @@ def test_fact_text_is_not_logged(store, caplog):
     caplog.set_level("DEBUG")
     make_memory_handler(store)("Запомни, что мой секрет — зелёный жираф")
     assert "жираф" not in caplog.text
+
+
+def test_forget_calls_callback_when_something_was_removed(store):
+    calls: list[int] = []
+    handle = make_memory_handler(store, on_forgotten=lambda: calls.append(1))
+    _reply(handle, "Запомни, что меня зовут Иван")
+    _reply(handle, "Забудь про Иван")
+    assert calls == [1]
+
+
+def test_forget_does_not_call_callback_when_nothing_found(store):
+    calls: list[int] = []
+    handle = make_memory_handler(store, on_forgotten=lambda: calls.append(1))
+    reply = _reply(handle, "Забудь про Марс")
+    assert reply.text == "Не нашла такого в памяти."
+    assert calls == []
+
+
+def test_remember_and_recall_do_not_call_callback(store):
+    calls: list[int] = []
+    handle = make_memory_handler(store, on_forgotten=lambda: calls.append(1))
+    _reply(handle, "Запомни, что я люблю кофе")
+    _reply(handle, "Что ты обо мне помнишь?")
+    assert calls == []
+
+
+def test_broken_callback_does_not_break_the_answer(store):
+    def boom() -> None:
+        raise RuntimeError("history is broken")
+
+    handle = make_memory_handler(store, on_forgotten=boom)
+    _reply(handle, "Запомни, что я люблю кофе")
+    reply = _reply(handle, "Забудь про кофе")
+    assert reply.text.startswith("Забыла")

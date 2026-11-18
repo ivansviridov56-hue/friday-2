@@ -1,5 +1,6 @@
 import numpy as np
 
+from friday.history import ConversationHistory
 from friday.assistant import FAILURE_PHRASE, Assistant, CommandReply
 from friday.llm import AllProvidersFailed, Reply
 
@@ -125,3 +126,32 @@ def test_prompt_function_is_not_called_for_local_commands() -> None:
     )
     assistant.handle_audio(AUDIO)
     assert built == []
+
+
+def test_assistant_uses_the_given_empty_history() -> None:
+    history = ConversationHistory()
+    assistant = Assistant(
+        FakeStt("q1"),
+        FakeLlm("a1"),
+        lambda text: None,
+        system_prompt="SYS",
+        history=history,
+    )
+    assistant.handle_audio(AUDIO)
+    assert len(history) == 1
+
+
+def test_clearing_the_given_history_removes_it_from_the_next_request() -> None:
+    history = ConversationHistory()
+    llm = FakeLlm("a1", "a2")
+    assistant = Assistant(
+        FakeStt("q1", "q2"),
+        llm,
+        lambda text: None,
+        system_prompt="SYS",
+        history=history,
+    )
+    assistant.handle_audio(AUDIO)
+    history.clear()
+    assistant.handle_audio(AUDIO)
+    assert len(llm.calls[1]) == 2

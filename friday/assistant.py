@@ -56,7 +56,7 @@ class Assistant:
         self._llm = llm
         self._speak = speak
         self._system_prompt = system_prompt
-        self._history = history or ConversationHistory()
+        self._history = history if history is not None else ConversationHistory()
         self._failure_phrase = failure_phrase
         self._events = events or UiEventBus()
         self._commands = commands

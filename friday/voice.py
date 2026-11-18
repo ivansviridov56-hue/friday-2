@@ -12,6 +12,7 @@ import threading
 
 from pathlib import Path
 
+from friday.history import ConversationHistory
 from friday.memory_prompt import with_facts
 from friday.memory_handler import make_memory_handler
 from friday.memory_store import MemoryStore
@@ -71,14 +72,16 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         player = PygamePlayer()
         token = os.environ.get("YM_TOKEN")
         memory = MemoryStore(MEMORY_FILE)
+        history = ConversationHistory()
         assistant = Assistant(
             stt,
             LLMClient(),
             lambda text: speak_text(text, player.play),
             system_prompt=lambda: with_facts(build_system_prompt(), memory.facts()),
             events=bus,
+            history=history,
             commands=chain_handlers(
-                make_memory_handler(memory),
+                make_memory_handler(memory, on_forgotten=history.clear),
                 make_play_handler(TrackSearch(token), build_launcher()),
                 make_artist_handler(ArtistSearch(token), build_artist_launcher()),
                 make_music_handler(MusicController(list_sessions)),
