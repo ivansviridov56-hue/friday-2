@@ -46,7 +46,7 @@ class Assistant:
         stt: Transcriber,
         llm: Brain,
         speak: Callable[[str], object],
-        system_prompt: str,
+        system_prompt: str | Callable[[], str],
         history: ConversationHistory | None = None,
         failure_phrase: str = FAILURE_PHRASE,
         events: UiEventBus | None = None,
@@ -82,7 +82,7 @@ class Assistant:
                 self._say(local.text)
             return Turn(heard, None, local_reply=local.text)
 
-        messages = [{"role": "system", "content": self._system_prompt}]
+        messages = [{"role": "system", "content": self._current_system_prompt()}]
         messages += self._history.messages_with(heard)
         try:
             reply = self._llm.ask(messages)
@@ -97,6 +97,11 @@ class Assistant:
         self._events.publish(MessageAdded("assistant", reply.text))
         self._say(reply.text)
         return Turn(heard, reply)
+
+    def _current_system_prompt(self) -> str:
+        """The prompt may be a function, so it can reflect what changed since the last turn."""
+        source = self._system_prompt
+        return source() if callable(source) else source
 
     def _try_command(self, heard: str) -> CommandReply | None:
         if self._commands is None:

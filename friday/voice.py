@@ -10,6 +10,11 @@ import logging
 import os
 import threading
 
+from pathlib import Path
+
+from friday.memory_prompt import with_facts
+from friday.memory_handler import make_memory_handler
+from friday.memory_store import MemoryStore
 from friday.assistant import Assistant, Turn
 from friday.audio import PygamePlayer
 from friday.listening_indicator import ListeningIndicator
@@ -34,6 +39,9 @@ from friday.artist_search import ArtistSearch
 from friday.ym_artist_ui import build_artist_launcher
 
 log = logging.getLogger(__name__)
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+MEMORY_FILE = PROJECT_ROOT / "data" / "memory" / "facts.json"
 
 
 def _show(turn: Turn | None) -> None:
@@ -62,13 +70,15 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
 
         player = PygamePlayer()
         token = os.environ.get("YM_TOKEN")
+        memory = MemoryStore(MEMORY_FILE)
         assistant = Assistant(
             stt,
             LLMClient(),
             lambda text: speak_text(text, player.play),
-            system_prompt=build_system_prompt(),
+            system_prompt=lambda: with_facts(build_system_prompt(), memory.facts()),
             events=bus,
             commands=chain_handlers(
+                make_memory_handler(memory),
                 make_play_handler(TrackSearch(token), build_launcher()),
                 make_artist_handler(ArtistSearch(token), build_artist_launcher()),
                 make_music_handler(MusicController(list_sessions)),

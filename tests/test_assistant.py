@@ -1,6 +1,6 @@
 import numpy as np
 
-from friday.assistant import FAILURE_PHRASE, Assistant
+from friday.assistant import FAILURE_PHRASE, Assistant, CommandReply
 from friday.llm import AllProvidersFailed, Reply
 
 AUDIO = np.ones(16000, dtype=np.float32)
@@ -92,3 +92,36 @@ def test_speech_failure_does_not_lose_the_exchange() -> None:
     assert turn.reply.text == "a1"
     assistant.handle_audio(AUDIO)
     assert contents(llm.calls[1]) == ["SYS", "q1", "a1", "q2"]
+
+
+def test_system_prompt_can_be_a_function_called_every_turn() -> None:
+    llm = FakeLlm("a1", "a2")
+    prompts = iter(["SYS1", "SYS2"])
+    assistant = Assistant(
+        FakeStt("q1", "q2"),
+        llm,
+        lambda text: None,
+        system_prompt=lambda: next(prompts),
+    )
+    assistant.handle_audio(AUDIO)
+    assistant.handle_audio(AUDIO)
+    assert llm.calls[0][0] == {"role": "system", "content": "SYS1"}
+    assert llm.calls[1][0] == {"role": "system", "content": "SYS2"}
+
+
+def test_prompt_function_is_not_called_for_local_commands() -> None:
+    built: list[int] = []
+
+    def build() -> str:
+        built.append(1)
+        return "SYS"
+
+    assistant = Assistant(
+        FakeStt("q"),
+        FakeLlm(),
+        lambda text: None,
+        system_prompt=build,
+        commands=lambda text: CommandReply("ok", spoken=False),
+    )
+    assistant.handle_audio(AUDIO)
+    assert built == []
