@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 510 passed).
+2. Ask the user to run `pytest` and paste the result (expect 541 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -13,7 +13,7 @@ with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Stage 10 (screen vision) in progress: 10a (probes), 10b (screen capture) and 10c (vision client) done. Next: live check of 10c, then 10d voice command.
+Stage 10 (screen vision): 10a-10d done (probes, capture, vision client, voice command "что на экране"). Left: privacy note about screenshots in both readmes.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -65,3 +65,4 @@ Stage 10 (screen vision) in progress: 10a (probes), 10b (screen capture) and 10c
   by Claude on the user's "выбери сам"). Only the plain command; "by mood" and similar are not
   hijacked. NOT_CONFIRMED has its own spoken answer, ERROR a generic one (chosen by Claude on
   the user's "делай как лучше").
+- Screen description by voice
