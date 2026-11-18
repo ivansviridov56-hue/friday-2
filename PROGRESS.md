@@ -137,6 +137,17 @@
   - Checked by voice: name from memory, a new fact works without restart, small talk does
     not recite the facts, unknown facts are not invented
 
+- [x] Stage 8e: "забудь" also clears the dialogue history, 434 tests
+  - memory_handler: optional on_forgotten callback, called only when a forget request
+    really removed facts (not on remember / recall / nothing found); a broken callback
+    does not break the spoken answer
+  - voice.py creates one ConversationHistory, gives it to Assistant and passes
+    history.clear as on_forgotten
+  - Bug fixed: Assistant did `history or ConversationHistory()`, and an empty history is
+    falsy (it has __len__), so a history passed from outside was silently replaced.
+    Now `history if history is not None else ...`
+  - Checked by voice: remember name -> forget -> "не знаю" without a restart
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -223,10 +234,7 @@
   word that was heard correctly.
 - Facts are sent to the cloud LLM providers inside the system prompt on every turn. They stay
   in data/memory/facts.json locally (git-ignored); do not dictate secrets to Friday.
-- "Забудь" removes a fact from the long-term memory, but the last 5 dialogue exchanges can
-  still contain the old answer (see the open decision in the stage 8 notes).
+
 
 ## Next
-Open decision: should "забудь" also clear the short dialogue history (A) or not (B)?
-Then: update README (memory in the feature list, privacy note), and pick the next stage:
-wake word "Пятница", Yandex Music "My Wave", screen vision.
+Pick the next stage: wake word "Пятница", Yandex Music "My Wave", screen vision.
