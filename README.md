@@ -2,9 +2,9 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-5 done). It already works as a voice
-chat: hold the mouse side button X2, speak, hear the answer. Not a finished
-product yet.
+**Status:** early development (stages 0-7 done). It already works as a voice
+chat that can also control Yandex Music: hold the mouse side button X2, speak,
+hear the answer. Not a finished product yet.
 
 ## Goals
 
@@ -21,6 +21,7 @@ product yet.
 - Short dialogue memory
 - Desktop window (PyWebView) with the chat and a state indicator
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
+- Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
 
 ## Development
 

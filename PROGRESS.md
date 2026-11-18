@@ -201,4 +201,13 @@
   Launcher protocol; there "title" is the artist name.
 
 ## Next
-Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: My Wave, screen vision, long-term memory.
+Stage 8: long-term memory (chosen by Claude on the user's "выбери сам"). Reasons: fully
+testable without new providers; the wake word depends on Whisper hearing the name
+("Бэтни"), screen vision needs a provider check from Belarus first.
+Design questions to ask the user before writing code (one module at a time, tests first):
+1. How do facts get saved: only on an explicit phrase ("запомни, что ..."), or the LLM
+   extracts facts on its own?
+2. Where to store: a local JSON file in a git-ignored folder (never committed, rule 6)?
+3. How to use them: add all saved facts to the system prompt, or pick relevant ones?
+4. Commands: "что ты обо мне помнишь" and "забудь ..." as local commands (no LLM)?
+Other candidates for later: wake word "Пятница", Yandex Music: My Wave, screen vision.

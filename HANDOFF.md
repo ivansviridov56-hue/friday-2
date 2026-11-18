@@ -6,14 +6,14 @@
 4. At the end of the session, update PROGRESS.md and this file.
 
 ## Current state
-Stages 0-6 done: persona, LLM client with fallback chain, TTS (with retry), STT,
+Stages 0-7e done: persona, LLM client with fallback chain, TTS (with retry), STT,
 microphone capture, push-to-talk on mouse side button X2, dialogue memory,
-conversation loop, desktop window (PyWebView, dark theme, chat + state indicator with a loading state).
+conversation loop, desktop window (PyWebView, dark theme, chat + state indicator
+with loading and error states), Yandex Music (control, play a song by name,
+play an artist by name).
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Next stage is not chosen yet.
-Stage 7a-7c: track search and start by link done; 7d (voice command) next
-Stages 0-7 done (Yandex Music: control, search, play a song by name)
-Stages 0-7e done (Yandex Music: control, play a song by name, play an artist by name)
+Next stage: 8, long-term memory (chosen by Claude on the user's "выбери сам"; the
+design questions are still open, see PROGRESS.md "Next").
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -32,13 +32,15 @@ Stages 0-7e done (Yandex Music: control, play a song by name, play an artist by 
 - Dialogue memory: last 5 exchanges. First version: a new phrase is ignored while
   the assistant is answering (no interruption, no queue).
 - Window v1: only the dialogue transcript and a state indicator (idle / listening /
-  thinking / speaking), dark theme. No buttons, text input or settings yet.
+  thinking / speaking, plus loading and error), dark theme. No buttons, text input
+  or settings yet.
 - Yandex Music is controlled through its own Windows media session (SMTC, winsdk),
   never through global media keys: those also hit browsers and other players.
-  Local commands skip the LLM and are not stored in dialogue memory. Success confirmations of music commands are not spoken (window only); errors and “what’s playing” are spoken.
+  Local commands skip the LLM and are not stored in dialogue memory. Success
+  confirmations of pause / play / next / previous are not spoken (window only);
+  errors and "what's playing" are spoken.
 - Yandex Music by name: search needs `YM_TOKEN` in `.env` (variant A). The core (stage 6
   commands) works without a token. Without a token Friday says a token is needed.
-  First phrases: "включи [track]" and "включи [artist] [track]"; whole artist later.
   A track is started through the link plus UI Automation invoke() on the track panel's
   button (found by structure, never by name or size alone), and success is confirmed via
   SMTC before Friday says "Включаю".
@@ -46,7 +48,10 @@ Stages 0-7e done (Yandex Music: control, play a song by name, play an artist by 
   Acapella are skipped unless the phrase itself asks for them. If only such versions exist, the
   first available one is used.
 - Voice feedback: commands with a search are spoken ("Включаю <artist>, <title>") once Music
-  confirms playback, so a wrong match is heard at once. pause / play / next / previous stay silent.
-- Play by name: only phrases with a play verb plus песня / трек / композиция (variant A, chosen by Claude on the user’s "делай как лучше"); "включи свет" and similar are not hijacked. Spoken confirmation "Включаю <artist>, <title>“ after SMTC confirms playback
-- Stage 7e chosen by Claude on the user’s "выбери сам": play a whole artist by voice
-- Stage 7e (play an artist) was chosen by Claude on the user’s "выбери сам"; marker word required (исполнитель / артист / группа)
+  confirms playback, so a wrong match is heard at once.
+- Play by name: only phrases with a play verb plus песня / трек / композиция (variant A,
+  chosen by Claude on the user's "делай как лучше"); "включи свет" and similar are not hijacked.
+- Play an artist: stage 7e, chosen by Claude on the user's "выбери сам"; a marker word is
+  required (исполнитель / артист / певец / группа), bare "включи Киркорова" is not a command.
+- Stage 8 (long-term memory) chosen by Claude on the user's "выбери сам": testable without
+  extra providers, unlike the wake word (Whisper mishears the name) and screen vision.
