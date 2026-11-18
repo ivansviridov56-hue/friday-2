@@ -178,7 +178,21 @@
     cf-mistral -> cf-llama4-scout -> OpenRouter, gemma4 excluded; the voice prompt asks for a
     short plain-text answer, no markdown. Screenshots go to the cloud: add a privacy note to the
     readmes when the stage is done.
+  - Pillow moved to requirements.txt (light, CI tests the image logic); chosen by Claude on the
+    user's "делай как лучше". Use Image.Resampling.LANCZOS, not Image.LANCZOS (Pylance flags it).
   - Next: 10b screen capture, 10c vision client, 10d voice command ("что на экране")
+
+- [x] Stage 10b: screen capture, 502 tests
+  - friday/screen_capture.py: capture_screen(grab=grab_full_screen, max_width=1536,
+    quality=85) -> Screenshot(data, mime, width, height, source_width, source_height).
+    The grabber is injected, so a rectangle or a window grabber can be added later without
+    changes. Errors become ScreenCaptureError; bad settings raise ValueError before grabbing.
+  - Checked live: 1920x1200 -> 1536x960, ~267 KB, 87 ms, image is whole and readable.
+  - Open point: SetProcessDpiAwareness is process-wide; inside the running assistant (PyWebView
+    already started) it may not apply. Check in 10d via the log line "screenshot WxH -> WxH".
+  - fit_size is duplicated in vision_shot_probe.py (the probe); remove when the probe goes.
+  - Next: 10c vision client (chain cf-mistral -> cf-llama4-scout -> OpenRouter, longer
+    timeout than text, plain-text prompt), then 10d voice command "что на экране".
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
