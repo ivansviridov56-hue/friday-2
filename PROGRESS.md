@@ -205,6 +205,28 @@
   - Next: live check of 10c, then 10d voice command "что на экране" (say "Смотрю экран" first,
     the answer takes 6-23 s; ask the user), then privacy note in both readmes.
 
+- [x] Stage 10d: voice command "что на экране", 541 tests
+  - friday/screen_request.py (strict parser: the word "экран" is required; the phrase must start
+    with "что ... на экране" or with "посмотри" / "опиши"; up to 7 words after fillers;
+    "выключи экран", "что такое экран", "запомни, что на экране ..." are not hijacked)
+  - friday/screen_handler.py (capture -> "Смотрю экран." spoken in a background thread while the
+    vision model works -> answer; the answer waits for the announce to finish, so there is no
+    overlap; never None for a recognized request: capture error, all providers failed and any
+    other error each get a spoken answer; a broken announce does not break the answer)
+  - voice.py: handler goes after the memory handler (so "запомни ..." always reaches memory);
+    one vision client per run; the heard phrase is the question for the model
+  - Decisions (chosen by Claude on the user's "выбери сам"): announce phrase, strict phrase
+    filter, question = heard phrase, parallel announce.
+  - Checked by voice: both phrases recognized, "включи свет" and "что такое экран" go to the LLM,
+    pause / next as before. Screenshot inside the running assistant is 1920x1200 -> 1536x960,
+    so the DPI open point from 10b is closed. Answer was truthful (editor, file tree, desktop
+    picture). The model took the user's own chat line "Что на экране?" for a button in the
+    assistant window (the window is in the frame; known quirk, harmless).
+  - Open point: the answer was 4 sentences and spoke for up to 19 s; a new phrase is ignored
+    meanwhile. The user left it as is. If it bothers: shorten SYSTEM_PROMPT to one or two short
+    sentences and set VISION_MAX_TOKENS = 250.
+  - Next: privacy note about screenshots in both readmes, then stage 10 is done.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
