@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 199 passed).
+2. Ask the user to run `pytest` and paste the result (expect 244 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -11,7 +11,7 @@ microphone capture, push-to-talk on mouse side button X2, dialogue memory,
 conversation loop, desktop window (PyWebView, dark theme, chat + state indicator with a loading state).
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Next stage is not chosen yet.
-Yandex Music control by voice (pause, play, next, previous, what’s playing)
+Stage 7a-7c: track search and start by link done; 7d (voice command) next
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

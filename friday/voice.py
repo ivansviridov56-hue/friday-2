@@ -7,6 +7,7 @@ runs in a background thread. Closing the window stops the assistant.
 from __future__ import annotations
 
 import logging
+import os
 import threading
 
 from friday.assistant import Assistant, Turn
@@ -25,6 +26,9 @@ from friday.tts import speak_text
 from friday.turn_runner import TurnRunner
 from friday.ui_events import State, StateChanged, UiEventBus
 from friday.window import run_window
+from friday.music_search import TrackSearch
+from friday.play_handler import chain_handlers, make_play_handler
+from friday.ym_ui import build_launcher
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +64,12 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             lambda text: speak_text(text, player.play),
             system_prompt=build_system_prompt(),
             events=bus,
-            commands=make_music_handler(MusicController(list_sessions)),
+            commands=chain_handlers(
+                make_play_handler(
+                    TrackSearch(os.environ.get("YM_TOKEN")), build_launcher()
+                ),
+                make_music_handler(MusicController(list_sessions)),
+            ),
         )
         runner = TurnRunner(lambda audio: _show(assistant.handle_audio(audio)))
         indicator = ListeningIndicator(bus, lambda: runner.is_busy)

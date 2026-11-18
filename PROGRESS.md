@@ -82,6 +82,18 @@
     the token is never logged; client is created lazily and retried after an error)
   - Next: 7c (start the track), 7d (voice command "включи ...")
 
+    - [x] Stage 7c: start a found Yandex Music track, 244 tests
+  - friday/track_launcher.py (pure logic: SMTC check first -> ALREADY_PLAYING without
+    opening the link; otherwise open link, wait for panel up to 15 s, compare title
+    strictly (case, "ё", spaces ignored), invoke() play, confirm via SMTC;
+    statuses STARTED / ALREADY_PLAYING / NO_PANEL / WRONG_TRACK / NOT_CONFIRMED / ERROR)
+  - friday/playback_check.py (is the given track playing, via SMTC; tested),
+    friday/ym_ui.py (UI Automation panel search; live-checked, no tests),
+    friday/ym_launch_probe.py (live check: search + start)
+  - Checked live: other track playing -> STARTED, same track playing -> ALREADY_PLAYING,
+    paused -> STARTED, Music closed (cold start) -> STARTED in ~11 s
+  - Next: 7d (voice command "включи ...")
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -132,6 +144,18 @@
   "тил ай коллапс эминем" (Yandex handles transliteration). Second hit can be an
   "Instrumental" version, so skip those. `artist.name` can be None. The same track id can
   come with different album ids; link: `yandexmusic://album/<album_id>/track/<track_id>`.
+- Track panel in the UI tree: the play button lives in a Custom container with "Закрыть"
+  and the title; the container also holds a List of similar tracks, each row with its own
+  "Воспроизведение" button. ym_ui.py counts only the buttons outside nested Lists.
+  While a track plays, the panel button is named "Пауза", so find_panel() finds nothing:
+  always ask SMTC first.
+- Cold start of Yandex Music takes ~10 s before the panel appears; panel_timeout is 15 s
+  (set in ym_ui.build_launcher, not in the TrackLauncher default of 6 s).
+- Strict title match: "Название (версия)" on the panel will give WRONG_TRACK; relax only
+  if it happens live.
+- Known weak spot: SMTC only reports the title, so another track with the same title
+  counts as ALREADY_PLAYING.
+- Console output of ym_* probes with `> file` is cp866 (mojibake in the file only).
 
 ## Next
 Not chosen yet (ask the user). Candidates: wake word "Пятница", Yandex Music: play a specific track / My Wave (decision needed),
