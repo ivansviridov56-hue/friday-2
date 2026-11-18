@@ -128,3 +128,72 @@ def test_close_closes_stream_and_stops_recording() -> None:
 def test_close_without_open_is_safe() -> None:
     rec, _ = make_recorder()
     rec.close()
+
+
+def test_listener_gets_frames_without_recording() -> None:
+    rec, streams = make_recorder()
+    rec.open()
+    heard: list[np.ndarray] = []
+    rec.add_listener(heard.append)
+    streams[0].feed(ones(10))
+    streams[0].feed(ones(5))
+    assert [f.shape for f in heard] == [(10,), (5,)]
+    assert heard[0].dtype == np.float32
+    assert rec.stop().size == 0  # listening is not recording
+
+
+def test_listener_does_not_disturb_push_to_talk_recording() -> None:
+    rec, streams = make_recorder()
+    rec.open()
+    heard: list[np.ndarray] = []
+    rec.add_listener(heard.append)
+    rec.start()
+    streams[0].feed(ones(10))
+    assert len(heard) == 1
+    assert rec.stop().shape == (10,)
+
+
+def test_removed_listener_gets_nothing_more() -> None:
+    rec, streams = make_recorder()
+    rec.open()
+    heard: list[np.ndarray] = []
+    rec.add_listener(heard.append)
+    streams[0].feed(ones(10))
+    rec.remove_listener(heard.append)
+    streams[0].feed(ones(10))
+    assert len(heard) == 1
+
+
+def test_same_listener_added_twice_is_called_once() -> None:
+    rec, streams = make_recorder()
+    rec.open()
+    calls: list[int] = []
+
+    def listener(frame: np.ndarray) -> None:
+        calls.append(frame.size)
+
+    rec.add_listener(listener)
+    rec.add_listener(listener)
+    streams[0].feed(ones(10))
+    assert calls == [10]
+
+
+def test_broken_listener_breaks_neither_recording_nor_other_listeners() -> None:
+    rec, streams = make_recorder()
+    rec.open()
+    heard: list[np.ndarray] = []
+
+    def broken(frame: np.ndarray) -> None:
+        raise RuntimeError("boom")
+
+    rec.add_listener(broken)
+    rec.add_listener(heard.append)
+    rec.start()
+    streams[0].feed(ones(10))
+    assert len(heard) == 1
+    assert rec.stop().shape == (10,)
+
+
+def test_removing_an_unknown_listener_is_safe() -> None:
+    rec, _ = make_recorder()
+    rec.remove_listener(lambda frame: None)

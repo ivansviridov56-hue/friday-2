@@ -14,7 +14,7 @@ play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Stage 10 (screen vision) done. 
-Stage 11 (wake word): 11a probe, 11b fuzzy match, 11c-1 speech segmenter done (variant A, continuous Whisper on phrases). Next: 11c-2 microphone subscription in recorder.py, then a level probe, then the listener.
+Stage 11 (wake word): 11a probe, 11b fuzzy match, 11c-1 speech segmenter and 11c-2 microphone subscription done (variant A, continuous Whisper on phrases). Next: 11c-3 live probe of microphone levels and the segmenter, then the listener.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

@@ -248,7 +248,7 @@
     6 s (window state "listening"); the listener transcribes a phrase to look for the name and the
     assistant transcribes it again (about 0.5 s extra), accepted for now, no change to assistant.py;
     a ready-text entry (handle_text) is a possible later optimization.
-    
+
 - [x] 11c-1: friday/speech_segmenter.py (continuous stream -> phrases by pauses: energy based,
     noise floor measured in the first 0.3 s and adapted during silence, 0.3 s of pre-roll, pause
     0.8 s ends a phrase, sounds under 0.3 s of speech dropped, phrase cut at 12 s), 598 tests.
@@ -258,6 +258,13 @@
     test_recorder.py), 11c-3 level probe on the real microphone, 11c-4 listener logic
     (segmenter + STT + wake_word + waiting for the command; muted while the assistant is busy,
     so she does not hear herself), then 11d wiring into voice.py and the window.
+
+- [x] 11c-2: Recorder.add_listener / remove_listener (every audio frame goes to subscribers, also
+    when no push-to-talk recording is going; called from the audio thread, so a listener must only
+    queue the frame; a broken listener is logged and does not break the stream or other listeners),
+    604 tests.
+  - Next: 11c-3 live probe on the real microphone (levels of silence / speech and what the segmenter
+    cuts out), then 11c-4 listener logic.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip

@@ -40,6 +40,7 @@ class Recorder:
         self._stream: Any = None
         self._recording = False
         self._chunks: list[np.ndarray] = []
+        self._listeners: list[Callable[[np.ndarray], object]] = []
         self._lock = threading.RLock()
 
     @property
@@ -55,9 +56,31 @@ class Recorder:
     ) -> None:
         if status:
             log.warning("audio status: %s", status)
+        mono = indata[:, 0].copy()
         with self._lock:
             if self._recording:
-                self._chunks.append(indata[:, 0].copy())
+                self._chunks.append(mono)
+            listeners = tuple(self._listeners)
+        for listener in listeners:  # outside the lock; must be fast, must not modify
+            try:
+                listener(mono)
+            except Exception:  # a broken listener must not kill the audio stream
+                log.exception("audio listener failed")
+
+    def add_listener(self, listener: Callable[[np.ndarray], object]) -> None:
+        """Get every audio frame (mono float32), recording or not.
+
+        Called from the audio thread: put the frame in a queue and return at once.
+        Adding the same listener twice has no effect.
+        """
+        with self._lock:
+            if listener not in self._listeners:
+                self._listeners.append(listener)
+
+    def remove_listener(self, listener: Callable[[np.ndarray], object]) -> None:
+        with self._lock:
+            if listener in self._listeners:
+                self._listeners.remove(listener)
 
     def open(self) -> None:
         """Open the microphone stream (idempotent)."""
