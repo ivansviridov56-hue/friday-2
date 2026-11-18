@@ -13,7 +13,7 @@ with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Stage 10 (screen vision) done: probes, capture, vision client, voice command "что на экране", privacy note in the readmes. Next: pick the next stage.
+Stage 10 (screen vision) done. Stage 11 (wake word "Пятница") chosen: next is 11a, a probe of how Whisper hears the name (friday/wake_probe.py), no assistant changes yet.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -66,3 +66,4 @@ Stage 10 (screen vision) done: probes, capture, vision client, voice command "ч
   hijacked. NOT_CONFIRMED has its own spoken answer, ERROR a generic one (chosen by Claude on
   the user's "делай как лучше").
 - Screen description by voice
+- Wake word: stage 11 chosen by Claude on the user's "выбери сам" (the most valuable remaining feature, but risky because Whisper mishears the name), so a probe goes first and the assistant is untouched until the results are in.

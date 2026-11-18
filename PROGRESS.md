@@ -324,4 +324,12 @@
 
 
 ## Next
-Pick the next stage: wake word «Пятница», My Wave extras (открыть страницу волны через меню, волна по настроению), снимок области или окна вместо всего экрана, удалить дубль fit_size вместе с vision_shot_probe.py
+Stage 11: wake word "Пятница" (chosen by Claude on the user's "выбери сам"). Start with 11a, a probe
+only (friday/wake_probe.py): the user says the name 10-15 times in different ways plus a minute of
+speech without it; the script prints what Whisper heard. No change to the assistant until the
+results are in. 11b depends on them: fuzzy match over heard variants, or stop and discuss
+(another activation word, a small dedicated keyword model). X2 push-to-talk stays in any case.
+Other options left: My Wave extras (open the wave page through the menu, wave by mood), a
+window or area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT
+to one or two short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together
+with vision_shot_probe.py.
