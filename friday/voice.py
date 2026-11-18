@@ -12,6 +12,8 @@ import threading
 
 from pathlib import Path
 
+from friday.wave_handler import make_wave_handler
+from friday.wave_ui import build_launcher as build_wave_launcher
 from friday.history import ConversationHistory
 from friday.memory_prompt import with_facts
 from friday.memory_handler import make_memory_handler
@@ -81,6 +83,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             events=bus,
             history=history,
             commands=chain_handlers(
+                make_wave_handler(build_wave_launcher()),
                 make_memory_handler(memory, on_forgotten=history.clear),
                 make_play_handler(TrackSearch(token), build_launcher()),
                 make_artist_handler(ArtistSearch(token), build_artist_launcher()),
