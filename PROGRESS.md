@@ -244,6 +244,20 @@
     "Пятенца" match, "пятнадцать", "пятно", "пятка" do not).
   - Next: 11c continuous listener (chunking, voice detector, cut the phrase by a pause), then
     11d wiring into voice.py and the window indicator. X2 push-to-talk stays.
+    - Decisions (user: "делай так как лучше"): after the name alone, wait for the next phrase up to
+    6 s (window state "listening"); the listener transcribes a phrase to look for the name and the
+    assistant transcribes it again (about 0.5 s extra), accepted for now, no change to assistant.py;
+    a ready-text entry (handle_text) is a possible later optimization.
+    
+- [x] 11c-1: friday/speech_segmenter.py (continuous stream -> phrases by pauses: energy based,
+    noise floor measured in the first 0.3 s and adapted during silence, 0.3 s of pre-roll, pause
+    0.8 s ends a phrase, sounds under 0.3 s of speech dropped, phrase cut at 12 s), 598 tests.
+    Thresholds (min_rms 0.012, noise factor 3) are tuned on synthetic audio only: they need a live
+    check on the real microphone. Known weak spot: a background louder than speech (fan, TV).
+  - Next: 11c-2 a way to subscribe to the microphone stream in recorder.py (tests in
+    test_recorder.py), 11c-3 level probe on the real microphone, 11c-4 listener logic
+    (segmenter + STT + wake_word + waiting for the command; muted while the assistant is busy,
+    so she does not hear herself), then 11d wiring into voice.py and the window.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
