@@ -13,7 +13,7 @@ with loading and error states), Yandex Music (control, play a song by name,
 play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
-Stage 10 (screen vision): 10a-10d done (probes, capture, vision client, voice command "что на экране"). Left: privacy note about screenshots in both readmes.
+Stage 10 (screen vision) done: probes, capture, vision client, voice command "что на экране", privacy note in the readmes. Next: pick the next stage.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

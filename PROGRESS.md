@@ -225,7 +225,8 @@
   - Open point: the answer was 4 sentences and spoke for up to 19 s; a new phrase is ignored
     meanwhile. The user left it as is. If it bothers: shorten SYSTEM_PROMPT to one or two short
     sentences and set VISION_MAX_TOKENS = 250.
-  - Next: privacy note about screenshots in both readmes, then stage 10 is done.
+  - Next: pick the next stage.
+  - Stage 10 is done: privacy note added to both readmes.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -323,5 +324,4 @@
 
 
 ## Next
-Pick the next stage: wake word "Пятница", screen vision, or My Wave extras (open the wave
-page through the menu, wave by mood / for an activity).
+Pick the next stage: wake word «Пятница», My Wave extras (открыть страницу волны через меню, волна по настроению), снимок области или окна вместо всего экрана, удалить дубль fit_size вместе с vision_shot_probe.py

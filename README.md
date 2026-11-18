@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-9 done). It already works as a voice
+**Status:** early development (stages 0-10 done). It already works as a voice
 chat that can also control Yandex Music: hold the mouse side button X2, speak,
 hear the answer. Not a finished product yet.
 
@@ -24,12 +24,16 @@ hear the answer. Not a finished product yet.
 - Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
 - Start My Wave in Yandex Music by voice: "включи мою волну" (the My Wave page must be open in the app)
 - Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
+- Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
 
 ## Privacy
 
 Saved facts live only in `data/memory/facts.json` on your machine (git-ignored). They are
 sent to the cloud LLM providers as part of the prompt on every turn, so do not tell the
 assistant anything you do not want to share with them.
+When you ask what is on the screen, a screenshot of your whole screen is taken, downscaled and sent
+to a cloud vision model (Cloudflare Workers AI, with OpenRouter as a fallback). It is kept in memory
+only and is never saved to disk, but close anything private before asking.
 
 ## Development
 
