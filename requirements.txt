@@ -4,3 +4,4 @@ python-dotenv
 edge-tts
 pygame
 numpy
+pillow

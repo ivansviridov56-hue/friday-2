@@ -29,7 +29,7 @@ def answer(text: str) -> dict:
     ],
 )
 def test_fit_size(size, max_width, expected) -> None:
-    assert fit_size(*size, max_width) == expected
+    assert fit_size(size[0], size[1], max_width) == expected
 
 
 def test_build_messages_has_prompt_and_data_url() -> None:

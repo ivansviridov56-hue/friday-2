@@ -154,7 +154,7 @@ def _variants(image) -> dict[str, tuple[bytes, str]]:
     result: dict[str, tuple[bytes, str]] = {}
     for max_width in WIDTHS:
         size = fit_size(rgb.width, rgb.height, max_width)
-        small = rgb if size == rgb.size else rgb.resize(size, Image.LANCZOS)
+        small = rgb if size == rgb.size else rgb.resize(size, Image.Resampling.LANCZOS)
         buffer = BytesIO()
         small.save(buffer, "JPEG", quality=85)
         result[f"{size[0]}x{size[1]}"] = (buffer.getvalue(), "image/jpeg")
