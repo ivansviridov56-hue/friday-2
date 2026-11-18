@@ -118,6 +118,17 @@
     page of another artist open -> started, Music closed (cold start) -> started,
     a track panel left open does not break it
 
+  - [x] Stage 8a-8c: long-term memory by voice commands, 419 tests
+  - friday/memory_store.py (MemoryStore: facts in data/memory/facts.json, atomic save,
+    broken file kept as .bad-<time>, limits 100 facts / 300 chars, fact texts never logged;
+    forget matches by word stems, so "кошку" finds "кошка")
+  - friday/memory_request.py (strict parser: the phrase must START with запомни / забудь,
+    or be a short "что ты обо мне помнишь"; "забудь всё" is deliberately not a query)
+  - friday/memory_handler.py (parser + store + spoken answer; never returns None for a
+    recognized request; first in the command chain in voice.py)
+  - Checked by voice: remember, repeat -> "Это я уже знаю", recall, forget, facts survive
+    a restart, ordinary speech still goes to the LLM
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -199,15 +210,13 @@
   bare "включи Киркорова" is not a command, by design.
 - ArtistLauncher.launch(link, title) keeps the parameter name "title" to match the
   Launcher protocol; there "title" is the artist name.
+- Whisper can spell a place or name differently from the user ("Мозыр" -> "Мозер"). A fact is
+  stored as heard, so "забудь про Мозыр" will not find it; recall first, then forget by a
+  word that was heard correctly.
 
 ## Next
-Stage 8: long-term memory (chosen by Claude on the user's "выбери сам"). Reasons: fully
-testable without new providers; the wake word depends on Whisper hearing the name
-("Бэтни"), screen vision needs a provider check from Belarus first.
-Design questions to ask the user before writing code (one module at a time, tests first):
-1. How do facts get saved: only on an explicit phrase ("запомни, что ..."), or the LLM
-   extracts facts on its own?
-2. Where to store: a local JSON file in a git-ignored folder (never committed, rule 6)?
-3. How to use them: add all saved facts to the system prompt, or pick relevant ones?
-4. Commands: "что ты обо мне помнишь" and "забудь ..." as local commands (no LLM)?
-Other candidates for later: wake word "Пятница", Yandex Music: My Wave, screen vision.
+Stage 8d: use the saved facts in conversation. The facts must reach the LLM system prompt
+(all facts, rebuilt every turn, because they change while the assistant runs). Needs a look
+at friday/persona.py and at how Assistant passes system_prompt to the LLM.
+After that: update README (feature list), then other candidates: wake word "Пятница",
+Yandex Music "My Wave", screen vision.
