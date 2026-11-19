@@ -266,6 +266,23 @@
   - Next: 11c-3 live probe on the real microphone (levels of silence / speech and what the segmenter
     cuts out), then 11c-4 listener logic.
 
+- [x] 11c-3: friday/mic_level_probe.py (live probe: 5 s of room background, 12 s of speech through
+  Recorder.add_listener, levels, threshold, phrases found by the segmenter, one-line verdict), 621 tests.
+  - Verdict fixed after the first live runs: speech is judged by its 90th percentile (pauses no
+    longer count against it), a dead microphone is reported separately, a noisy background is a
+    warning, not a failure.
+  - SpeechSegmenter default min_rms lowered 0.012 -> 0.004 (shared constants DEFAULT_MIN_RMS,
+    DEFAULT_NOISE_FACTOR).
+  - Live numbers (lavalier, laptop). Quiet room: background 0.0001, speech p90 0.022, 3 phrases
+    of 2.5-2.9 s found, none in silence (OK). Music on: background median 0.005, p95 0.02, 10% of
+    silence frames above the threshold, one false 2.5 s phrase in silence. Another run (conditions
+    not confirmed): background median 0.0004, 2.4% above the threshold, no phrases in silence, but
+    the speech came out as ONE 10.1 s phrase (pauses never reached 0.8 s of quiet).
+  - Open: a weekday ("в пятницу") would wake the assistant with the current match anywhere in the
+    phrase. Proposed rule: the name must stand at the start of the phrase (first word, or second
+    after "эй / слушай / привет / ну"). Waiting for the user's decision.
+  - Next: 11c-4 listener logic.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.

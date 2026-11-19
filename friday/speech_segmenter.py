@@ -16,6 +16,8 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
+DEFAULT_MIN_RMS = 0.004  # a quiet lavalier in a quiet room speaks at about 0.01
+DEFAULT_NOISE_FACTOR = 3.0
 
 
 class SpeechSegmenter:
@@ -23,8 +25,8 @@ class SpeechSegmenter:
         self,
         sample_rate: int = SAMPLE_RATE,
         frame_ms: int = 30,
-        min_rms: float = 0.012,
-        noise_factor: float = 3.0,
+        min_rms: float = DEFAULT_MIN_RMS,
+        noise_factor: float = DEFAULT_NOISE_FACTOR,
         start_frames: int = 3,
         end_silence_s: float = 0.8,
         min_speech_s: float = 0.3,
