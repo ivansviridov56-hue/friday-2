@@ -146,7 +146,7 @@ class WakeListener:
         self._quiet_until = now + self._cooldown_s
         if self._waiting_until is not None:
             self._waiting_until = None
-            self._emit("timeout")
+            self._emit("cancel")  # someone else (the assistant, X2) owns the window now
 
     def _expire_wait(self, now: float) -> None:
         if (

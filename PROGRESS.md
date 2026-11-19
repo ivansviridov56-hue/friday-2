@@ -309,6 +309,23 @@
     an .env flag to turn the listener on (off by default), the log_text debug flag.
   - Next: 11d wiring and the live check with music playing (see the music finding above).
 
+- [x] 11d: wake listener wired into voice.py, off by default, 689 tests
+  - voice.py: WAKE_WORD=1 in .env turns the listener on (WAKE_DEBUG=1 prints what Whisper heard:
+    everything said near the microphone, for tuning only); one SerializedTranscriber shared by the
+    listener and the assistant (one recognition at a time); TurnRunner takes text as well as audio
+    (X2 still sends audio); is_busy = assistant answering or X2 held.
+  - friday/wake_setup.py (env_flag, WakeIndicator: "wake" -> LISTENING, "timeout" -> IDLE, "cancel" and
+    "command" leave the window to the assistant / X2; SerializedTranscriber). Event "cancel" added to the
+    listener for the case when the assistant or X2 takes over during the wait.
+  - Live check, quiet room, lavalier, no music: name + command in one phrase works; name alone + next
+    phrase works; name alone + 7 s silence -> timeout; "мы поедем в пятницу на дачу" and phrases without
+    the name do not wake her; her own voice was never heard back; short noises give 1.7 s phrases with
+    empty text that Whisper's VAD rejects in 0-15 ms. Once Whisper heard "Тони Стах" for "Тони Старк"
+    (recognition accuracy, not the listener).
+  - Not yet checked: music playing; X2 together with the listener; the window indicator;
+    speakers vs headphones.
+  - Next: live check with music, then README privacy note for the always-on listening.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.

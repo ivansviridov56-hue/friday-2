@@ -14,7 +14,7 @@ play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Stage 10 (screen vision) done. 
-Stage 11 (wake word): 11a-11c-4 done (listener logic is ready and tested but NOT wired into voice.py yet). Known issue: loud music glues phrases together (energy segmenter), to be measured live. Next: 11d wiring (flag in .env, TurnRunner takes text, window states), then a live check with music.
+Stage 11 (wake word): 11a-11d done. The listener is wired into voice.py and OFF by default (WAKE_WORD=1 in .env turns it on; WAKE_DEBUG=1 prints what was heard). Works in a quiet room. Next: live check with music playing and with X2, then a README privacy note.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

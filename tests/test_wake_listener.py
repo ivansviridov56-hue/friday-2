@@ -199,7 +199,7 @@ def test_busy_cancels_the_wait() -> None:
     rig.hear()
     rig.busy[0] = True
     rig.listener.process(FRAME)
-    assert rig.events == ["wake", "timeout"]
+    assert rig.events == ["wake", "cancel"]
 
 
 def test_recognition_error_does_not_stop_the_listener() -> None:

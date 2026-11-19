@@ -24,7 +24,7 @@ def _spawn_thread(task: Callable[[], None]) -> None:
 class TurnRunner:
     def __init__(
         self,
-        handler: Callable[[np.ndarray], object],
+        handler: Callable[[np.ndarray | str], object],
         spawn: Spawn = _spawn_thread,
     ) -> None:
         self._handler = handler
@@ -36,7 +36,7 @@ class TurnRunner:
     def is_busy(self) -> bool:
         return self._busy
 
-    def submit(self, audio: np.ndarray) -> bool:
+    def submit(self, audio: np.ndarray | str) -> bool:
         """Start a turn. Returns False if the audio was dropped."""
         with self._lock:
             if self._busy:
@@ -51,7 +51,7 @@ class TurnRunner:
             return False
         return True
 
-    def _run(self, audio: np.ndarray) -> None:
+    def _run(self, audio: np.ndarray | str) -> None:
         try:
             self._handler(audio)
         except Exception:

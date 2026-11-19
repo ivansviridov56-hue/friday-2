@@ -12,6 +12,8 @@ import threading
 
 from pathlib import Path
 
+from friday.wake_listener import WakeListener
+from friday.wake_setup import SerializedTranscriber, WakeIndicator, env_flag
 from friday.screen_capture import capture_screen
 from friday.screen_handler import make_screen_handler
 from friday.vision import build_vision_client, describe
@@ -67,12 +69,14 @@ def _show(turn: Turn | None) -> None:
 def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
     """Background thread: load models, wire everything, wait until `stop`."""
     trigger = None
+    listener = None
     recorder = None
     try:
         bus.publish(StateChanged(State.LOADING))
         stt = SpeechToText()
         print("Прогреваю распознавание речи...")
         stt.warm_up_async().join()
+        shared_stt = SerializedTranscriber(stt)
 
         player = PygamePlayer()
 
@@ -84,7 +88,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         memory = MemoryStore(MEMORY_FILE)
         history = ConversationHistory()
         assistant = Assistant(
-            stt,
+            shared_stt,
             LLMClient(),
             speak,
             system_prompt=lambda: with_facts(build_system_prompt(), memory.facts()),
@@ -102,7 +106,16 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
                 make_music_handler(MusicController(list_sessions)),
             ),
         )
-        runner = TurnRunner(lambda audio: _show(assistant.handle_audio(audio)))
+
+        def run_turn(item) -> None:
+            if isinstance(
+                item, str
+            ):  # a phrase already recognized by the wake listener
+                _show(assistant.handle_text(item))
+            else:
+                _show(assistant.handle_audio(item))
+
+        runner = TurnRunner(run_turn)
         indicator = ListeningIndicator(bus, lambda: runner.is_busy)
 
         def submit(audio) -> bool:
@@ -117,6 +130,18 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         recorder = Recorder()
         recorder.open()
         ptt = PushToTalk(recorder, submit)
+        if env_flag(os.environ.get("WAKE_WORD")):
+            wake_indicator = WakeIndicator(bus)
+            listener = WakeListener(
+                recorder,
+                shared_stt,
+                runner.submit,
+                lambda: runner.is_busy or recorder.is_recording,
+                on_event=wake_indicator.on_event,
+                log_text=env_flag(os.environ.get("WAKE_DEBUG")),
+            )
+            listener.start()
+            print('Слово-активатор включено: скажи "Пятница, ..."')
 
         def press() -> None:
             indicator.on_press()
@@ -134,6 +159,8 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         log.exception("assistant crashed")
         bus.publish(StateChanged(State.ERROR))
     finally:
+        if listener is not None:
+            listener.stop()
         if trigger is not None:
             trigger.stop()
         if recorder is not None:
