@@ -295,6 +295,20 @@
     to 6 s for the command after the name alone, silent while the assistant is busy or X2 is held,
     measurement log). Planned: off by default, switched on by an .env flag until it proves itself.
 
+- [x] 11c-4: continuous listener, 666 tests
+  - friday/wake_listener.py (WakeListener: frames from Recorder.add_listener -> queue -> worker thread ->
+    SpeechSegmenter -> STT -> split_wake_phrase. Text after the name goes to submit(text) as a ready
+    command; the name alone arms a 6 s wait for the next phrase (judged by when the phrase STARTED, and
+    the wait does not expire while the user is speaking); deaf while is_busy() (assistant answering or
+    X2 held) and for 1 s afterwards so she never hears herself; events "wake" / "command" / "timeout"
+    for the window. Phrase texts are not logged unless log_text is on; the log has lengths and timings.)
+  - Assistant.handle_text(text): the same turn from an already recognized phrase (no second STT).
+    Reason: commands like "запомни ..." and "включи песню ..." must START with their verb, so the name
+    cannot be left in the text; the listener passes the text after the name.
+  - Not wired yet (11d): voice.py, TurnRunner accepting text, window states for wake / timeout,
+    an .env flag to turn the listener on (off by default), the log_text debug flag.
+  - Next: 11d wiring and the live check with music playing (see the music finding above).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.

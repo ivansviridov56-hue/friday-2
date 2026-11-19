@@ -69,8 +69,18 @@ class Assistant:
         finally:
             self._set_state(State.IDLE)
 
+    def handle_text(self, text: str) -> Turn | None:
+        """Run one turn from an already recognized phrase (the wake word path)."""
+        self._set_state(State.THINKING)
+        try:
+            return self._run_text(text.strip())
+        finally:
+            self._set_state(State.IDLE)
+
     def _run_turn(self, audio: np.ndarray) -> Turn | None:
-        heard = self._stt.transcribe(audio).strip()
+        return self._run_text(self._stt.transcribe(audio).strip())
+
+    def _run_text(self, heard: str) -> Turn | None:
         if not heard:
             log.info("nothing heard")
             return None
