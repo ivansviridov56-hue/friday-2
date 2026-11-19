@@ -278,10 +278,22 @@
     silence frames above the threshold, one false 2.5 s phrase in silence. Another run (conditions
     not confirmed): background median 0.0004, 2.4% above the threshold, no phrases in silence, but
     the speech came out as ONE 10.1 s phrase (pauses never reached 0.8 s of quiet).
-  - Open: a weekday ("в пятницу") would wake the assistant with the current match anywhere in the
-    phrase. Proposed rule: the name must stand at the start of the phrase (first word, or second
-    after "эй / слушай / привет / ну"). Waiting for the user's decision.
   - Next: 11c-4 listener logic.
+
+- [x] 11c-3b: wake phrase must START with the name, 640 tests
+  - Decision (chosen by Claude on the user's "выбери сам"): the name must start the phrase, after at
+    most two lead-in words (эй / слушай / привет / ну ...). friday/wake_word.py: split_wake_phrase(text)
+    returns the text after the name, "" for the name alone, None if the phrase does not start with the
+    name ("в пятницу поедем" and "включи музыку, Пятница" do not wake her; X2 stays for those).
+  - Music finding (the user confirmed: music was playing, pauses were made): the speech came out as ONE
+    10.1 s phrase, so the energy segmenter does not find the end of a phrase over loud or dynamic music.
+    Not patched blindly: the live listener (11c-4) will log phrase lengths and what Whisper heard, and
+    we decide on real data (smarter end detection, name listening only without music, or a dedicated
+    keyword model). SpeechToText.transcribe uses vad_filter=True, so music-only fragments should come
+    back empty and cost little (to be confirmed live).
+  - Next: 11c-4 listener logic (queue off the audio thread, segmenter, STT, split_wake_phrase, wait up
+    to 6 s for the command after the name alone, silent while the assistant is busy or X2 is held,
+    measurement log). Planned: off by default, switched on by an .env flag until it proves itself.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
