@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 
-from friday.window_restore import restore_minimized
+from friday.window_restore import minimize_windows, restore_minimized
 from friday.playback_check import make_is_any_playing
 from friday.smtc import list_sessions
 from friday.wave_launcher import WaveLauncher
@@ -80,13 +80,25 @@ def find_player() -> UiaWavePlayer | None:
     return UiaWavePlayer(found[0])
 
 
-def prepare_window() -> None:
-    restore_minimized(_pids())
+class _WindowRestorer:
+    """Remembers the windows we restored, so we can minimize exactly those again."""
+
+    def __init__(self) -> None:
+        self._hwnds: list[int] = []
+
+    def prepare(self) -> None:
+        self._hwnds = restore_minimized(_pids())
+
+    def minimize_back(self) -> None:
+        hwnds, self._hwnds = self._hwnds, []
+        minimize_windows(hwnds)
 
 
 def build_launcher() -> WaveLauncher:
+    restorer = _WindowRestorer()
     return WaveLauncher(
         find_player,
         make_is_any_playing(list_sessions),
-        prepare=prepare_window,
+        prepare=restorer.prepare,
+        after_start=restorer.minimize_back,
     )

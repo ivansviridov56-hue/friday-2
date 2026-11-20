@@ -37,6 +37,7 @@ class WaveLauncher:
         is_playing: Callable[[], bool],
         *,
         prepare: Callable[[], None] | None = None,
+        after_start: Callable[[], None] | None = None,
         sleep: Callable[[float], None] = time.sleep,
         monotonic: Callable[[], float] = time.monotonic,
         player_timeout: float = 5.0,
@@ -46,6 +47,7 @@ class WaveLauncher:
         self._find_player = find_player
         self._is_playing = is_playing
         self._prepare = prepare
+        self._after_start = after_start
         self._sleep = sleep
         self._monotonic = monotonic
         self._player_timeout = player_timeout
@@ -68,6 +70,7 @@ class WaveLauncher:
             logger.warning("pressing play failed: %s", type(error).__name__)
             return WaveStatus.ERROR
         if self._poll(self._safe_playing, self._confirm_timeout, bool):
+            self._safe_after_start()
             return WaveStatus.STARTED
         logger.info("play was pressed but the session does not report playback")
         return WaveStatus.NOT_CONFIRMED
@@ -78,6 +81,14 @@ class WaveLauncher:
         except Exception as error:
             logger.debug("player lookup failed: %s", type(error).__name__)
             return None
+
+    def _safe_after_start(self) -> None:
+        if self._after_start is None:
+            return
+        try:
+            self._after_start()
+        except Exception as error:
+            logger.debug("after_start failed: %s", type(error).__name__)
 
     def _safe_prepare(self) -> None:
         if self._prepare is None:
