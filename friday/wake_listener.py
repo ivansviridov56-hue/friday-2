@@ -213,10 +213,18 @@ class WakeListener:
     ) -> None:
         shown = f" heard={text!r}" if self._log_text else ""
         log.info(
-            "wake listener: phrase %.1f s, recognized in %d ms, name=%s, waiting=%s%s",
+            "wake listener: phrase %.1f s, recognized in %d ms, name=%s, waiting=%s%s%s",
             seconds,
             took * 1000,
             rest is not None,
             waiting,
+            self._end_note(),
             shown,
         )
+
+    def _end_note(self) -> str:
+        """How the segmenter closed the phrase: ended=max means it was cut at the limit."""
+        info = getattr(self._segmenter, "last_end", None)  # older cutters have none
+        if info is None:
+            return ""
+        return f" ended={info.reason} floor={info.floor:.4f} thr={info.threshold:.4f}"

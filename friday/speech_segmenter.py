@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -18,6 +19,19 @@ log = logging.getLogger(__name__)
 SAMPLE_RATE = 16000
 DEFAULT_MIN_RMS = 0.004  # a quiet lavalier in a quiet room speaks at about 0.01
 DEFAULT_NOISE_FACTOR = 3.0
+
+
+@dataclass(frozen=True)
+class EndInfo:
+    """Why the latest phrase was closed (for diagnostics only).
+
+    reason: "silence" (a real pause was found) or "max" (cut at max_phrase_s).
+    With a big chunk that ends several phrases at once this describes the last one.
+    """
+
+    reason: str
+    threshold: float
+    floor: float
 
 
 class SpeechSegmenter:
@@ -62,6 +76,11 @@ class SpeechSegmenter:
         self._frames: list[np.ndarray] | None = None  # None while idle
         self._quiet_run = 0
         self._speech_frames = 0
+        self._last_end: EndInfo | None = None
+
+    @property
+    def last_end(self) -> EndInfo | None:
+        return self._last_end
 
     @property
     def in_speech(self) -> bool:
@@ -132,6 +151,11 @@ class SpeechSegmenter:
         ended = self._quiet_run >= self._end_frames
         if not ended and len(self._frames) < self._max_frames:
             return None
+        self._last_end = EndInfo(
+            reason="silence" if ended else "max",
+            threshold=self._threshold(),
+            floor=self._noise_floor or 0.0,
+        )
         frames, self._frames = self._frames, None
         speech_frames, self._speech_frames = self._speech_frames, 0
         if speech_frames < self._min_speech_frames:
