@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 761 passed).
+2. Ask the user to run `pytest` and paste the result (expect 768 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -23,6 +23,7 @@ Stage 13b done: My Wave works with a minimized Yandex Music window (a closed or 
 Music is still not handled). The My Wave handler had been dropped from voice.py in stage 10d
 and is wired in again.
 Stage 13c done: after My Wave starts, a Yandex Music window that Friday restored is minimized back.
+Stage 13d done: the handler chain is built by name in friday/command_chain.py (a missing handler fails at startup).
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made

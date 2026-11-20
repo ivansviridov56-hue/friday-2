@@ -407,6 +407,13 @@
   - Not reproduced: an earlier run where 7 processes were found but no window passed the
     filter. If it comes back, read the "windows seen" log line.
 
+- [x] Stage 13d: the command chain is built in one place, 768 tests
+  - friday/command_chain.py: COMMAND_ORDER = memory, screen, wave, play, artist, music;
+    build_command_chain(handlers) takes a name -> handler dict and raises ValueError if a
+    handler is missing or unknown (the case that hid the lost My Wave handler in stage 10d)
+  - friday/voice.py calls build_command_chain instead of chain_handlers
+  - Checked by voice (wake word on): wave, what's playing, play a song, screen, memory
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -512,8 +519,7 @@ Stage 13 candidates (ask the user): (c) My Wave when Music is closed or in the t
 app, wait for the window (cold start ~10 s), open the wave page (needs a probe for a reliable
 way, the menu item "Моя волна" conflicts with the structure-first rule); (b) a second cloud
 voice or a local neural Russian voice instead of the Windows fallback, and a fix for slow Edge
-synthesis (a timeout before going local?); a small function that builds the handler chain in
-voice.py, with a test that all handlers are present. Other options: wave by mood, a window or
+synthesis (a timeout before going local?); Other options: wave by mood, a window or
 area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT to one or two
 short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together with
 vision_shot_probe.py. X2 push-to-talk stays in any case.
