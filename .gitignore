@@ -15,3 +15,5 @@ samples/panel_debug*.txt
 panel_debug*.txt
 samples/
 artist_debug*.txt
+# Written by the silero package into the working directory on every model load
+latest_silero_models.yml

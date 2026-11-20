@@ -36,6 +36,7 @@ from friday.push_to_talk import PushToTalk
 from friday.recorder import Recorder
 from friday.stt import SpeechToText
 from friday.tts import speak_text
+from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
 from friday.ui_events import State, StateChanged, UiEventBus
 from friday.window import run_window
@@ -74,6 +75,15 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
     recorder = None
     try:
         bus.publish(StateChanged(State.LOADING))
+        tts_choice = choose_tts(os.environ.get("TTS_ENGINE"))
+
+        def _warm_up_voice() -> None:
+            try:
+                tts_choice.warm_up()
+            except Exception:
+                log.exception("voice warm-up failed")
+
+        threading.Thread(target=_warm_up_voice, name="tts-warm-up", daemon=True).start()
         stt = SpeechToText()
         print("Прогреваю распознавание речи...")
         stt.warm_up_async().join()
@@ -82,7 +92,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         player = PygamePlayer()
 
         def speak(text: str) -> None:
-            speak_text(text, player.play)
+            speak_text(text, player.play, engine=tts_choice.engine)
 
         vision_client = build_vision_client()
         token = os.environ.get("YM_TOKEN")

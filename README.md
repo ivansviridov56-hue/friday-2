@@ -17,7 +17,7 @@ hear the answer. Not a finished product yet.
 - Push-to-talk on the mouse side button X2
 - Speech recognition on the GPU (faster-whisper)
 - Cloud LLM with a fallback chain of free providers
-- Spoken answers (Edge TTS)
+- - Spoken answers: local Silero voice by default, Edge TTS as an option (`TTS_ENGINE=edge` in `.env`)
 - Short dialogue memory
 - Desktop window (PyWebView) with the chat and a state indicator
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
@@ -40,6 +40,11 @@ it is recognized on your machine by the local Whisper model. Audio is never save
 text is not logged unless `WAKE_DEBUG=1` (it prints what was heard to the console, for tuning only).
 Phrases that do not start with the name are dropped on your machine; the text of a phrase that does
 is sent to the cloud LLM providers like any other command.
+The default voice is the Silero TTS model `v5_ru`, which runs locally on the CPU. It is downloaded
+on the first start by the `silero` package and is not part of this repository. The Silero models are
+published under a non-commercial licence (CC BY-NC, see https://github.com/snakers4/silero-models),
+so they are fine for personal use but not for commercial use. For a commercial setup, use
+`TTS_ENGINE=edge` or another voice.
 
 ## Development
 

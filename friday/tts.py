@@ -149,13 +149,19 @@ async def speak_async(
     settings: TtsSettings = TtsSettings(),
     communicate=None,
     local: Callable[[str], bytes] | None = None,
+    engine: Callable[[str], bytes] | None = None,
 ) -> int:
-    """Speak `text` piece by piece. Returns how many pieces were played."""
+    """Speak `text` piece by piece. Returns how many pieces were played.
+
+    With `engine` (e.g. Silero) every piece is voiced by it and Edge is not used.
+    """
     chunks = split_for_speech(clean_for_speech(text))
     gate = asyncio.Semaphore(MAX_PARALLEL)
 
     async def render(chunk: str) -> bytes:
         async with gate:
+            if engine is not None:
+                return await asyncio.to_thread(engine, chunk)
             return await synthesize_with_fallback(chunk, settings, communicate, local)
 
     begun = time.perf_counter()
@@ -182,5 +188,12 @@ async def speak_async(
     return played
 
 
-def speak_text(text: str, play, settings: TtsSettings = TtsSettings()) -> int:
-    return asyncio.run(speak_async(text, play, settings, local=synthesize_local))
+def speak_text(
+    text: str,
+    play,
+    settings: TtsSettings = TtsSettings(),
+    engine: Callable[[str], bytes] | None = None,
+) -> int:
+    return asyncio.run(
+        speak_async(text, play, settings, local=synthesize_local, engine=engine)
+    )

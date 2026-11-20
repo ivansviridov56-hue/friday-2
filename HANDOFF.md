@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 775 passed).
+2. Ask the user to run `pytest` and paste the result (expect 797 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -24,6 +24,7 @@ and is wired in again.
 Stage 13c done: after My Wave starts, a Yandex Music window that Friday restored is minimized back.
 Stage 13d done: the handler chain is built by name in friday/command_chain.py (a missing handler fails at startup).
 Stage 13e done: My Wave also works with Yandex Music closed (the wave link is opened only when no Music process exists).
+Stage 13f done: the main voice is local Silero v5_ru (kseniya); Edge is an option via TTS_ENGINE=edge.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -85,3 +86,12 @@ Next: see the Next section of PROGRESS.md.
 - TTS: Edge TTS (Svetlana) first, one try; if it fails, that chunk goes to the local Windows voice
   "Microsoft Irina Desktop" (PowerShell System.Speech, text in a base64 env variable). Edge failures
   are on the service side (not parallelism, rate, punctuation or library version).
+- My Wave with closed Music (13e): the wave link is opened only when no Music process exists (it does
+  not switch the page of a running app). A failed cold start keeps the generic NO_PLAYER answer; a
+  separate "Music did not start" status is postponed until it happens live (chosen by Claude on the
+  user's "решай сам").
+- TTS engine (13f): Silero v5_ru (local, CPU, voice kseniya, chosen by the user after listening)
+  is the main voice; Edge stays as an option via TTS_ENGINE=edge (with the Windows fallback voice
+  as before). No Edge-first/Silero-fallback chain (chosen by Claude on the user's "решай сам").
+  Probe: model loads in ~9 s, synthesis 55-106 ms per ~5 s of audio. The model is never committed
+  to the repo; the licence note goes to README.

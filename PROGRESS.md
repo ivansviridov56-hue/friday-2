@@ -423,6 +423,30 @@
   - Checked by voice (wake word on): closed Music -> wave starts in ~4 s, window stays in front;
     Music open on another page -> "Не вижу плеер Моей волны..."; already playing -> "Музыка уже играет"
 
+- [x] Stage 13f: local Silero voice as the main TTS, 797 tests
+  - friday/tts_silero.py (SileroVoice: model v5_ru, speaker kseniya, 48000 Hz, CPU, lazy torch import,
+    loader injected for tests, warm_up(), returns WAV bytes; a load or synthesis failure is a SileroError
+    and a failed load is retried on the next call), friday/tts_choice.py (choose_tts: TTS_ENGINE
+    "silero" by default, "edge" keeps the old Edge + Windows fallback path, unknown name raises
+    ValueError at startup), tts.py: speak_async / speak_text take an optional `engine`; with it every
+    chunk is voiced by it and Edge is not used, one failed chunk does not silence the rest.
+  - voice.py: choose_tts(os.environ.get("TTS_ENGINE")), warm-up in a background thread started before
+    Whisper loads, engine passed to speak_text. .env.example has TTS_ENGINE, requirements-local.txt has
+    silero>=0.5 (torch 2.15.0+cpu comes with it), .gitignore has latest_silero_models.yml (the silero
+    package writes it into the working directory on every model load).
+  - Tests: 775 + 10 (tts_silero) + 3 (tts_engine) + 9 (tts_choice) = 797 passed.
+  - Checked by voice (wake word on, Silero): model loaded in 15.6 s (in parallel with Whisper), synthesis
+    33-125 ms per chunk, first chunk ready in 43-112 ms (Edge: 1.2-2.4 s); Edge and Irina were never
+    called. Wave, what's playing, play a song by name, pause, continue and the wake word all work as before.
+  - Seen, not investigated: in a multi-chunk answer "chunk 2/3 ready" comes 1.5-2.4 s after chunk 1
+    (looks like waiting for the previous chunk to finish playing, not slow synthesis); a harmless
+    TypedStorage UserWarning from torch at model load; the wake listener cut several phrases at 12 s
+    (ended=max) in this run.
+  - Not checked: a phrase said in the first seconds after "Пятница готова", before the model has loaded.
+  - Licence: Silero models are CC BY-NC (non-commercial), except the base CIS models under MIT, and
+    v5_ru is not one of them. The model is never committed; both readmes carry the note and point to
+    TTS_ENGINE=edge for commercial use. The licence of the `silero` pip package itself was not checked.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -528,9 +552,7 @@
 
 
 ## Next
-Stage 13 candidates (ask the user): (b) a second cloud
-voice or a local neural Russian voice instead of the Windows fallback, and a fix for slow Edge
-synthesis (a timeout before going local?); Other options: wave by mood, a window or
-area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT to one or two
-short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together with
-vision_shot_probe.py. X2 push-to-talk stays in any case.
+Stage 14 candidates (ask the user): wave by mood, a window or area screenshot instead of the whole
+screen, shorter vision answers (SYSTEM_PROMPT to one or two short sentences, VISION_MAX_TOKENS = 250),
+remove the fit_size duplicate together with vision_shot_probe.py, check the first seconds after
+startup with Silero still loading. X2 push-to-talk stays in any case.
