@@ -38,6 +38,9 @@ class WaveLauncher:
         *,
         prepare: Callable[[], None] | None = None,
         after_start: Callable[[], None] | None = None,
+        is_running: Callable[[], bool] | None = None,
+        open_wave: Callable[[], None] | None = None,
+        cold_start_timeout: float = 20.0,
         sleep: Callable[[float], None] = time.sleep,
         monotonic: Callable[[], float] = time.monotonic,
         player_timeout: float = 5.0,
@@ -48,6 +51,9 @@ class WaveLauncher:
         self._is_playing = is_playing
         self._prepare = prepare
         self._after_start = after_start
+        self._is_running = is_running
+        self._open_wave = open_wave
+        self._cold_start_timeout = cold_start_timeout
         self._sleep = sleep
         self._monotonic = monotonic
         self._player_timeout = player_timeout
@@ -58,9 +64,10 @@ class WaveLauncher:
         if self._safe_playing():
             return WaveStatus.ALREADY_PLAYING
         self._safe_prepare()
-        player = self._poll(
-            self._safe_player, self._player_timeout, lambda v: v is not None
-        )
+        timeout = self._player_timeout
+        if self._start_app_if_closed():
+            timeout = self._cold_start_timeout
+        player = self._poll(self._safe_player, timeout, lambda v: v is not None)
         if player is None:
             logger.info("wave player not found")
             return WaveStatus.NO_PLAYER
@@ -97,6 +104,24 @@ class WaveLauncher:
             self._prepare()
         except Exception as error:
             logger.debug("prepare failed: %s", type(error).__name__)
+
+    def _start_app_if_closed(self) -> bool:
+        """Open the wave link only when Yandex Music is not running at all."""
+        if self._is_running is None or self._open_wave is None:
+            return False
+        try:
+            if self._is_running():
+                return False
+        except Exception as error:
+            logger.debug("running check failed: %s", type(error).__name__)
+            return False
+        try:
+            self._open_wave()
+        except Exception as error:
+            logger.warning("opening the wave link failed: %s", type(error).__name__)
+            return False
+        logger.info("Yandex Music is closed: opened the wave link")
+        return True
 
     def _safe_playing(self) -> bool:
         try:

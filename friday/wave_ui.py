@@ -15,9 +15,11 @@ from friday.window_restore import minimize_windows, restore_minimized
 from friday.playback_check import make_is_any_playing
 from friday.smtc import list_sessions
 from friday.wave_launcher import WaveLauncher
-from friday.ym_ui import _descendants, _find_window, _pids
+from friday.ym_ui import _descendants, _find_window, _pids, open_link
 
 logger = logging.getLogger(__name__)
+
+WAVE_LINK = "yandexmusic://radio/user/onyourwave"
 
 
 class UiaWavePlayer:
@@ -101,4 +103,6 @@ def build_launcher() -> WaveLauncher:
         make_is_any_playing(list_sessions),
         prepare=restorer.prepare,
         after_start=restorer.minimize_back,
+        is_running=lambda: bool(_pids()),
+        open_wave=lambda: open_link(WAVE_LINK),
     )
