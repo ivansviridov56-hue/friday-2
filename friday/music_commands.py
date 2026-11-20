@@ -125,8 +125,6 @@ def _has(words: list[str], group: Group) -> bool:
                     return True
             elif word.startswith(stem):
                 return True
-            elif word.startswith(stem):
-                return True
     return False
 
 
