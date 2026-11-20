@@ -14,7 +14,7 @@ def audio_kind(audio: bytes) -> str:
 
 
 class PygamePlayer:
-    """Play mp3 bytes and block until they finish."""
+    """Play mp3 or WAV bytes and block until they finish."""
 
     def __init__(self) -> None:
         import pygame
