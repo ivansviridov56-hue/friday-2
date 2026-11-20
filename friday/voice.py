@@ -101,6 +101,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
                     lambda shot, question: describe(vision_client, shot, question),
                     announce=speak,
                 ),
+                make_wave_handler(build_wave_launcher()),
                 make_play_handler(TrackSearch(token), build_launcher()),
                 make_artist_handler(ArtistSearch(token), build_artist_launcher()),
                 make_music_handler(MusicController(list_sessions)),
