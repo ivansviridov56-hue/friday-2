@@ -119,9 +119,6 @@ def _has(words: list[str], group: Group) -> bool:
             if stem.startswith("="):
                 if word == stem[1:]:
                     return True
-            if stem.startswith("="):
-                if word == stem[1:]:
-                    return True
             elif stem.startswith("?"):
                 body = stem[2:]  # the stem without "?" and without its first letter
                 if len(word) > len(body) and word[1 : 1 + len(body)] == body:
