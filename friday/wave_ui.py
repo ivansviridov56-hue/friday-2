@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import logging
 
+from friday.window_restore import restore_minimized
 from friday.playback_check import make_is_any_playing
 from friday.smtc import list_sessions
 from friday.wave_launcher import WaveLauncher
-from friday.ym_ui import _descendants, _find_window
+from friday.ym_ui import _descendants, _find_window, _pids
 
 logger = logging.getLogger(__name__)
 
@@ -79,5 +80,13 @@ def find_player() -> UiaWavePlayer | None:
     return UiaWavePlayer(found[0])
 
 
+def prepare_window() -> None:
+    restore_minimized(_pids())
+
+
 def build_launcher() -> WaveLauncher:
-    return WaveLauncher(find_player, make_is_any_playing(list_sessions))
+    return WaveLauncher(
+        find_player,
+        make_is_any_playing(list_sessions),
+        prepare=prepare_window,
+    )

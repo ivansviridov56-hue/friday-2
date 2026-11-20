@@ -36,6 +36,7 @@ class WaveLauncher:
         find_player: Callable[[], WavePlayer | None],
         is_playing: Callable[[], bool],
         *,
+        prepare: Callable[[], None] | None = None,
         sleep: Callable[[float], None] = time.sleep,
         monotonic: Callable[[], float] = time.monotonic,
         player_timeout: float = 5.0,
@@ -44,6 +45,7 @@ class WaveLauncher:
     ) -> None:
         self._find_player = find_player
         self._is_playing = is_playing
+        self._prepare = prepare
         self._sleep = sleep
         self._monotonic = monotonic
         self._player_timeout = player_timeout
@@ -53,6 +55,7 @@ class WaveLauncher:
     def launch(self) -> WaveStatus:
         if self._safe_playing():
             return WaveStatus.ALREADY_PLAYING
+        self._safe_prepare()
         player = self._poll(
             self._safe_player, self._player_timeout, lambda v: v is not None
         )
@@ -75,6 +78,14 @@ class WaveLauncher:
         except Exception as error:
             logger.debug("player lookup failed: %s", type(error).__name__)
             return None
+
+    def _safe_prepare(self) -> None:
+        if self._prepare is None:
+            return
+        try:
+            self._prepare()
+        except Exception as error:
+            logger.debug("prepare failed: %s", type(error).__name__)
 
     def _safe_playing(self) -> bool:
         try:
