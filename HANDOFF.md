@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 703 passed).
+2. Ask the user to run `pytest` and paste the result (expect 729 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -16,7 +16,9 @@ Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be gre
 Stage 10 (screen vision) done. 
 Stage 11 (wake word) done: 11a-11e. The listener is wired into voice.py and OFF by default
 (WAKE_WORD=1 in .env turns it on; WAKE_DEBUG=1 prints what was heard, for tuning only). Checked in
-a quiet room and with music on speakers. Next: stage 12, Edge TTS NoAudioReceived (see PROGRESS.md).
+a quiet room and with music on speakers. 
+Stage 12 (TTS fallback) done: Edge first (one try), the local Windows voice Irina for chunks Edge
+cannot voice. Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -74,3 +76,6 @@ a quiet room and with music on speakers. Next: stage 12, Edge TTS NoAudioReceive
   is sent at once; the name alone waits up to 6 s for the next phrase. The listener is deaf while the
   assistant answers or X2 is held, and 1 s after. Phrase texts are not logged unless WAKE_DEBUG=1.
   X2 push-to-talk stays. Not hijacking: phrases without the name are dropped.
+- TTS: Edge TTS (Svetlana) first, one try; if it fails, that chunk goes to the local Windows voice
+  "Microsoft Irina Desktop" (PowerShell System.Speech, text in a base64 env variable). Edge failures
+  are on the service side (not parallelism, rate, punctuation or library version).

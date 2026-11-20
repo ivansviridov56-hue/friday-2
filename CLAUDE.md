@@ -15,6 +15,9 @@ commit messages and docs in English.
 7. No hardcoded absolute paths; resolve everything from the project root.
 8. Before finishing a stage: run `pytest`, update PROGRESS.md and HANDOFF.md.
 9. Give the user small steps with exact commands and ask for the output.
+10. Never send ready-made files (no present_files, no downloads): give code as text in the chat
+    to paste. The free plan has message limits, and unfinished work would lose the files.
+    Files with Windows line endings: give edits as text, never whole files.
 
 ## Context
 - The user is on the free Claude plan and switches accounts, so this file,

@@ -346,6 +346,25 @@
   - README (en, ru): wake word feature line and privacy note for the always-on listening.
   - Next: fix the TTS NoAudioReceived problem (stage 12).
 
+- [x] 12: Edge TTS failures and a local fallback voice, 729 tests
+  - Problem: Edge TTS answers NoAudioReceived for some phrases (about 30% in a probe, more in live
+    use). friday/tts_probe.py (python -m friday.tts_probe [rates]) showed it is NOT caused by parallel
+    requests (1 vs 2 at a time: the same 6 of 20), the speaking rate (+0% vs +30%), the final period
+    or the library (edge-tts 7.3.1 is the latest). Some phrases fail every time, others at random;
+    a second try recovered about 1 of 8.
+  - friday/tts_fallback.py: the Windows voice "Microsoft Irina Desktop" through PowerShell
+    (System.Speech). The text travels in a base64 environment variable, never in the command line;
+    returns WAV bytes; the temp file is deleted at once.
+  - tts.py: one Edge try (RETRY_ATTEMPTS = 1), then the local voice for that chunk; if it fails
+    too, the chunk is skipped (the answer stays in the window). speak_text passes the fallback,
+    speak_async has none by default. audio.py plays mp3 or WAV (audio_kind).
+  - Live check: a failed chunk is voiced by Irina after about 3.8 s (6.6-7.5 s with two Edge tries);
+    Edge takes 1.2-2.4 s when it works. Irina's speed is fine. Both voices alternate in one answer.
+  - Open: the cause is on the service side. A second cloud voice or a good local Russian voice
+    would remove the voice change.
+  - Seen in the log, not fixed: "что играет" heard as "стойграет" went to the LLM instead of the
+    music command; "включи мою волну" with Yandex Music closed went to the LLM.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -442,9 +461,9 @@
 
 
 ## Next
-Stage 12: Edge TTS fails with NoAudioReceived too often (retries add 5-10 s, some chunks are not
-spoken). Start with a probe or a log of what fails (text, length, language mix), then decide: smarter
-retry, another voice, or a fallback provider. Ask the user before choosing. X2 push-to-talk stays in any case.
+Stage 13 candidates (ask the user): (a) music commands tolerant to Whisper mishearings (fuzzy match,
+"стойграет" -> "что играет") and a check of "включи мою волну" with Yandex Music open;
+(b) a second cloud voice or a local neural Russian voice instead of the Windows fallback. X2 push-to-talk stays in any case.
 Other options left: My Wave extras (open the wave page through the menu, wave by mood), a
 window or area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT
 to one or two short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together
