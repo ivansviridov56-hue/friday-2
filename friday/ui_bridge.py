@@ -10,7 +10,7 @@ import logging
 import threading
 from typing import Callable
 
-from friday.ui_events import MessageAdded, StateChanged, UiEvent
+from friday.ui_events import LevelChanged, MessageAdded, StateChanged, UiEvent
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,8 @@ class UiBridge:
             return
         with self._lock:
             if not self._ready:
-                self._pending.append(script)
+                if not isinstance(event, LevelChanged):
+                    self._pending.append(script)
                 return
             self._run(script)
 
@@ -49,6 +50,9 @@ class UiBridge:
                 f"window.fridayUi.addMessage({json.dumps(event.role)}, "
                 f"{json.dumps(event.text)})"
             )
+        if isinstance(event, LevelChanged):
+            level = min(1.0, max(0.0, event.level))
+            return f"window.fridayUi.setLevel({level:.3f})"
         logger.warning("unknown UI event %r", event)
         return None
 

@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 808 passed).
+2. Ask the user to run `pytest` and paste the result (expect 834 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -27,6 +27,7 @@ Stage 13e done: My Wave also works with Yandex Music closed (the wave link is op
 Stage 13f done: the main voice is local Silero v5_ru (kseniya); Edge is an option via TTS_ENGINE=edge.
 Stage 13g done: Latin words are spelled in Cyrillic before the Silero voice (friday/translit.py).
 Stage 15a done: new window design (friday/ui/: index.html, styles.css, app.js), circle colour follows the state.
+Stage 15b done: circles follow the microphone loudness while listening (level_meter.py, level_publisher.py).
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -106,3 +107,5 @@ Next: see the Next section of PROGRESS.md.
 - Window design (15a): taken from the user's old project (look only, no old code); the page API
   window.fridayUi.setState / addMessage must stay the same. Sidebar sections and the text input are
   postponed until there are features behind them (chosen by the user).
+- Circles and sound (15b): only the user's voice for now (variant A, chosen by the user); loudness goes
+  to the window only in the LISTENING state; her own voice moving the circles is a later step (variant B).

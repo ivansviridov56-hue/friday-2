@@ -26,6 +26,7 @@ from friday.memory_store import MemoryStore
 from friday.assistant import Assistant, Turn
 from friday.audio import PygamePlayer
 from friday.listening_indicator import ListeningIndicator
+from friday.level_publisher import LevelPublisher
 from friday.llm import LLMClient
 from friday.mouse_trigger import XBUTTON2, SideButtonTrigger
 from friday.music import MusicController
@@ -73,6 +74,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
     trigger = None
     listener = None
     recorder = None
+    level_publisher = None
     try:
         bus.publish(StateChanged(State.LOADING))
         tts_choice = choose_tts(os.environ.get("TTS_ENGINE"))
@@ -145,6 +147,8 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
 
         recorder = Recorder()
         recorder.open()
+        level_publisher = LevelPublisher(bus, recorder)
+        level_publisher.start()
         ptt = PushToTalk(recorder, submit)
         if env_flag(os.environ.get("WAKE_WORD")):
             wake_indicator = WakeIndicator(bus)
@@ -179,6 +183,8 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             listener.stop()
         if trigger is not None:
             trigger.stop()
+        if level_publisher is not None:
+            level_publisher.close()
         if recorder is not None:
             recorder.close()
 

@@ -34,7 +34,14 @@ class MessageAdded:
     text: str
 
 
-UiEvent = StateChanged | MessageAdded
+@dataclass(frozen=True)
+class LevelChanged:
+    """Microphone loudness 0..1 for the window; not remembered by the bus."""
+
+    level: float
+
+
+UiEvent = StateChanged | MessageAdded | LevelChanged
 Listener = Callable[[UiEvent], None]
 
 

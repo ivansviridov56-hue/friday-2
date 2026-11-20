@@ -483,6 +483,23 @@
   - Not done: the left strip with the logo, window controls (a frameless window), a text input,
     circles reacting to the sound level (the old project did it through requestAnimationFrame).
 
+- [x] Stage 15b: circles react to the microphone loudness, 834 tests
+  - friday/level_meter.py (LevelMeter: RMS of the frames, noise gate 0.004, full 0.05, averaged,
+    attack/release smoothing, at most 20 values a second; pure logic, no threads)
+  - friday/level_publisher.py (LevelPublisher: Recorder.add_listener only queues frames in the audio
+    thread, a worker thread computes and publishes LevelChanged; values go out only in the LISTENING
+    state, one zero when listening ends)
+  - ui_events.py: LevelChanged (not remembered by the bus); ui_bridge.py: window.fridayUi.setLevel(x),
+    dropped (not queued) before the page has loaded
+  - ui: app.js eases the level every frame (factor 0.12) into the CSS variable --lvl; styles.css scales the
+    circles by it (inner circles more than outer). The per-state breathing speed (--breath) was removed:
+    it made the circles jump when the colour changed.
+  - voice.py creates LevelPublisher next to the Recorder and closes it in finally.
+  - Checked live: circles follow the voice, colour change is smooth now, 160+ fps. Easing 0.25 felt
+    too sharp, 0.12 is fine.
+  - Not done: her own voice (speaking state) does not move the circles (variant B: needs a loudness
+    envelope of the answer synchronized with playback).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -589,6 +606,6 @@
 
 ## Next
 Stage 14 candidates (ask the user): window: left logo strip, frameless window with its own buttons,
-circles reacting to sound level, wave by mood, a window or area screenshot instead of the whole
+circles reacting to her own voice while she speaks, wave by mood, a window or area screenshot instead of the whole
 screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
 the user left it as is for now). X2 push-to-talk stays in any case.
