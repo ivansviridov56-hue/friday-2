@@ -190,7 +190,7 @@
   - Checked live: 1920x1200 -> 1536x960, ~267 KB, 87 ms, image is whole and readable.
   - Open point: SetProcessDpiAwareness is process-wide; inside the running assistant (PyWebView
     already started) it may not apply. Check in 10d via the log line "screenshot WxH -> WxH".
-  - fit_size is duplicated in vision_shot_probe.py (the probe); remove when the probe goes.
+  - fit_size was duplicated in vision_shot_probe.py; the probe was removed in stage 14a.
   - Next: 10c vision client (chain cf-mistral -> cf-llama4-scout -> OpenRouter, longer
     timeout than text, plain-text prompt), then 10d voice command "что на экране".
 
@@ -464,8 +464,10 @@
     separate English voice or Edge for Latin chunks was not chosen.
   - Not done: the dictionary is short; add words as they are found live. The fallback gives only a rough
     pronunciation.
-  - Seen, not investigated: "Субтитры подогнал «Симон»" (a Whisper hallucination) reached the LLM as a
-    command and got "Чем могу быть полезна, босс?"; probably the name alone, then the next phrase.
+
+- [x] Stage 14a: removed friday/vision_shot_probe.py and its test (the fit_size duplicate), 800 tests
+  - The probe was a one-off diagnostic from stage 10a; its results stay in the 10a notes above.
+  - fit_size lives only in friday/screen_capture.py now.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -573,7 +575,6 @@
 
 ## Next
 Stage 14 candidates (ask the user): wave by mood, a window or area screenshot instead of the whole
-screen, remove the fit_size duplicate together with vision_shot_probe.py, README status line (still
-says stages 0-11), the "Субтитры ..." phrase reaching the LLM, shorter spoken answers (screen
+screen, shorter spoken answers (screen
 descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now).
 X2 push-to-talk stays in any case.
