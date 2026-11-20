@@ -3,77 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Пятница</title>
-<style>
-  :root {
-    --bg: #14161a; --panel: #1d2026; --text: #e6e8eb; --muted: #8b919a;
-    --user: #2b3a55; --idle: #5b616b; --listening: #4fb36b;
-    --thinking: #e0a93b; --speaking: #4f8fe0;
-    --error: #d9534f;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: "Segoe UI", system-ui, sans-serif;
-    display: flex; flex-direction: column;
-  }
-  header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px; background: var(--panel);
-  }
-  #dot {
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--idle); transition: background 0.2s;
-  }
-  #dot.listening { background: var(--listening); }
-  #dot.thinking { background: var(--thinking); }
-  #dot.speaking { background: var(--speaking); }
-  #dot.error { background: var(--error); }
-  #dot.loading { background: var(--thinking); animation: pulse 1s infinite; }
-  @keyframes pulse { 50% { opacity: 0.3; } }
-  #status { color: var(--muted); font-size: 14px; }
-  #chat {
-    flex: 1; overflow-y: auto; padding: 16px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .msg {
-    max-width: 85%; padding: 10px 14px; border-radius: 14px;
-    line-height: 1.4; white-space: pre-wrap; word-wrap: break-word;
-  }
-  .msg.user { align-self: flex-end; background: var(--user); }
-  .msg.assistant { align-self: flex-start; background: var(--panel); }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<header>
-  <div id="dot" class="loading"></div>
-  <div id="status">Загружаюсь…</div>
-</header>
-<div id="chat"></div>
-<script>
-  const LABELS = {
-    loading: "Загружаюсь…",
-    idle: "Готова", listening: "Слушаю…",
-    thinking: "Думаю…", speaking: "Говорю…",
-    error: "Ошибка запуска. Подробности в консоли.",
-  };
-  const dot = document.getElementById("dot");
-  const status = document.getElementById("status");
-  const chat = document.getElementById("chat");
-
-  window.fridayUi = {
-    setState(state) {
-      dot.className = state === "idle" ? "" : state;
-      status.textContent = LABELS[state] || state;
-    },
-    addMessage(role, text) {
-      const el = document.createElement("div");
-      el.className = "msg " + role;
-      el.textContent = text;
-      chat.appendChild(el);
-      chat.scrollTop = chat.scrollHeight;
-    },
-  };
-</script>
+<body class="state-loading">
+<div id="bg-layer">
+  <div class="circles-anchor">
+    <div class="circle c4"></div>
+    <div class="circle c3"></div>
+    <div class="circle c2"></div>
+    <div class="circle c1"></div>
+  </div>
+</div>
+<div id="app">
+  <header>
+    <h1>Пятница</h1>
+    <span id="status">Загружаюсь…</span>
+  </header>
+  <div id="chat"></div>
+</div>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,110 @@
+/* Friday 2.0 window: dark theme, circles that change colour with the state. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0f1d;
+  --text: #d1d9ff;
+  --muted: #7d86b3;
+  --c1: #2f5ef1;
+  --c2: #192b77;
+  --c3: #131b3d;
+  --breath: 5s;
+}
+
+/* One class on <body> per assistant state (see friday/ui_events.py). */
+body.state-idle      { --c1: #2f5ef1; --c2: #192b77; --c3: #131b3d; --breath: 5s; }
+body.state-loading   { --c1: #2f5ef1; --c2: #192b77; --c3: #131b3d; --breath: 2.4s; }
+body.state-listening { --c1: #d93060; --c2: #5a1030; --c3: #200812; --breath: 3.5s; }
+body.state-thinking  { --c1: #7c3aed; --c2: #3b1a6e; --c3: #160a2a; --breath: 2.8s; }
+body.state-speaking  { --c1: #06c6d4; --c2: #024a52; --c3: #011e22; --breath: 4s; }
+body.state-error     { --c1: #e0443e; --c2: #6b1a18; --c3: #240a09; --breath: 6s; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: "Rubik", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Background circles */
+#bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.circles-anchor { position: absolute; right: 0; top: 50%; width: 0; height: 0; }
+.circle {
+  position: absolute; top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  transition: background 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: border-radius, transform;
+}
+.c4 { width: 1100px; height: 1100px; background: rgba(14, 18, 46, 0.6); filter: blur(48px);
+      animation: breathe4 var(--breath) ease-in-out infinite, morph4 22s ease-in-out infinite;
+      animation-delay: 0s, -7s; }
+.c3 { width: 860px; height: 860px; background: var(--c3);
+      animation: breathe3 var(--breath) ease-in-out infinite, morph3 17s ease-in-out infinite;
+      animation-delay: -1.3s, -3s; }
+.c2 { width: 610px; height: 610px; background: var(--c2);
+      animation: breathe2 var(--breath) ease-in-out infinite, morph2 13s ease-in-out infinite;
+      animation-delay: -2.7s, -11s; }
+.c1 { width: 390px; height: 390px; background: var(--c1); box-shadow: 0 0 70px rgba(47, 94, 241, 0.22);
+      animation: breathe1 var(--breath) ease-in-out infinite, morph1 9s ease-in-out infinite;
+      animation-delay: -0.9s, -4s; }
+
+@keyframes morph4 {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+  18% { border-radius: 58% 42% 46% 54% / 52% 44% 56% 48%; }
+  36% { border-radius: 44% 56% 62% 38% / 60% 54% 46% 40%; }
+  54% { border-radius: 52% 48% 38% 62% / 44% 62% 38% 56%; }
+  72% { border-radius: 46% 54% 54% 46% / 56% 40% 60% 44%; }
+}
+@keyframes morph3 {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+  20% { border-radius: 62% 38% 44% 56% / 48% 58% 42% 52%; }
+  42% { border-radius: 40% 60% 58% 42% / 56% 44% 54% 46%; }
+  60% { border-radius: 54% 46% 36% 64% / 42% 60% 40% 58%; }
+  80% { border-radius: 44% 56% 60% 40% / 58% 38% 62% 42%; }
+}
+@keyframes morph2 {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+  15% { border-radius: 64% 36% 42% 58% / 46% 62% 38% 54%; }
+  35% { border-radius: 38% 62% 60% 40% / 58% 42% 56% 44%; }
+  55% { border-radius: 56% 44% 34% 66% / 40% 64% 36% 60%; }
+  75% { border-radius: 42% 58% 62% 38% / 60% 36% 64% 40%; }
+}
+@keyframes morph1 {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+  12% { border-radius: 66% 34% 40% 60% / 44% 64% 36% 56%; }
+  28% { border-radius: 36% 64% 62% 38% / 60% 40% 58% 42%; }
+  48% { border-radius: 58% 42% 32% 68% / 38% 66% 34% 62%; }
+  68% { border-radius: 40% 60% 64% 36% / 62% 34% 66% 38%; }
+  85% { border-radius: 54% 46% 46% 54% / 48% 56% 44% 52%; }
+}
+@keyframes breathe4 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.04); } }
+@keyframes breathe3 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.055); } }
+@keyframes breathe2 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.07); } }
+@keyframes breathe1 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+
+/* Foreground */
+#app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+header { display: flex; align-items: baseline; gap: 16px; padding: 22px 36px 8px; }
+header h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+#status { font-size: 13px; color: var(--muted); }
+
+#chat {
+  flex: 1; overflow-y: auto; padding: 16px 36px 28px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin; scrollbar-color: #232a52 transparent;
+}
+.msg {
+  max-width: min(520px, 62%); padding: 12px 18px; line-height: 1.45;
+  white-space: pre-wrap; word-wrap: break-word;
+  animation: fadeUp 0.35s ease-out;
+}
+.msg.user {
+  align-self: flex-end; border-radius: 20px; color: #fff;
+  background: linear-gradient(135deg, #3b5bf0, #5b2fd6);
+  box-shadow: 0 0 24px rgba(70, 90, 255, 0.35);
+}
+.msg.assistant {
+  align-self: flex-start; border-radius: 14px;
+  background: rgba(16, 20, 46, 0.85);
+  border: 1px solid rgba(120, 140, 255, 0.14);
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

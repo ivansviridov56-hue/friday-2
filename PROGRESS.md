@@ -469,6 +469,20 @@
   - The probe was a one-off diagnostic from stage 10a; its results stay in the 10a notes above.
   - fit_size lives only in friday/screen_capture.py now.
 
+- [x] Stage 15a: new window look after the old project's design, 808 tests
+  - friday/ui/ is split into index.html (markup), styles.css (theme, circles, bubbles) and app.js
+    (window.fridayUi.setState / addMessage, same API as before, so ui_bridge.py and window.py are
+    unchanged). Only the look of the old project was reused, none of its logic.
+  - Dark navy theme; four blurred circles on the right morph and "breathe"; their colour follows the
+    state through a body class state-<name>: idle blue, listening red-pink, thinking violet,
+    speaking cyan, loading blue (faster), error red. Bubbles: user gradient with a glow,
+    assistant dark card.
+  - tests/test_ui_assets.py (8 tests): every State has a CSS rule, the page links its assets,
+    app.js exposes the bridge API.
+  - Checked live in the demo window (python -m friday.window): looks fine.
+  - Not done: the left strip with the logo, window controls (a frameless window), a text input,
+    circles reacting to the sound level (the old project did it through requestAnimationFrame).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -574,7 +588,7 @@
 
 
 ## Next
-Stage 14 candidates (ask the user): wave by mood, a window or area screenshot instead of the whole
-screen, shorter spoken answers (screen
-descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now).
-X2 push-to-talk stays in any case.
+Stage 14 candidates (ask the user): window: left logo strip, frameless window with its own buttons,
+circles reacting to sound level, wave by mood, a window or area screenshot instead of the whole
+screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
+the user left it as is for now). X2 push-to-talk stays in any case.

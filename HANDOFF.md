@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 800 passed).
+2. Ask the user to run `pytest` and paste the result (expect 808 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -26,6 +26,7 @@ Stage 13d done: the handler chain is built by name in friday/command_chain.py (a
 Stage 13e done: My Wave also works with Yandex Music closed (the wave link is opened only when no Music process exists).
 Stage 13f done: the main voice is local Silero v5_ru (kseniya); Edge is an option via TTS_ENGINE=edge.
 Stage 13g done: Latin words are spelled in Cyrillic before the Silero voice (friday/translit.py).
+Stage 15a done: new window design (friday/ui/: index.html, styles.css, app.js), circle colour follows the state.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -102,3 +103,6 @@ Next: see the Next section of PROGRESS.md.
   (small dictionary + letter-by-letter fallback); one voice, no English model (variant A, chosen by
   the user: "сделаем так, а дальше посмотрим"). Screen-description answers are left long on purpose:
   the user is fine with the speed, shorten only if it starts to bother.
+- Window design (15a): taken from the user's old project (look only, no old code); the page API
+  window.fridayUi.setState / addMessage must stay the same. Sidebar sections and the text input are
+  postponed until there are features behind them (chosen by the user).
