@@ -414,6 +414,15 @@
   - friday/voice.py calls build_command_chain instead of chain_handlers
   - Checked by voice (wake word on): wave, what's playing, play a song, screen, memory
 
+- [x] Stage 13e: My Wave when Yandex Music is closed, 775 tests
+  - friday/wave_launcher.py: optional is_running / open_wave / cold_start_timeout (20 s);
+    only when no Music process exists, the link yandexmusic://radio/user/onyourwave is opened
+    and the launcher waits longer for the player; without these parameters nothing changes
+  - friday/wave_ui.py: build_launcher passes is_running (process list) and open_wave
+    (WAVE_LINK through ym_ui.open_link)
+  - Checked by voice (wake word on): closed Music -> wave starts in ~4 s, window stays in front;
+    Music open on another page -> "Не вижу плеер Моей волны..."; already playing -> "Музыка уже играет"
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -512,12 +521,14 @@
   process id (window_restore.py). The line "expected one wave player, found 0" in the log
   can be a normal first poll before the page has drawn; it is not an error by itself.
 - After My Wave starts, only a window that Friday itself restored is minimized back again.
+- The wave link opens the wave page and brings the window to the front, but does not start playback
+  (Play is still pressed by wave_ui). It does NOT switch the page of an already running app, so the link
+  is used only when no Music process exists. Music goes to the tray only when closed while playing, and
+  then the wave is already playing (ALREADY_PLAYING).
 
 
 ## Next
-Stage 13 candidates (ask the user): (c) My Wave when Music is closed or in the tray: start the
-app, wait for the window (cold start ~10 s), open the wave page (needs a probe for a reliable
-way, the menu item "Моя волна" conflicts with the structure-first rule); (b) a second cloud
+Stage 13 candidates (ask the user): (b) a second cloud
 voice or a local neural Russian voice instead of the Windows fallback, and a fix for slow Edge
 synthesis (a timeout before going local?); Other options: wave by mood, a window or
 area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT to one or two

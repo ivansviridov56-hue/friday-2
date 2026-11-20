@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 768 passed).
+2. Ask the user to run `pytest` and paste the result (expect 775 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -19,11 +19,11 @@ Stage 11 (wake word) done: 11a-11e. The listener is wired into voice.py and OFF 
 a quiet room and with music on speakers. 
 Stage 12 (TTS fallback) done: Edge first (one try), the local Windows voice Irina for chunks Edge
 cannot voice. Stage 13a done: music commands tolerate recognition slips (glued and smeared words).
-Stage 13b done: My Wave works with a minimized Yandex Music window (a closed or tray-hidden
-Music is still not handled). The My Wave handler had been dropped from voice.py in stage 10d
+Stage 13b done: My Wave works with a minimized Yandex Music window (a tray-hidden Music is not handled, see PROGRESS notes). The My Wave handler had been dropped from voice.py in stage 10d
 and is wired in again.
 Stage 13c done: after My Wave starts, a Yandex Music window that Friday restored is minimized back.
 Stage 13d done: the handler chain is built by name in friday/command_chain.py (a missing handler fails at startup).
+Stage 13e done: My Wave also works with Yandex Music closed (the wave link is opened only when no Music process exists).
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made

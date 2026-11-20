@@ -22,7 +22,7 @@ hear the answer. Not a finished product yet.
 - Desktop window (PyWebView) with the chat and a state indicator
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
 - Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
-- Start My Wave in Yandex Music by voice: "включи мою волну" (the My Wave page must be open in the app)
+- Start My Wave in Yandex Music by voice: "включи мою волну" (works when the app is closed or minimized; if it is open on another page, open My Wave first)
 - Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
 - Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
