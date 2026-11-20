@@ -382,6 +382,18 @@
     Edge synthesis took 5.7-6.1 s for two chunks of one answer (service side, no fallback
     triggered because Edge did not fail, only slow).
 
+- [x] Stage 13b: My Wave works with a minimized Yandex Music window, 755 tests
+  - friday/voice.py: the My Wave handler was dropped from chain_handlers in stage 10d
+    (voice.py has no unit tests, so nothing caught it); put back after the screen handler.
+  - friday/wave_launcher.py: optional `prepare` hook, called once before the player lookup
+    when nothing plays yet (a failing hook is swallowed); tests/test_wave_launcher_prepare.py.
+  - friday/window_restore.py: restores minimized windows of the Yandex Music processes through
+    Win32 (EnumWindows by pid, IsIconic, ShowWindow SW_RESTORE); live-checked, no unit tests.
+  - Checked by voice (wake word on): minimized -> restored and "Включаю Мою волну" (3 of 3),
+    already playing -> "Музыка уже играет" without touching the window.
+  - Not done: Music fully closed or hidden in the tray still gives "Открой Мою волну в
+    приложении" (that is variant C).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -475,13 +487,20 @@
   While music plays the button is named "Пауза": ask SMTC first, never press.
 - Wave not confirmed through the menu path: "Моя волна" menu item (Hyperlink, 240x60 in the
   "Главное меню" group) would need a name lookup, which conflicts with the structure-first rule.
+- UI Automation (`windows(visible_only=True)`) does not see a minimized window, so
+  ym_ui._find_window() returns None for it. Minimized windows are found through Win32 by
+  process id (window_restore.py). The line "expected one wave player, found 0" in the log
+  can be a normal first poll before the page has drawn; it is not an error by itself.
+- The window stays restored after My Wave starts (not minimized back); decide later if needed.
 
 
 ## Next
-Stage 13 candidates (ask the user): (a2) check "включи мою волну" with Yandex Music open;
-(b) a second cloud voice or a local neural Russian voice instead of the Windows fallback, and a
-fix for slow Edge synthesis (a timeout before going local?). X2 push-to-talk stays in any case.
-Other options left: My Wave extras (open the wave page through the menu, wave by mood), a
-window or area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT
-to one or two short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together
-with vision_shot_probe.py.
+Stage 13 candidates (ask the user): (c) My Wave when Music is closed or in the tray: start the
+app, wait for the window (cold start ~10 s), open the wave page (needs a probe for a reliable
+way, the menu item "Моя волна" conflicts with the structure-first rule); (b) a second cloud
+voice or a local neural Russian voice instead of the Windows fallback, and a fix for slow Edge
+synthesis (a timeout before going local?); a small function that builds the handler chain in
+voice.py, with a test that all handlers are present. Other options: wave by mood, a window or
+area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT to one or two
+short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together with
+vision_shot_probe.py. X2 push-to-talk stays in any case.
