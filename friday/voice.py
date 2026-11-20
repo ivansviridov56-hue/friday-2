@@ -40,7 +40,8 @@ from friday.turn_runner import TurnRunner
 from friday.ui_events import State, StateChanged, UiEventBus
 from friday.window import run_window
 from friday.music_search import TrackSearch
-from friday.play_handler import chain_handlers, make_play_handler
+from friday.command_chain import build_command_chain
+from friday.play_handler import make_play_handler
 from friday.ym_ui import build_launcher
 from friday.artist_handler import make_artist_handler
 from friday.artist_search import ArtistSearch
@@ -94,17 +95,21 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
             system_prompt=lambda: with_facts(build_system_prompt(), memory.facts()),
             events=bus,
             history=history,
-            commands=chain_handlers(
-                make_memory_handler(memory, on_forgotten=history.clear),
-                make_screen_handler(
-                    capture_screen,
-                    lambda shot, question: describe(vision_client, shot, question),
-                    announce=speak,
-                ),
-                make_wave_handler(build_wave_launcher()),
-                make_play_handler(TrackSearch(token), build_launcher()),
-                make_artist_handler(ArtistSearch(token), build_artist_launcher()),
-                make_music_handler(MusicController(list_sessions)),
+            commands=build_command_chain(
+                {
+                    "memory": make_memory_handler(memory, on_forgotten=history.clear),
+                    "screen": make_screen_handler(
+                        capture_screen,
+                        lambda shot, question: describe(vision_client, shot, question),
+                        announce=speak,
+                    ),
+                    "wave": make_wave_handler(build_wave_launcher()),
+                    "play": make_play_handler(TrackSearch(token), build_launcher()),
+                    "artist": make_artist_handler(
+                        ArtistSearch(token), build_artist_launcher()
+                    ),
+                    "music": make_music_handler(MusicController(list_sessions)),
+                }
             ),
         )
 
