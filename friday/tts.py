@@ -6,7 +6,10 @@ import asyncio
 import logging
 import re
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
+
+from friday.tts_fallback import synthesize_local
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ _CLAUSE_BREAK = re.compile(r"(?<=[,;:])\s+")
 FIRST_CHUNK_MAX = 50
 CHUNK_MAX = 90
 MAX_PARALLEL = 2
-RETRY_ATTEMPTS = 3
+RETRY_ATTEMPTS = 2  # some phrases fail every time, so more tries only add delay
 RETRY_DELAY = 0.4  # seconds, multiplied by the attempt number
 
 
@@ -116,8 +119,32 @@ async def synthesize_with_retry(
     raise TtsError("unreachable")  # keeps type checkers happy
 
 
+async def synthesize_with_fallback(
+    text: str,
+    settings: TtsSettings = TtsSettings(),
+    communicate=None,
+    local: Callable[[str], bytes] | None = None,
+) -> bytes:
+    """Edge first; if it cannot voice the text, the local voice does (when given)."""
+    try:
+        return await synthesize_with_retry(text, settings, communicate)
+    except Exception as exc:
+        if local is None:
+            raise
+        log.warning(
+            "tts: Edge failed for %r (%s), using the local voice",
+            text[:30],
+            type(exc).__name__,
+        )
+    return await asyncio.to_thread(local, text)
+
+
 async def speak_async(
-    text: str, play, settings: TtsSettings = TtsSettings(), communicate=None
+    text: str,
+    play,
+    settings: TtsSettings = TtsSettings(),
+    communicate=None,
+    local: Callable[[str], bytes] | None = None,
 ) -> int:
     """Speak `text` piece by piece. Returns how many pieces were played."""
     chunks = split_for_speech(clean_for_speech(text))
@@ -125,7 +152,7 @@ async def speak_async(
 
     async def render(chunk: str) -> bytes:
         async with gate:
-            return await synthesize_with_retry(chunk, settings, communicate)
+            return await synthesize_with_fallback(chunk, settings, communicate, local)
 
     begun = time.perf_counter()
     tasks = [asyncio.create_task(render(chunk)) for chunk in chunks]
@@ -152,4 +179,4 @@ async def speak_async(
 
 
 def speak_text(text: str, play, settings: TtsSettings = TtsSettings()) -> int:
-    return asyncio.run(speak_async(text, play, settings))
+    return asyncio.run(speak_async(text, play, settings, local=synthesize_local))
