@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 541 passed).
+2. Ask the user to run `pytest` and paste the result (expect 703 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -14,7 +14,9 @@ play an artist by name).
 Stage 9: My Wave by voice.
 Run it with `python -m friday.voice`. Repo is public on GitHub, CI should be green.
 Stage 10 (screen vision) done. 
-Stage 11 (wake word): 11a-11d done. The listener is wired into voice.py and OFF by default (WAKE_WORD=1 in .env turns it on; WAKE_DEBUG=1 prints what was heard). Works in a quiet room. Next: live check with music playing and with X2, then a README privacy note.
+Stage 11 (wake word) done: 11a-11e. The listener is wired into voice.py and OFF by default
+(WAKE_WORD=1 in .env turns it on; WAKE_DEBUG=1 prints what was heard, for tuning only). Checked in
+a quiet room and with music on speakers. Next: stage 12, Edge TTS NoAudioReceived (see PROGRESS.md).
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -67,4 +69,8 @@ Stage 11 (wake word): 11a-11d done. The listener is wired into voice.py and OFF 
   hijacked. NOT_CONFIRMED has its own spoken answer, ERROR a generic one (chosen by Claude on
   the user's "делай как лучше").
 - Screen description by voice
-- Stage 11a (wake word probe) done: Whisper hears "Пятница" in 10 of 12 clips (misses: "Ветница", "Пятенца"). Next: the user picks how to listen continuously (A Whisper on chunks, B small keyword model, C no wake word), then 11b fuzzy match.
+- Wake word "Пятница": energy segmenter cuts the microphone stream into phrases, local Whisper
+  recognizes each, the phrase must START with the name (fuzzy match). Name + command in one phrase
+  is sent at once; the name alone waits up to 6 s for the next phrase. The listener is deaf while the
+  assistant answers or X2 is held, and 1 s after. Phrase texts are not logged unless WAKE_DEBUG=1.
+  X2 push-to-talk stays. Not hijacking: phrases without the name are dropped.

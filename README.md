@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-10 done). It already works as a voice
+**Status:** early development (stages 0-11 done). It already works as a voice
 chat that can also control Yandex Music: hold the mouse side button X2, speak,
 hear the answer. Not a finished product yet.
 
@@ -25,6 +25,7 @@ hear the answer. Not a finished product yet.
 - Start My Wave in Yandex Music by voice: "включи мою волну" (the My Wave page must be open in the app)
 - Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
+- Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
 
 ## Privacy
 
@@ -34,6 +35,11 @@ assistant anything you do not want to share with them.
 When you ask what is on the screen, a screenshot of your whole screen is taken, downscaled and sent
 to a cloud vision model (Cloudflare Workers AI, with OpenRouter as a fallback). It is kept in memory
 only and is never saved to disk, but close anything private before asking.
+If you turn the wake word on, the microphone is listened to continuously and everything said near
+it is recognized on your machine by the local Whisper model. Audio is never saved, and recognized
+text is not logged unless `WAKE_DEBUG=1` (it prints what was heard to the console, for tuning only).
+Phrases that do not start with the name are dropped on your machine; the text of a phrase that does
+is sent to the cloud LLM providers like any other command.
 
 ## Development
 

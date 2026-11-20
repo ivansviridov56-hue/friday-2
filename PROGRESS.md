@@ -324,7 +324,27 @@
     (recognition accuracy, not the listener).
   - Not yet checked: music playing; X2 together with the listener; the window indicator;
     speakers vs headphones.
-  - Next: live check with music, then README privacy note for the always-on listening.
+  - Live check with music: see 11e.
+
+- [x] 11e: why a phrase ended (diagnostics), level dump probe, README privacy note, 703 tests
+  - SpeechSegmenter.last_end (EndInfo: reason "silence" or "max", threshold, floor); the listener
+    logs "ended=... floor=... thr=..." next to every phrase. Old fakes without last_end still work.
+  - friday/level_dump_probe.py: 48 s scenario with music, writes one RMS number per 30 ms plus step
+    marks to data/probes/ (no sound, no words). Offline replay of the real segmenter on that dump:
+    a 10 s music phrase closed by a pause, short phrases in quiet, no 12 s cuts. The earlier 12.0 s
+    phrases came from steadier, louder music (the energy detector finds no 0.8 s pause there).
+  - Live check, speakers, own music, user singing along: about 25 phrases, only one ended=max (12.0 s,
+    singing over the track), the rest ended=silence. Over music: "Пятница, что играет", "Пятница,
+    пауза", name alone + "следующая песня", "Пятница, как дела?" all worked; no false wake-ups; her
+    own voice through the speakers was not heard; X2 works with the listener on (checked earlier).
+  - Observed: Whisper hallucinates "Субтитры сделал ..." on non-speech (harmless without the name);
+    the name was missed once of about 6 ("Ветнится"); at the start with loud music the threshold was
+    0.0057-0.0078 (noise floor measured in the first 0.3 s) and fell back to 0.004 in quiet.
+  - Decision: no smarter cut at the 12 s limit for now (rare in the live run).
+  - Found, not wired to this stage: Edge TTS often fails with NoAudioReceived; retries make an
+    answer take 5-10 s and some chunks are never spoken (latin names, short chunks).
+  - README (en, ru): wake word feature line and privacy note for the always-on listening.
+  - Next: fix the TTS NoAudioReceived problem (stage 12).
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -422,11 +442,9 @@
 
 
 ## Next
-Stage 11: wake word "Пятница" (chosen by Claude on the user's "выбери сам"). Start with 11a, a probe
-only (friday/wake_probe.py): the user says the name 10-15 times in different ways plus a minute of
-speech without it; the script prints what Whisper heard. No change to the assistant until the
-results are in. 11b depends on them: fuzzy match over heard variants, or stop and discuss
-(another activation word, a small dedicated keyword model). X2 push-to-talk stays in any case.
+Stage 12: Edge TTS fails with NoAudioReceived too often (retries add 5-10 s, some chunks are not
+spoken). Start with a probe or a log of what fails (text, length, language mix), then decide: smarter
+retry, another voice, or a fallback provider. Ask the user before choosing. X2 push-to-talk stays in any case.
 Other options left: My Wave extras (open the wave page through the menu, wave by mood), a
 window or area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT
 to one or two short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together
