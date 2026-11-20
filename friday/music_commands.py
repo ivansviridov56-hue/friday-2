@@ -24,7 +24,9 @@ class MusicCommand(Enum):
 
 
 # A group matches if any of its stems matches any word. A stem starting with
-# "=" must equal the whole word; any other stem matches the start of a word.
+# "=" must equal the whole word; a stem starting with "?" matches the start of a
+# word whatever its first letter is (a smeared first sound, "йграет" for "играет");
+# any other stem matches the start of a word.
 Group = tuple[str, ...]
 
 _MUSIC = (
@@ -41,6 +43,11 @@ _MUSIC = (
 _SONG = ("песн", "трек", "композиц")
 _FILLERS = frozenset({"пятница", "пожалуйста", "давай", "ну"})
 
+# How a quiet voice over music is written: "што играет", "стойграет" (see _match_glued).
+_ALIASES: dict[str, str] = {"што": "что", "шо": "что", "чо": "что", "сто": "что"}
+GLUED_MIN = 7  # a single unknown word this long may be two words without a space
+GLUED_MAX = 20
+
 
 @dataclass(frozen=True)
 class _Rule:
@@ -55,7 +62,7 @@ _RULES = (
         (
             (
                 ("=что", "=кто", "=какая", "=какой"),
-                ("играет", "звучит", "поет", "поют"),
+                ("?играет", "играют", "звучит", "поет", "поют"),
             ),
             (("=как",), ("называет",), _SONG),
             (("=что",), ("=за",), _SONG),
@@ -103,7 +110,7 @@ _RULES = (
 
 def _words(text: str) -> list[str]:
     found = re.findall(r"\w+", text.lower().replace("ё", "е"))
-    return [word for word in found if word not in _FILLERS]
+    return [_ALIASES[w] if w in _ALIASES else w for w in found if w not in _FILLERS]
 
 
 def _has(words: list[str], group: Group) -> bool:
@@ -112,9 +119,43 @@ def _has(words: list[str], group: Group) -> bool:
             if stem.startswith("="):
                 if word == stem[1:]:
                     return True
+            if stem.startswith("="):
+                if word == stem[1:]:
+                    return True
+            elif stem.startswith("?"):
+                body = stem[2:]  # the stem without "?" and without its first letter
+                if len(word) > len(body) and word[1 : 1 + len(body)] == body:
+                    return True
+            elif word.startswith(stem):
+                return True
             elif word.startswith(stem):
                 return True
     return False
+
+
+def _match(words: list[str]) -> MusicCommand | None:
+    for rule in _RULES:
+        if len(words) > rule.max_words:
+            continue
+        for alternative in rule.alternatives:
+            if all(_has(words, group) for group in alternative):
+                return rule.command
+    return None
+
+
+def _match_glued(word: str) -> MusicCommand | None:
+    """A quiet voice over music can come out as one word: "стойграет" is "что играет".
+
+    Only for a phrase of a single word: try to cut it into two words.
+    """
+    if not GLUED_MIN <= len(word) <= GLUED_MAX:
+        return None
+    for cut in range(2, len(word) - 1):
+        parts = [_ALIASES.get(part, part) for part in (word[:cut], word[cut:])]
+        command = _match(parts)
+        if command is not None:
+            return command
+    return None
 
 
 def parse_music_command(text: str) -> MusicCommand | None:
@@ -122,11 +163,9 @@ def parse_music_command(text: str) -> MusicCommand | None:
     words = _words(text)
     if not words:
         return None
-    for rule in _RULES:
-        if len(words) > rule.max_words:
-            continue
-        for alternative in rule.alternatives:
-            if all(_has(words, group) for group in alternative):
-                log.info("music command %s from %r", rule.command.name, text)
-                return rule.command
-    return None
+    command = _match(words)
+    if command is None and len(words) == 1:
+        command = _match_glued(words[0])
+    if command is not None:
+        log.info("music command %s from %r", command.name, text)
+    return command
