@@ -164,7 +164,9 @@ def test_retry_also_covers_empty_audio():
         )
 
 
-def test_speak_recovers_a_chunk_that_fails_once():
+def test_speak_recovers_a_chunk_that_fails_once(monkeypatch):
+    monkeypatch.setattr("friday.tts.RETRY_ATTEMPTS", 2)
+    flaky = make_flaky(fail_times=1)
     flaky = make_flaky(fail_times=1)
     played = []
     count = asyncio.run(speak_async("Раз. Два. Три.", played.append, communicate=flaky))

@@ -19,7 +19,9 @@ _CLAUSE_BREAK = re.compile(r"(?<=[,;:])\s+")
 FIRST_CHUNK_MAX = 50
 CHUNK_MAX = 90
 MAX_PARALLEL = 2
-RETRY_ATTEMPTS = 2  # some phrases fail every time, so more tries only add delay
+RETRY_ATTEMPTS = (
+    1  # a failed Edge try costs seconds and rarely recovers: go local at once
+)
 RETRY_DELAY = 0.4  # seconds, multiplied by the attempt number
 
 
@@ -127,7 +129,9 @@ async def synthesize_with_fallback(
 ) -> bytes:
     """Edge first; if it cannot voice the text, the local voice does (when given)."""
     try:
-        return await synthesize_with_retry(text, settings, communicate)
+        return await synthesize_with_retry(
+            text, settings, communicate, attempts=RETRY_ATTEMPTS
+        )
     except Exception as exc:
         if local is None:
             raise

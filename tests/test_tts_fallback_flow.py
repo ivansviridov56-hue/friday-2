@@ -24,8 +24,8 @@ def local_voice(text: str) -> bytes:
     return b"LOCAL:" + text.encode()
 
 
-def test_edge_is_tried_twice_by_default() -> None:
-    assert RETRY_ATTEMPTS == 2
+def test_edge_is_tried_once_before_the_local_voice() -> None:
+    assert RETRY_ATTEMPTS == 1
 
 
 def test_local_voice_is_not_used_when_edge_works() -> None:
