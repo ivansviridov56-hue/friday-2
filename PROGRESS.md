@@ -500,17 +500,6 @@
   - Not done: her own voice (speaking state) does not move the circles (variant B: needs a loudness
     envelope of the answer synchronized with playback).
 
-- [x] Stage 15c: header without title, own logo, 834 tests
-  - friday/ui/index.html: the big title "Пятница" is removed from the header; instead a small SVG
-    logo (letter П whose crossbar is a sound wave) and the status text. The left strip from the
-    old project's design is not used (chosen by the user: not suited to a modern design).
-  - friday/ui/styles.css: the wave stroke follows the state colour through var(--c1), so it changes
-    together with the circles; app.js is unchanged (still uses id="status").
-  - Logo variants were compared (orbit, voice bars, П-drop, ring, five days, П-wave); П-wave chosen by
-    Claude on the user's "на твой выбор".
-  - Checked live in the demo window (python -m friday.window).
-  - Not done: window / shortcut icon (.ico), a frameless window with its own buttons.
-
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -616,7 +605,7 @@
 
 
 ## Next
-Stage 14 candidates (ask the user): window: frameless window with its own buttons,
+Stage 14 candidates (ask the user): window: left logo strip, frameless window with its own buttons,
 circles reacting to her own voice while she speaks, wave by mood, a window or area screenshot instead of the whole
 screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
 the user left it as is for now). X2 push-to-talk stays in any case.
