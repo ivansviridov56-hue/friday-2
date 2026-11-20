@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 729 passed).
+2. Ask the user to run `pytest` and paste the result (expect 752 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -18,7 +18,8 @@ Stage 11 (wake word) done: 11a-11e. The listener is wired into voice.py and OFF 
 (WAKE_WORD=1 in .env turns it on; WAKE_DEBUG=1 prints what was heard, for tuning only). Checked in
 a quiet room and with music on speakers. 
 Stage 12 (TTS fallback) done: Edge first (one try), the local Windows voice Irina for chunks Edge
-cannot voice. Next: see the Next section of PROGRESS.md.
+cannot voice. Stage 13a done: music commands tolerate recognition slips (glued and smeared words).
+Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.

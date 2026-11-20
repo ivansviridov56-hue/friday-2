@@ -365,6 +365,23 @@
   - Seen in the log, not fixed: "что играет" heard as "стойграет" went to the LLM instead of the
     music command; "включи мою волну" with Yandex Music closed went to the LLM.
 
+- [x] 13a: music commands tolerate Whisper mishearings, 752 tests
+  - music_commands.py: a single unknown word of 7-20 letters is cut into two ("стойграет" ->
+    "сто" + "играет"); a "?" stem ignores the first letter ("йграет", "играется"); aliases
+    "што" / "шо" / "чо" / "сто" -> "что"; "что играют" is a command too. Whole-phrase fuzzy
+    matching was measured and rejected (too little margin against ordinary talk).
+    Lookalikes ("во что играем сегодня", "он играет на гитаре", "сто рублей", "заиграет") stay
+    ordinary speech (tests/test_music_commands_fuzzy.py).
+  - Checked by voice (quiet voice, music on, wake word on): "что играет" in three spellings and
+    two next-track phrases worked, "ты самая лучшая" went to the LLM. The glued "стойграет" did
+    not occur live, it is covered by tests only.
+  - Not done: Whisper hints (initial_prompt / hotwords): risky in an always-on listener
+    (hallucinated words, false wake-ups); try only if mishearings stay frequent.
+  - Not checked: "включи мою волну" with Yandex Music open.
+  - Seen in the log, not fixed: "Включаю следующий." is a masculine form (window text only).
+    Edge synthesis took 5.7-6.1 s for two chunks of one answer (service side, no fallback
+    triggered because Edge did not fail, only slow).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -461,9 +478,9 @@
 
 
 ## Next
-Stage 13 candidates (ask the user): (a) music commands tolerant to Whisper mishearings (fuzzy match,
-"стойграет" -> "что играет") and a check of "включи мою волну" with Yandex Music open;
-(b) a second cloud voice or a local neural Russian voice instead of the Windows fallback. X2 push-to-talk stays in any case.
+Stage 13 candidates (ask the user): (a2) check "включи мою волну" with Yandex Music open;
+(b) a second cloud voice or a local neural Russian voice instead of the Windows fallback, and a
+fix for slow Edge synthesis (a timeout before going local?). X2 push-to-talk stays in any case.
 Other options left: My Wave extras (open the wave page through the menu, wave by mood), a
 window or area screenshot instead of the whole screen, shorter vision answers (SYSTEM_PROMPT
 to one or two short sentences, VISION_MAX_TOKENS = 250), remove the fit_size duplicate together
