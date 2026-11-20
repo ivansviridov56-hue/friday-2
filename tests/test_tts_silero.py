@@ -2,6 +2,7 @@
 
 import io
 import struct
+import threading
 import wave
 
 import pytest
@@ -122,3 +123,35 @@ def test_model_failure_is_an_error():
     voice = SileroVoice(loader=lambda: FakeModel(fail=True))
     with pytest.raises(SileroError):
         voice.synthesize("Привет.")
+
+
+def test_phrase_during_loading_waits_and_loads_only_once():
+    loads = []
+    loading = threading.Event()
+    release = threading.Event()
+
+    def loader():
+        loads.append(1)
+        loading.set()
+        release.wait(5)
+        return FakeModel()
+
+    voice = SileroVoice(loader=loader)
+    result = []
+    warm = threading.Thread(target=voice.warm_up)
+    speak = threading.Thread(target=lambda: result.append(voice.synthesize("Hello.")))
+    try:
+        warm.start()
+        assert loading.wait(5)
+        speak.start()
+        speak.join(0.2)
+        assert speak.is_alive()
+        assert result == []
+    finally:
+        release.set()
+    warm.join(5)
+    speak.join(5)
+    assert not warm.is_alive()
+    assert not speak.is_alive()
+    assert len(loads) == 1
+    assert result[0].startswith(b"RIFF")

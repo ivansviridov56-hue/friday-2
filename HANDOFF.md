@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 797 passed).
+2. Ask the user to run `pytest` and paste the result (expect 798 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -95,3 +95,5 @@ Next: see the Next section of PROGRESS.md.
   as before). No Edge-first/Silero-fallback chain (chosen by Claude on the user's "решай сам").
   Probe: model loads in ~9 s, synthesis 55-106 ms per ~5 s of audio. The model is never committed
   to the repo; the licence note goes to README.
+- 13f, last open point: the startup window (a phrase before Silero has loaded) was checked by a test, not
+  live; the voice waits for the model, nothing is lost (chosen by Claude on the user's "выбери сам").

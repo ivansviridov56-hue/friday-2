@@ -423,7 +423,7 @@
   - Checked by voice (wake word on): closed Music -> wave starts in ~4 s, window stays in front;
     Music open on another page -> "Не вижу плеер Моей волны..."; already playing -> "Музыка уже играет"
 
-- [x] Stage 13f: local Silero voice as the main TTS, 797 tests
+- [x] Stage 13f: local Silero voice as the main TTS, 798 tests
   - friday/tts_silero.py (SileroVoice: model v5_ru, speaker kseniya, 48000 Hz, CPU, lazy torch import,
     loader injected for tests, warm_up(), returns WAV bytes; a load or synthesis failure is a SileroError
     and a failed load is retried on the next call), friday/tts_choice.py (choose_tts: TTS_ENGINE
@@ -434,7 +434,7 @@
     Whisper loads, engine passed to speak_text. .env.example has TTS_ENGINE, requirements-local.txt has
     silero>=0.5 (torch 2.15.0+cpu comes with it), .gitignore has latest_silero_models.yml (the silero
     package writes it into the working directory on every model load).
-  - Tests: 775 + 10 (tts_silero) + 3 (tts_engine) + 9 (tts_choice) = 797 passed.
+  - Tests: 775 + 11 (tts_silero) + 3 (tts_engine) + 9 (tts_choice) = 798 passed.
   - Checked by voice (wake word on, Silero): model loaded in 15.6 s (in parallel with Whisper), synthesis
     33-125 ms per chunk, first chunk ready in 43-112 ms (Edge: 1.2-2.4 s); Edge and Irina were never
     called. Wave, what's playing, play a song by name, pause, continue and the wake word all work as before.
@@ -442,7 +442,10 @@
     (looks like waiting for the previous chunk to finish playing, not slow synthesis); a harmless
     TypedStorage UserWarning from torch at model load; the wake listener cut several phrases at 12 s
     (ended=max) in this run.
-  - Not checked: a phrase said in the first seconds after "Пятница готова", before the model has loaded.
+   - Startup window: on the second live run Silero loaded in 4.7 s (the first run: 15.6 s, cold disk cache)
+    and finished before Whisper, so the window where the voice is not ready was not reproduced. In code a
+    phrase that arrives during loading waits on the load lock and the model is loaded once (covered by
+    test_phrase_during_loading_waits_and_loads_only_once).
   - Licence: Silero models are CC BY-NC (non-commercial), except the base CIS models under MIT, and
     v5_ru is not one of them. The model is never committed; both readmes carry the note and point to
     TTS_ENGINE=edge for commercial use. The licence of the `silero` pip package itself was not checked.
