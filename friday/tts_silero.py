@@ -10,6 +10,7 @@ import time
 import wave
 from collections.abc import Callable, Iterable
 from typing import Any
+from friday.translit import latin_to_cyrillic
 
 log = logging.getLogger(__name__)
 
@@ -97,11 +98,12 @@ class SileroVoice:
         if not text:
             raise SileroError("empty text")
         model = self._get_model()
+        spoken = latin_to_cyrillic(text)
         started = time.perf_counter()
         try:
             with self._run_lock:
                 audio = model.apply_tts(
-                    text=text,
+                    text=spoken,
                     speaker=self._speaker,
                     sample_rate=self._sample_rate,
                 )

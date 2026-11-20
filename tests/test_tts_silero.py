@@ -155,3 +155,17 @@ def test_phrase_during_loading_waits_and_loads_only_once():
     assert not speak.is_alive()
     assert len(loads) == 1
     assert result[0].startswith(b"RIFF")
+
+
+def test_latin_words_reach_the_model_in_cyrillic():
+    model = FakeModel()
+    voice = SileroVoice(loader=lambda: model)
+    voice.synthesize("Включи Python")
+    assert model.calls[0][0] == "Включи Пайтон"
+
+
+def test_russian_text_reaches_the_model_unchanged():
+    model = FakeModel()
+    voice = SileroVoice(loader=lambda: model)
+    voice.synthesize("Привет, как дела?")
+    assert model.calls[0][0] == "Привет, как дела?"

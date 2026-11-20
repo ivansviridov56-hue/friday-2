@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 798 passed).
+2. Ask the user to run `pytest` and paste the result (expect 811 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -25,6 +25,7 @@ Stage 13c done: after My Wave starts, a Yandex Music window that Friday restored
 Stage 13d done: the handler chain is built by name in friday/command_chain.py (a missing handler fails at startup).
 Stage 13e done: My Wave also works with Yandex Music closed (the wave link is opened only when no Music process exists).
 Stage 13f done: the main voice is local Silero v5_ru (kseniya); Edge is an option via TTS_ENGINE=edge.
+Stage 13g done: Latin words are spelled in Cyrillic before the Silero voice (friday/translit.py).
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -97,3 +98,7 @@ Next: see the Next section of PROGRESS.md.
   to the repo; the licence note goes to README.
 - 13f, last open point: the startup window (a phrase before Silero has loaded) was checked by a test, not
   live; the voice waits for the model, nothing is lost (chosen by Claude on the user's "выбери сам").
+- 13g: Silero does not read Latin letters, so text is converted to Cyrillic right before synthesis
+  (small dictionary + letter-by-letter fallback); one voice, no English model (variant A, chosen by
+  the user: "сделаем так, а дальше посмотрим"). Screen-description answers are left long on purpose:
+  the user is fine with the speed, shorten only if it starts to bother.

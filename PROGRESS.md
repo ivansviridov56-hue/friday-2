@@ -450,6 +450,23 @@
     v5_ru is not one of them. The model is never committed; both readmes carry the note and point to
     TTS_ENGINE=edge for commercial use. The licence of the `silero` pip package itself was not checked.
 
+- [x] Stage 13g: Latin words are spelled in Cyrillic before Silero, 811 tests
+  - Problem: the Russian Silero model silently skips Latin letters, so "Python" or "GitHub" were not spoken.
+  - friday/translit.py: latin_to_cyrillic(text) replaces every Latin word; a small dictionary of common
+    names first (Yandex, Music, Python, GitHub, Windows, YouTube), then a letter-by-letter fallback with
+    digraphs (sh, ch, zh, kh, ph, ts, ck); case is kept (first capital, ALL CAPS). Russian text, digits
+    and punctuation are untouched.
+  - tts_silero.py: synthesize() passes the converted text to the model; the window and dialogue history
+    keep the original text. The Edge path is not changed.
+  - Tests: 798 + 11 (translit) + 2 (tts_silero) = 811 passed.
+  - Checked by voice: "Python" and "GitHub" sound fine.
+  - Decision (user: "сделаем так, а дальше посмотрим"): variant A (spelling in Cyrillic, one voice); a
+    separate English voice or Edge for Latin chunks was not chosen.
+  - Not done: the dictionary is short; add words as they are found live. The fallback gives only a rough
+    pronunciation.
+  - Seen, not investigated: "Субтитры подогнал «Симон»" (a Whisper hallucination) reached the LLM as a
+    command and got "Чем могу быть полезна, босс?"; probably the name alone, then the next phrase.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -556,6 +573,7 @@
 
 ## Next
 Stage 14 candidates (ask the user): wave by mood, a window or area screenshot instead of the whole
-screen, shorter vision answers (SYSTEM_PROMPT to one or two short sentences, VISION_MAX_TOKENS = 250),
-remove the fit_size duplicate together with vision_shot_probe.py, check the first seconds after
-startup with Silero still loading. X2 push-to-talk stays in any case.
+screen, remove the fit_size duplicate together with vision_shot_probe.py, README status line (still
+says stages 0-11), the "Субтитры ..." phrase reaching the LLM, shorter spoken answers (screen
+descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now).
+X2 push-to-talk stays in any case.
