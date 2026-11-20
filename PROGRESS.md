@@ -394,6 +394,19 @@
   - Not done: Music fully closed or hidden in the tray still gives "Открой Мою волну в
     приложении" (that is variant C).
 
+- [x] Stage 13c: the Yandex Music window is minimized back after My Wave starts, 761 tests
+  - friday/wave_launcher.py: optional `after_start` hook, called only when the wave really
+    started (STARTED); a failing hook is swallowed; tests/test_wave_launcher_after_start.py.
+  - friday/window_restore.py: restore_minimized returns the restored window handles,
+    minimize_windows puts exactly those windows back; if nothing was restored, the log has
+    "restore: windows seen: ..." (only visibility / minimized / has-title flags, no titles).
+  - friday/wave_ui.py: _WindowRestorer remembers the windows it restored; a window that was
+    already open stays as it is.
+  - Checked by voice (wake word on): minimized -> restored, wave started, minimized back
+    (3 of 3); already playing -> "Музыка уже играет", window untouched.
+  - Not reproduced: an earlier run where 7 processes were found but no window passed the
+    filter. If it comes back, read the "windows seen" log line.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -491,7 +504,7 @@
   ym_ui._find_window() returns None for it. Minimized windows are found through Win32 by
   process id (window_restore.py). The line "expected one wave player, found 0" in the log
   can be a normal first poll before the page has drawn; it is not an error by itself.
-- The window stays restored after My Wave starts (not minimized back); decide later if needed.
+- After My Wave starts, only a window that Friday itself restored is minimized back again.
 
 
 ## Next
