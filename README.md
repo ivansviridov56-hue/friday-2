@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-11 done). It already works as a voice
+**Status:** early development (stages 0-13 done). It already works as a voice
 chat that can also control Yandex Music: hold the mouse side button X2, speak,
 hear the answer. Not a finished product yet.
 
@@ -17,7 +17,7 @@ hear the answer. Not a finished product yet.
 - Push-to-talk on the mouse side button X2
 - Speech recognition on the GPU (faster-whisper)
 - Cloud LLM with a fallback chain of free providers
-- - Spoken answers: local Silero voice by default, Edge TTS as an option (`TTS_ENGINE=edge` in `.env`)
+- Spoken answers: local Silero voice by default, Edge TTS as an option (`TTS_ENGINE=edge` in `.env`)
 - Short dialogue memory
 - Desktop window (PyWebView) with the chat and a state indicator
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
