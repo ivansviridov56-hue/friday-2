@@ -29,6 +29,8 @@ from friday.memory_store import MemoryStore
 from friday.assistant import Assistant, Turn
 from friday.audio import PygamePlayer
 from friday.listening_indicator import ListeningIndicator
+from friday.cover_publisher import CoverPublisher
+from friday.cover_source import SmtcCoverSource
 from friday.level_publisher import LevelPublisher
 from friday.llm import LLMClient
 from friday.mouse_trigger import XBUTTON2, SideButtonTrigger
@@ -42,7 +44,8 @@ from friday.stt import SpeechToText
 from friday.tts import speak_text
 from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
-from friday.ui_events import State, StateChanged, UiEventBus
+from friday.ui_events import CirclesStyleChanged, State, StateChanged, UiEventBus
+from friday.circles_style import parse_circles_style
 from friday.window import run_window
 from friday.music_search import TrackSearch
 from friday.command_chain import build_command_chain
@@ -80,6 +83,7 @@ def _start_assistant(
     listener = None
     recorder = None
     level_publisher = None
+    cover_publisher = None
     try:
         bus.publish(StateChanged(State.LOADING))
         tts_choice = choose_tts(os.environ.get("TTS_ENGINE"))
@@ -155,6 +159,8 @@ def _start_assistant(
         recorder.open()
         level_publisher = LevelPublisher(bus, recorder)
         level_publisher.start()
+        cover_publisher = CoverPublisher(bus, SmtcCoverSource())
+        cover_publisher.start()
         ptt = PushToTalk(recorder, submit)
         if env_flag(os.environ.get("WAKE_WORD")):
             wake_indicator = WakeIndicator(bus)
@@ -192,6 +198,8 @@ def _start_assistant(
             trigger.stop()
         if level_publisher is not None:
             level_publisher.close()
+        if cover_publisher is not None:
+            cover_publisher.close()
         if recorder is not None:
             recorder.close()
 
@@ -205,6 +213,7 @@ def main() -> None:
     logging.getLogger("faster_whisper").setLevel(logging.WARNING)
 
     bus = UiEventBus()
+    bus.publish(CirclesStyleChanged(parse_circles_style(os.environ.get("CIRCLES"))))
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()

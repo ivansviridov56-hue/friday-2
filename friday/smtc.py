@@ -36,6 +36,28 @@ class SmtcSession:
             status=_STATUS.get(code, PlaybackStatus.OTHER),
         )
 
+    async def thumbnail_bytes(self) -> bytes | None:
+        """Cover of the current track as raw image bytes, or None if there is none."""
+        from winsdk.windows.storage.streams import (
+            Buffer,
+            DataReader,
+            InputStreamOptions,
+        )
+
+        props = await self._raw.try_get_media_properties_async()
+        ref = props.thumbnail
+        if ref is None:
+            return None
+        stream = await ref.open_read_async()
+        size = int(stream.size)
+        if size <= 0:
+            return None
+        buffer = Buffer(size)
+        await stream.read_async(buffer, size, InputStreamOptions.READ_AHEAD)  # type: ignore[attr-defined]
+        data = bytearray(buffer.length)
+        DataReader.from_buffer(buffer).read_bytes(data)  # type: ignore
+        return bytes(data)
+
     async def play(self) -> bool:
         return bool(await self._raw.try_play_async())
 

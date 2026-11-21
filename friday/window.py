@@ -14,7 +14,13 @@ from friday.text_input import TextInput
 from friday.window_api import WindowApi
 from friday.window_controls import WindowControls
 from friday.ui_bridge import UiBridge
-from friday.ui_events import MessageAdded, State, StateChanged, UiEventBus
+from friday.ui_events import (
+    CirclesStyleChanged,
+    MessageAdded,
+    State,
+    StateChanged,
+    UiEventBus,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +76,7 @@ def _demo(bus: UiEventBus) -> None:
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     bus = UiEventBus()
+    bus.publish(CirclesStyleChanged("classic"))
     threading.Thread(target=_demo, args=(bus,), daemon=True).start()
     controls = WindowControls()
     run_window(bus, WindowApi(TextInput(), controls), controls)

@@ -549,6 +549,7 @@
   - Not done: the look of the circles will be reconsidered (maybe replaced by something else); the music
     circle should hide until music plays and show the cover (needs title and cover from SMTC); the black
     Windows-like theme and real Mica (not checked whether PyWebView on Windows can do a transparent window).
+
 - [x] Stage 18b: input island
   - Text area grows with the text (up to 5 rows, then inner scroll). Enter sends, Shift+Enter adds a line.
   - Island is compact (260 px) and opens to 500 px on hover, focus, or while it holds text.
@@ -556,6 +557,25 @@
   - The island animates its own height; the text area jumps to its final height at once. The composer uses overflow: clip, so the caret cannot scroll the text.
   - Tests: 892 passed.
   - Known issue (postponed by the user): the text jitters slightly when typing fast with Shift+Enter. Cause is probably fitInput restarting the height transition on every keypress.
+
+- [x] Stage 18c: input island tuned, take 7 in styles.css
+  - Smaller (closed 220 px, open 400 px), slower opening (0.6 s, no spring), raised (44 px from the bottom).
+  - Checked live: the user is happy with the size and the speed.
+
+- [x] Stage 19a: music circle shows the cover of the current track, 910 tests
+  - friday/smtc.py: SmtcSession.thumbnail_bytes() (live-checked), friday/ym_cover_probe.py (diagnostic: saves each session's cover to the temp folder)
+  - friday/cover_data.py (bytes -> PNG / JPEG data URL), CoverChanged event in ui_events.py, UiBridge calls window.fridayUi.setCover(image or null)
+  - friday/cover_publisher.py (polls every 2 s; reads the cover only when the track changes, retries while the cover is missing, publishes None when Music closes or has no track), friday/cover_source.py (SMTC adapter, live-checked, no tests)
+  - UiEventBus remembers the last CoverChanged and gives it to a late subscriber, like the state
+  - Window: #music-orb is hidden until a cover arrives, shows it round, stays on screen while paused, hides when Music closes; wired into voice.py next to LevelPublisher
+  - Checked live: cover appears, track change swaps the cover, pause keeps the circle.
+
+- [x] Stage 20a: switchable look of the background circles, 924 tests
+  - friday/circles_style.py (CIRCLES from .env: classic / blobs / equalizer / dots; empty or unknown gives classic with a warning)
+  - CirclesStyleChanged event in ui_events.py (the bus remembers the last one, like the state and the cover), UiBridge calls window.fridayUi.setCirclesStyle(name), voice.py publishes it at start
+  - Page: friday/ui/circles/core.js (registry, eased state colours, loudness, canvas helper) and one file per look: blobs.js (CSS blurred spots), equalizer.js (canvas rays), dots.js (canvas particles). Classic stays in index.html / styles.css and is only hidden when another look is chosen. A new look = one new file + one script line in index.html
+  - No flash of the old circles at start: .circles-anchor is hidden until body has data-circles
+  - Checked live: all four looks work, colour follows the state, loudness moves them while listening. The user will tune each look later.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -659,10 +679,10 @@
   (Play is still pressed by wave_ui). It does NOT switch the page of an already running app, so the link
   is used only when no Music process exists. Music goes to the tray only when closed while playing, and
   then the wave is already playing (ALREADY_PLAYING).
+- Yandex Music gives its cover through SMTC as a 150x150 PNG (about 52 KB), also while paused. The cover is read only when the track (title + artist) changes. Animations of the circle are postponed by the user.
+- Circles: the equalizer and dots are drawn at the right edge of the window (cx = width - 30). Loudness reaches them only in the LISTENING state; her own voice does not move them yet. The blobs look uses blur(48px) on big shapes: watch for lag on weaker machines.
+- Known small issue (postponed by the user): the window jitters slightly when it appears at start. Idea for later: smooth fade-in or a start animation of the window.
 
 
 ## Next
-Stage 14 candidates (ask the user): window: new look of the circles, music circle with the cover (hidden when nothing plays),
-circles reacting to her own voice while she speaks, wave by mood, a window or area screenshot instead of the whole
-screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
-the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); a settings screen in the app where the circles look (and other options) can be chosen; smooth appearance of the window; animations of the music circle and the island; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

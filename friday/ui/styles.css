@@ -266,3 +266,64 @@ header h1, #status { position: relative; pointer-events: none; }
 
 /* Input island, take 6: "clip" cannot be scrolled, so the caret cannot shift the text while the island grows. */
 #composer { overflow: clip; }
+
+
+/* Input island, take 7: smaller, calmer opening, a little higher. */
+#dock { padding-bottom: 44px; }
+#composer {
+  flex: 0 1 220px;
+  padding: 4px 6px 4px 18px;
+  transition: flex-basis 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s,
+              height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#composer:hover,
+#composer:focus-within,
+#composer:has(#text-input:not(:placeholder-shown)) {
+  flex-basis: 400px;
+}
+#text-input { padding: 7px 0; font-size: 14px; }
+#music-orb { margin-bottom: 3px; }
+#send { margin-bottom: 2px; }
+
+
+/* Music circle, take 2: shows the cover, hidden when nothing is playing. */
+#music-orb {
+  width: 44px; height: 44px; margin-bottom: 1px; overflow: hidden;
+  transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+              margin 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+              opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.3s, box-shadow 0.3s;
+}
+#music-orb.hidden {
+  width: 0; margin-left: -12px; opacity: 0; transform: scale(0.6);
+  border-color: transparent; pointer-events: none;
+}
+#music-cover { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+
+
+/* Switchable circles (see friday/ui/circles/). Classic is hidden when another style is chosen. */
+body[data-circles]:not([data-circles="classic"]) .circles-anchor { display: none; }
+#circles-custom { position: absolute; inset: 0; }
+#circles-custom canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Style "blobs" */
+.blobs-anchor { position: absolute; right: 0; top: 50%; width: 0; height: 0; }
+.blob {
+  position: absolute; top: 0; left: 0; border-radius: 50%;
+  filter: blur(48px); mix-blend-mode: screen;
+  transition: background 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: blob-drift 9s ease-in-out infinite;
+  scale: calc(1 + var(--lvl) * 0.35);
+  will-change: transform;
+}
+.blob.a { width: 420px; height: 420px; background: var(--c1); --dx: 40px; --dy: -30px; }
+.blob.b { width: 520px; height: 520px; background: var(--c2); --dx: -50px; --dy: 40px; animation-duration: 12s; }
+.blob.c { width: 300px; height: 300px; background: var(--c1); --dx: 30px; --dy: 50px; animation-duration: 7s; opacity: 0.8; }
+@keyframes blob-drift {
+  0%, 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))); }
+  50% { transform: translate(calc(-50% - var(--dx)), calc(-50% - var(--dy))); }
+}
+
+
+/* No flash of the classic circles at start: hidden until a style has been chosen. */
+body:not([data-circles]) .circles-anchor { visibility: hidden; }

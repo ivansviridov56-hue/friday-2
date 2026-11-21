@@ -26,6 +26,7 @@ hear the answer. Not a finished product yet.
 - Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
 - Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
+- Switchable look of the background circles (`CIRCLES=classic|blobs|equalizer|dots` in `.env`)
 
 ## Privacy
 

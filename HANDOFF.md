@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 892 passed).
+2. Ask the user to run `pytest` and paste the result (expect 924 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -32,6 +32,8 @@ Stage 16 done: text input in the window (friday/text_input.py, field under the c
 Stage 17 done: frameless window with own minimize / close buttons, drag by the header, resize by the right / bottom edge and corner (friday/window_controls.py, friday/window_api.py).
 Stage 18 done: window layout (chat column on the left, island input bar, music circle placeholder); the look of the circles is open.
 Stage 18b done: input island (compact, opens on hover / focus / text, grows with the text, Enter sends, Shift+Enter adds a line). Slight text jitter on fast typing is a known postponed issue.
+Stage 18c done: input island smaller, slower opening, raised. Stage 19a done: the music circle shows the cover of the current Yandex Music track (hidden when Music is closed, stays on pause); friday/cover_publisher.py + cover_source.py; animations of the circle postponed.
+Stage 20a done: the look of the background circles is switchable by CIRCLES in .env (classic, blobs, equalizer, dots); each look is one file in friday/ui/circles/; the choice in the app settings comes later.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -127,3 +129,6 @@ Next: see the Next section of PROGRESS.md.
   decided (the user: "maybe replace them with something else"). A black Windows-like theme is a possible
   later step.
 - Input island (18b): no state hint in the placeholder and no state glow, only the nudge on refusal (the user's decision). Compact by default and opens on hover or focus; stays open while there is text. The island animates its height, the text area does not. Shift+Enter jitter on fast typing is postponed by the user.
+- Input island (18c): closed 220 px, open 400 px, slow opening, raised; the user is happy (take 7 in styles.css).
+- Music circle (19a): cover first, control later as 19b (chosen by the user). On pause the circle stays; it is hidden only when there is no cover or Music is closed. Animations are postponed by the user.
+- Circles looks (20a): four looks, chosen through .env for now (variant A, chosen by the user), a choice inside the app settings later. The user liked the blobs, the equalizer and the dots from the preview page and wants to tune each one separately. The window jitter at start is postponed by the user (smooth appearance later).

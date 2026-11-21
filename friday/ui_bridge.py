@@ -10,7 +10,14 @@ import logging
 import threading
 from typing import Callable
 
-from friday.ui_events import LevelChanged, MessageAdded, StateChanged, UiEvent
+from friday.ui_events import (
+    CirclesStyleChanged,
+    CoverChanged,
+    LevelChanged,
+    MessageAdded,
+    StateChanged,
+    UiEvent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +60,10 @@ class UiBridge:
         if isinstance(event, LevelChanged):
             level = min(1.0, max(0.0, event.level))
             return f"window.fridayUi.setLevel({level:.3f})"
+        if isinstance(event, CoverChanged):
+            return f"window.fridayUi.setCover({json.dumps(event.image)})"
+        if isinstance(event, CirclesStyleChanged):
+            return f"window.fridayUi.setCirclesStyle({json.dumps(event.name)})"
         logger.warning("unknown UI event %r", event)
         return None
 

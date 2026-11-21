@@ -13,6 +13,7 @@
     <div class="circle c2"></div>
     <div class="circle c1"></div>
   </div>
+  <div id="circles-custom"></div>
 </div>
 <div id="app">
   <header>
@@ -30,14 +31,18 @@
       <textarea id="text-input" rows="1" maxlength="500" placeholder="Напишите сообщение…" autocomplete="off" spellcheck="false"></textarea>
       <button id="send" type="submit" aria-label="Отправить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
     </form>
-    <div id="music-orb" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+    <div id="music-orb" class="hidden" aria-hidden="true">
+      <img id="music-cover" alt="">
     </div>
   </div>
 </div>
 <div class="resize-handle" id="resize-right" data-resize="x"></div>
 <div class="resize-handle" id="resize-bottom" data-resize="y"></div>
 <div class="resize-handle" id="resize-corner" data-resize="xy"></div>
+<script src="circles/core.js"></script>
+<script src="circles/blobs.js"></script>
+<script src="circles/equalizer.js"></script>
+<script src="circles/dots.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

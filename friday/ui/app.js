@@ -16,6 +16,7 @@ const root = document.documentElement;
 let levelTarget = 0;
 let levelNow = 0;
 let levelLoop = false;
+window.fridayLevel = () => levelNow;
 
 function stepLevel() {
   levelNow += (levelTarget - levelNow) * 0.12;
@@ -48,6 +49,19 @@ window.fridayUi = {
       levelLoop = true;
       requestAnimationFrame(stepLevel);
     }
+  },
+  setCover(image) {
+    const orb = document.getElementById("music-orb");
+    const cover = document.getElementById("music-cover");
+    if (image) {
+      cover.src = image;
+      orb.classList.remove("hidden");
+    } else {
+      orb.classList.add("hidden");
+    }
+  },
+  setCirclesStyle(name) {
+    window.fridayCircles.use(name);
   },
 };
 
