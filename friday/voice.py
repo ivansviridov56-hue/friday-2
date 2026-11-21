@@ -12,6 +12,7 @@ import threading
 
 from pathlib import Path
 
+from friday.text_input import TextInput, WindowApi
 from friday.wake_listener import WakeListener
 from friday.wake_setup import SerializedTranscriber, WakeIndicator, env_flag
 from friday.screen_capture import capture_screen
@@ -69,7 +70,9 @@ def _show(turn: Turn | None) -> None:
         )
 
 
-def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
+def _start_assistant(
+    bus: UiEventBus, stop: threading.Event, text_input: TextInput
+) -> None:
     """Background thread: load models, wire everything, wait until `stop`."""
     trigger = None
     listener = None
@@ -134,6 +137,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
                 _show(assistant.handle_audio(item))
 
         runner = TurnRunner(run_turn)
+        text_input.set_handler(runner.submit)
         indicator = ListeningIndicator(bus, lambda: runner.is_busy)
 
         def submit(audio) -> bool:
@@ -179,6 +183,7 @@ def _start_assistant(bus: UiEventBus, stop: threading.Event) -> None:
         log.exception("assistant crashed")
         bus.publish(StateChanged(State.ERROR))
     finally:
+        text_input.set_handler(None)
         if listener is not None:
             listener.stop()
         if trigger is not None:
@@ -199,12 +204,16 @@ def main() -> None:
 
     bus = UiEventBus()
     stop = threading.Event()
+    text_input = TextInput()
     worker = threading.Thread(
-        target=_start_assistant, args=(bus, stop), name="assistant", daemon=True
+        target=_start_assistant,
+        args=(bus, stop, text_input),
+        name="assistant",
+        daemon=True,
     )
     worker.start()
     try:
-        run_window(bus)  # blocks until the window is closed
+        run_window(bus, WindowApi(text_input))  # blocks until the window is closed
     finally:
         stop.set()
         worker.join(timeout=5)

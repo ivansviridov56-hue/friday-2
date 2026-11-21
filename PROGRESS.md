@@ -500,6 +500,24 @@
   - Not done: her own voice (speaking state) does not move the circles (variant B: needs a loudness
     envelope of the answer synchronized with playback).
 
+- [x] Stage 16: text input in the window, 853 tests
+  - friday/text_input.py (TextInput: strips the text, rejects empty text, text over 500 characters, and
+    text typed before the assistant is ready; the handler is set by the assistant thread when it is
+    ready and cleared on exit; the typed text is never logged; WindowApi.submit_text is the only method
+    the page can call, and it accepts only strings)
+  - window.py: run_window takes an optional api and passes it to PyWebView as js_api; voice.py creates
+    TextInput in main(), passes it to the assistant thread and hands it runner.submit (the same path as a
+    phrase from the wake listener, so music and memory commands work from typed text too; no
+    ListeningIndicator, it belongs to the mouse button)
+  - ui: a simple pill-shaped field with a round send button under the chat (index.html, styles.css,
+    app.js); on refusal (busy or loading) the field flashes red and keeps the text; no new window design
+    yet
+  - Tests: 850 + 3 (test_ui_composer: elements, API call, styles) = 853; test_text_input has 16
+  - Checked live: typed question answered and spoken, "что играет" works, typed phrase while she answers
+    is refused (field flashes red, text stays), empty field does nothing, X2 and the wake word as before.
+  - Not done: showing a typed message before she answers is handled by the existing events (works);
+    the look of the field is temporary and will change with the window design.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.

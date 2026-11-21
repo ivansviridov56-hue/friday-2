@@ -50,3 +50,36 @@ window.fridayUi = {
     }
   },
 };
+
+// Text input: the page hands typed text to Python (friday/text_input.py).
+// If Python refuses it (busy, still loading), the text stays in the field.
+const composer = document.getElementById("composer");
+const textInput = document.getElementById("text-input");
+const sendButton = document.getElementById("send");
+
+composer.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const text = textInput.value.trim();
+  if (!text) {
+    return;
+  }
+  const api = window.pywebview && window.pywebview.api;
+  if (!api || !api.submit_text) {
+    return;
+  }
+  sendButton.disabled = true;
+  try {
+    const accepted = await api.submit_text(text);
+    if (accepted) {
+      textInput.value = "";
+    } else {
+      textInput.classList.add("refused");
+      setTimeout(() => textInput.classList.remove("refused"), 700);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    sendButton.disabled = false;
+    textInput.focus();
+  }
+});

@@ -10,6 +10,7 @@ import threading
 import time
 from pathlib import Path
 
+from friday.text_input import WindowApi
 from friday.ui_bridge import UiBridge
 from friday.ui_events import MessageAdded, State, StateChanged, UiEventBus
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 HTML_PATH = Path(__file__).resolve().parent / "ui" / "index.html"
 
 
-def run_window(bus: UiEventBus) -> None:
+def run_window(bus: UiEventBus, api: WindowApi | None = None) -> None:
     """Show the window and block until it is closed. Must run on the main thread."""
     import webview
 
@@ -28,6 +29,7 @@ def run_window(bus: UiEventBus) -> None:
         width=420,
         height=640,
         background_color="#14161a",
+        js_api=api,
     )
     if window is None:
         raise RuntimeError("could not create the window")

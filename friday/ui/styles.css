@@ -115,3 +115,22 @@ header h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.16em; text-tran
 .c2 { scale: calc(1 + var(--lvl) * 0.20); }
 .c3 { scale: calc(1 + var(--lvl) * 0.12); }
 .c4 { scale: calc(1 + var(--lvl) * 0.06); }
+
+/* Text input (sent to Python through window.pywebview.api.submit_text) */
+#composer { display: flex; gap: 10px; padding: 0 36px 22px; }
+#text-input {
+  flex: 1; min-width: 0; padding: 12px 18px; border-radius: 999px;
+  border: 1px solid rgba(120, 140, 255, 0.18);
+  background: rgba(16, 20, 46, 0.6); color: var(--text);
+  font: inherit; outline: none; backdrop-filter: blur(12px);
+  transition: border-color 0.25s;
+}
+#text-input::placeholder { color: var(--muted); }
+#text-input:focus { border-color: rgba(120, 140, 255, 0.45); }
+#text-input.refused { border-color: rgba(224, 68, 62, 0.8); }
+#send {
+  width: 44px; height: 44px; flex: none; border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(120, 140, 255, 0.3); color: #fff; font-size: 18px;
+  background: linear-gradient(135deg, #3b5bf0, #5b2fd6);
+}
+#send:disabled { opacity: 0.4; cursor: default; }
