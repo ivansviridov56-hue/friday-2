@@ -549,6 +549,13 @@
   - Not done: the look of the circles will be reconsidered (maybe replaced by something else); the music
     circle should hide until music plays and show the cover (needs title and cover from SMTC); the black
     Windows-like theme and real Mica (not checked whether PyWebView on Windows can do a transparent window).
+- [x] Stage 18b: input island
+  - Text area grows with the text (up to 5 rows, then inner scroll). Enter sends, Shift+Enter adds a line.
+  - Island is compact (260 px) and opens to 500 px on hover, focus, or while it holds text.
+  - No state hints in the placeholder and no state glow (the user's decision). The only reaction is the nudge when a phrase is refused.
+  - The island animates its own height; the text area jumps to its final height at once. The composer uses overflow: clip, so the caret cannot scroll the text.
+  - Tests: 892 passed.
+  - Known issue (postponed by the user): the text jitters slightly when typing fast with Shift+Enter. Cause is probably fitInput restarting the height transition on every keypress.
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip

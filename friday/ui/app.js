@@ -72,6 +72,7 @@ composer.addEventListener("submit", async (event) => {
     const accepted = await api.submit_text(text);
     if (accepted) {
       textInput.value = "";
+      fitInput();
     } else {
       textInput.classList.add("refused");
       setTimeout(() => textInput.classList.remove("refused"), 700);
@@ -157,3 +158,41 @@ document.getElementById("btn-close").addEventListener("click", () => callApi("cl
     handle.addEventListener("pointercancel", onUp);
   });
 })();
+
+// Input island, take 2: a growing text area, Enter sends, Shift+Enter makes a new line,
+// the placeholder shows what she is doing.
+const MAX_INPUT_HEIGHT = 136;
+
+function fitInput() {
+  const from = composer.offsetHeight;
+  composer.style.height = "auto";
+  textInput.style.height = "auto";
+  const full = textInput.scrollHeight;
+  const to = Math.min(full, MAX_INPUT_HEIGHT);
+  // The text area jumps to its final height at once, so the text never scrolls;
+  // only the island animates (its bottom edge opens smoothly).
+  textInput.style.height = to + "px";
+  textInput.style.overflowY = full > MAX_INPUT_HEIGHT ? "auto" : "hidden";
+  if (full <= MAX_INPUT_HEIGHT) textInput.scrollTop = 0;
+  const target = composer.offsetHeight;
+  if (from === target) {
+    return;
+  }
+  composer.style.height = from + "px";
+  void composer.offsetHeight; // force reflow so the transition starts from `from`
+  composer.style.height = target + "px";
+}
+
+composer.addEventListener("transitionend", (event) => {
+  if (event.target === composer && event.propertyName === "height") {
+    composer.style.height = "";
+  }
+});
+
+textInput.addEventListener("input", fitInput);
+textInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    composer.requestSubmit();
+  }
+});

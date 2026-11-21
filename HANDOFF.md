@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 884 passed).
+2. Ask the user to run `pytest` and paste the result (expect 892 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -31,6 +31,7 @@ Stage 15b done: circles follow the microphone loudness while listening (level_me
 Stage 16 done: text input in the window (friday/text_input.py, field under the chat); typed text goes the same way as a phrase from the wake listener.
 Stage 17 done: frameless window with own minimize / close buttons, drag by the header, resize by the right / bottom edge and corner (friday/window_controls.py, friday/window_api.py).
 Stage 18 done: window layout (chat column on the left, island input bar, music circle placeholder); the look of the circles is open.
+Stage 18b done: input island (compact, opens on hover / focus / text, grows with the text, Enter sends, Shift+Enter adds a line). Slight text jitter on fast typing is a known postponed issue.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -125,3 +126,4 @@ Next: see the Next section of PROGRESS.md.
   decisions). The circles are not blurred for now (blur caused banding); their final look is still to be
   decided (the user: "maybe replace them with something else"). A black Windows-like theme is a possible
   later step.
+- Input island (18b): no state hint in the placeholder and no state glow, only the nudge on refusal (the user's decision). Compact by default and opens on hover or focus; stays open while there is text. The island animates its height, the text area does not. Shift+Enter jitter on fast typing is postponed by the user.

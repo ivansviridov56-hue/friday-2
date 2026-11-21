@@ -196,3 +196,73 @@ header h1, #status { position: relative; pointer-events: none; }
 
 /* Slightly blurred inner circles (small blur: the blur is what causes colour steps) */
 .c1, .c2, .c3 { filter: blur(0px); }
+
+/* Input island, take 2: grows with the text, follows the state colour */
+#dock { align-items: flex-end; }
+#music-orb { margin-bottom: 6px; }
+#composer {
+  align-items: flex-end;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: border-color 0.4s, box-shadow 0.6s, flex-basis 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#composer:focus-within {
+  flex-basis: 500px;
+  border-color: rgba(150, 165, 255, 0.35);
+  border-color: color-mix(in srgb, var(--c1) 55%, transparent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07),
+              0 0 36px rgba(70, 90, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07),
+              0 0 36px color-mix(in srgb, var(--c1) 22%, transparent);
+}
+#text-input {
+  resize: none; overflow-y: auto; scrollbar-width: none;
+  line-height: 24px; padding: 8px 0; max-height: 136px;
+  caret-color: var(--c1);
+}
+#text-input::-webkit-scrollbar { display: none; }
+#send { margin-bottom: 4px; }
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+#composer:has(#text-input.refused) { animation: nudge 0.3s ease-in-out; }
+
+/* Multi-line input: a rounded rectangle instead of a pill, soft fade at the scroll edges */
+#composer { border-radius: 26px; padding: 6px 8px 6px 22px; }
+#text-input {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+}
+#music-orb svg { width: 20px; height: 20px; }
+
+/* Input island, take 3: compact by default, opens on hover or focus, no state glow. */
+#composer {
+  flex: 0 1 260px;
+  border-color: rgba(150, 165, 255, 0.14);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: flex-basis 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s;
+}
+#composer:hover,
+#composer:focus-within,
+#composer:has(#text-input:not(:placeholder-shown)) {
+  flex-basis: 500px;
+  border-color: rgba(150, 165, 255, 0.28);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+#text-input { transition: height 0.18s ease; }
+
+/* Input island, take 4: lower field, wider compact state so the hint fits. */
+#composer { padding: 4px 6px 4px 20px; }
+#text-input { padding: 9px 0; line-height: 22px; transition: height 0.2s ease-out; }
+
+/* Input island, take 5: the island animates its height, the text area does not. */
+#composer {
+  overflow: hidden;
+  transition: flex-basis 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s,
+              height 0.22s ease-out;
+}
+#text-input { transition: none; align-self: flex-start; }
+
+/* Input island, take 6: "clip" cannot be scrolled, so the caret cannot shift the text while the island grows. */
+#composer { overflow: clip; }
