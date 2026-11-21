@@ -535,6 +535,21 @@
   - Checked live: no system frame, drag by the header, minimize and restore, close without errors,
     resize by the right edge / bottom edge / corner (minimum respected), text input, X2.
 
+- [x] Stage 18: window layout like the old project, 884 tests
+  - ui: the chat is a column on the left (max 640 px), under it an "island": a pill-shaped glass input
+    field (the send arrow, an SVG icon, appears only when there is text) and a small round music circle
+    next to it (a placeholder styled like the old project's satellite: dark glass, thin teal ring;
+    nothing is connected to it yet). Removed by the user's decision: the three dots and the hint under
+    the field. No microphone button in the field (push-to-talk and the wake word stay).
+  - A fine noise layer over the background (#bg-layer::after, opacity 0.01) hides colour steps; the
+    blur of the circles is switched off (blur(0px) in styles.css, kept for experiments): a bigger blur
+    made vertical stripes (banding) worse; a gradient-edge variant without blur was tried and looked worse
+    too. The window default size is now 1000 px wide.
+  - tests/test_ui_layout.py (5 tests).
+  - Not done: the look of the circles will be reconsidered (maybe replaced by something else); the music
+    circle should hide until music plays and show the cover (needs title and cover from SMTC); the black
+    Windows-like theme and real Mica (not checked whether PyWebView on Windows can do a transparent window).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -640,7 +655,7 @@
 
 
 ## Next
-Stage 14 candidates (ask the user): window:
+Stage 14 candidates (ask the user): window: new look of the circles, music circle with the cover (hidden when nothing plays),
 circles reacting to her own voice while she speaks, wave by mood, a window or area screenshot instead of the whole
 screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
 the user left it as is for now). X2 push-to-talk stays in any case.

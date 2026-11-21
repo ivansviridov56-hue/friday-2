@@ -25,10 +25,15 @@
     </div>
   </header>
   <div id="chat"></div>
-  <form id="composer" autocomplete="off">
-    <input id="text-input" type="text" maxlength="500" placeholder="Напишите сообщение…" autocomplete="off">
-    <button id="send" type="submit" aria-label="Отправить">↑</button>
-  </form>
+  <div id="dock">
+    <form id="composer" autocomplete="off">
+      <input id="text-input" type="text" maxlength="500" placeholder="Напишите сообщение…" autocomplete="off">
+      <button id="send" type="submit" aria-label="Отправить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+    </form>
+    <div id="music-orb" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+    </div>
+  </div>
 </div>
 <div class="resize-handle" id="resize-right" data-resize="x"></div>
 <div class="resize-handle" id="resize-bottom" data-resize="y"></div>

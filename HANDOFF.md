@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 879 passed).
+2. Ask the user to run `pytest` and paste the result (expect 884 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -30,6 +30,7 @@ Stage 15a done: new window design (friday/ui/: index.html, styles.css, app.js), 
 Stage 15b done: circles follow the microphone loudness while listening (level_meter.py, level_publisher.py).
 Stage 16 done: text input in the window (friday/text_input.py, field under the chat); typed text goes the same way as a phrase from the wake listener.
 Stage 17 done: frameless window with own minimize / close buttons, drag by the header, resize by the right / bottom edge and corner (friday/window_controls.py, friday/window_api.py).
+Stage 18 done: window layout (chat column on the left, island input bar, music circle placeholder); the look of the circles is open.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -119,3 +120,8 @@ Next: see the Next section of PROGRESS.md.
 - Window frame (17): no system frame; only minimize and close (the user does not want maximize).
   Resizing works only from the right edge, the bottom edge and the corner (variant A, chosen by the user);
   left and top edges are not supported. The page can call only the methods listed in WindowApi.
+- Window layout (18): the chat column is on the left, the input is a floating glass "island" under it with a
+  round music circle beside it; no title in the island, no dots, no hint, no microphone button (the user's
+  decisions). The circles are not blurred for now (blur caused banding); their final look is still to be
+  decided (the user: "maybe replace them with something else"). A black Windows-like theme is a possible
+  later step.

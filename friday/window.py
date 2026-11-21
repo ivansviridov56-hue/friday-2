@@ -32,7 +32,7 @@ def run_window(
     window = webview.create_window(
         "Пятница",
         url=str(HTML_PATH),
-        width=420,
+        width=1000,
         height=640,
         background_color="#14161a",
         js_api=api,
