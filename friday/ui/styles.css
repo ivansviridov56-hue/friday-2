@@ -134,3 +134,22 @@ header h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.16em; text-tran
   background: linear-gradient(135deg, #3b5bf0, #5b2fd6);
 }
 #send:disabled { opacity: 0.4; cursor: default; }
+
+/* Frameless window: drag strip and own buttons */
+header { position: relative; }
+.drag-strip { position: absolute; inset: 0; }
+header h1, #status { position: relative; pointer-events: none; }
+.window-buttons { position: relative; margin-left: auto; display: flex; gap: 6px; align-self: center; }
+.window-buttons button {
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  border: 1px solid transparent; background: transparent; color: var(--muted);
+  font-size: 14px; line-height: 1; transition: background 0.2s, color 0.2s;
+}
+.window-buttons button:hover { background: rgba(120, 140, 255, 0.16); color: var(--text); }
+#btn-close:hover { background: rgba(224, 68, 62, 0.85); color: #fff; }
+
+/* Resize handles of the frameless window (see app.js) */
+.resize-handle { position: fixed; z-index: 10; }
+#resize-right { top: 0; right: 0; bottom: 14px; width: 6px; cursor: ew-resize; }
+#resize-bottom { left: 0; bottom: 0; right: 14px; height: 6px; cursor: ns-resize; }
+#resize-corner { right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize; }

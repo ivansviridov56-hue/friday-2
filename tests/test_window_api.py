@@ -1,0 +1,62 @@
+import pytest
+
+from friday.text_input import TextInput
+from friday.window_api import WindowApi
+from friday.window_controls import WindowControls
+
+
+def make_api():
+    received: list[str] = []
+    text_input = TextInput()
+    text_input.set_handler(lambda text: received.append(text) or True)
+    calls: list[str] = []
+    controls = WindowControls()
+    controls.bind(
+        lambda: calls.append("minimize"),
+        lambda: calls.append("close"),
+        lambda w, h: calls.append(f"resize {w}x{h}"),
+    )
+    return WindowApi(text_input, controls), received, calls
+
+
+def test_submit_text_is_forwarded():
+    api, received, _ = make_api()
+    assert api.submit_text("привет") is True
+    assert received == ["привет"]
+
+
+@pytest.mark.parametrize("value", [None, 5, ["a"]])
+def test_non_text_is_rejected(value):
+    api, received, _ = make_api()
+    assert api.submit_text(value) is False
+    assert received == []
+
+
+def test_minimize_is_forwarded():
+    api, _, calls = make_api()
+    assert api.minimize_window() is True
+    assert calls == ["minimize"]
+
+
+def test_close_is_forwarded():
+    api, _, calls = make_api()
+    assert api.close_window() is True
+    assert calls == ["close"]
+
+
+def test_public_methods_are_the_whole_page_api():
+    names = {name for name in dir(WindowApi) if not name.startswith("_")}
+    assert names == {"submit_text", "minimize_window", "close_window", "resize_window"}
+
+
+def test_resize_is_forwarded():
+    api, _, calls = make_api()
+    assert api.resize_window(500, 600) is True
+    assert calls == ["resize 500x600"]
+
+
+@pytest.mark.parametrize("value", [None, "500", True, float("nan")])
+def test_resize_rejects_non_numbers(value):
+    api, _, calls = make_api()
+    assert api.resize_window(value, 600) is False
+    assert calls == []

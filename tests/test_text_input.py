@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from friday.text_input import TextInput, WindowApi
+from friday.text_input import TextInput
 
 
 def make_input(result: bool = True, max_length: int = 500):
@@ -79,16 +79,3 @@ def test_text_is_never_logged(caplog):
     TextInput(max_length=3).submit("секретный")
     TextInput().submit("секретный")
     assert "секретный" not in caplog.text
-
-
-def test_window_api_forwards_text():
-    text_input, received = make_input()
-    assert WindowApi(text_input).submit_text("привет") is True
-    assert received == ["привет"]
-
-
-@pytest.mark.parametrize("value", [None, 5, ["a"]])
-def test_window_api_rejects_non_text(value):
-    text_input, received = make_input()
-    assert WindowApi(text_input).submit_text(value) is False
-    assert received == []

@@ -83,3 +83,77 @@ composer.addEventListener("submit", async (event) => {
     textInput.focus();
   }
 });
+
+// Own window buttons (the window has no system frame).
+function callApi(name) {
+  const api = window.pywebview && window.pywebview.api;
+  if (api && api[name]) {
+    api[name]().catch((error) => console.error(error));
+  }
+}
+
+document.getElementById("btn-minimize").addEventListener("click", () => callApi("minimize_window"));
+document.getElementById("btn-close").addEventListener("click", () => callApi("close_window"));
+
+// Resizing the frameless window: three invisible handles. While one is held, the page
+// sends the wanted size to Python, one request at a time (the last wanted size wins).
+(function () {
+  let drag = null;
+  let pending = null;
+  let sending = false;
+
+  function flush() {
+    if (sending || !pending) {
+      return;
+    }
+    const size = pending;
+    pending = null;
+    const api = window.pywebview && window.pywebview.api;
+    if (!api || !api.resize_window) {
+      return;
+    }
+    sending = true;
+    api.resize_window(size.width, size.height)
+      .catch((error) => console.error(error))
+      .finally(() => {
+        sending = false;
+        flush();
+      });
+  }
+
+  function onDown(event) {
+    const mode = event.currentTarget.dataset.resize;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag = {
+      sx: event.screenX,
+      sy: event.screenY,
+      w: window.outerWidth,
+      h: window.outerHeight,
+      x: mode.includes("x"),
+      y: mode.includes("y"),
+    };
+  }
+
+  function onMove(event) {
+    if (!drag) {
+      return;
+    }
+    pending = {
+      width: drag.x ? drag.w + (event.screenX - drag.sx) : drag.w,
+      height: drag.y ? drag.h + (event.screenY - drag.sy) : drag.h,
+    };
+    flush();
+  }
+
+  function onUp() {
+    drag = null;
+  }
+
+  document.querySelectorAll(".resize-handle").forEach((handle) => {
+    handle.addEventListener("pointerdown", onDown);
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", onUp);
+    handle.addEventListener("pointercancel", onUp);
+  });
+})();

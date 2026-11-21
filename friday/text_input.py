@@ -52,15 +52,3 @@ class TextInput:
         except Exception:
             log.exception("could not hand over typed text")
             return False
-
-
-class WindowApi:
-    """Methods the page can call as window.pywebview.api.<name>(...). Keep it thin."""
-
-    def __init__(self, text_input: TextInput) -> None:
-        self._text_input = text_input
-
-    def submit_text(self, text: object) -> bool:
-        if not isinstance(text, str):
-            return False
-        return self._text_input.submit(text)

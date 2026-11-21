@@ -12,7 +12,9 @@ import threading
 
 from pathlib import Path
 
-from friday.text_input import TextInput, WindowApi
+from friday.text_input import TextInput
+from friday.window_api import WindowApi
+from friday.window_controls import WindowControls
 from friday.wake_listener import WakeListener
 from friday.wake_setup import SerializedTranscriber, WakeIndicator, env_flag
 from friday.screen_capture import capture_screen
@@ -205,6 +207,7 @@ def main() -> None:
     bus = UiEventBus()
     stop = threading.Event()
     text_input = TextInput()
+    controls = WindowControls()
     worker = threading.Thread(
         target=_start_assistant,
         args=(bus, stop, text_input),
@@ -213,7 +216,9 @@ def main() -> None:
     )
     worker.start()
     try:
-        run_window(bus, WindowApi(text_input))  # blocks until the window is closed
+        run_window(
+            bus, WindowApi(text_input, controls), controls
+        )  # blocks until closed
     finally:
         stop.set()
         worker.join(timeout=5)

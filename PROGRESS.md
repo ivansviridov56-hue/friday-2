@@ -518,6 +518,23 @@
   - Not done: showing a typed message before she answers is handled by the existing events (works);
     the look of the field is temporary and will change with the window design.
 
+- [x] Stage 17: frameless window with its own buttons, 879 tests
+  - friday/window_controls.py (WindowControls: minimize, close and resize callbacks bound by window.py
+    once the window exists and cleared when it closes; sizes clamped to 320x420 .. 4000x3000; a broken
+    callback does not raise), friday/window_api.py (WindowApi moved out of text_input.py: submit_text,
+    minimize_window, close_window, resize_window; the whole public API is pinned by a test)
+  - window.py: frameless=True, easy_drag=False, controls bound to window.minimize / destroy / resize;
+    voice.py creates WindowControls next to TextInput and passes both to run_window
+  - ui: only "minimize" and "close" buttons in the header (no maximize, by the user's choice); a drag
+    strip with the class pywebview-drag-region under the header text; three invisible resize handles
+    (right edge, bottom edge, bottom-right corner) drive window.resize through the API, one request at
+    a time, so the last wanted size wins
+  - Not possible: resizing from the left or top edge (it would also need moving the window)
+  - Tests: 853 - 4 (the old WindowApi tests left test_text_input) + 6 (window_controls) + 6 (resize) +
+    7 (window_api) + 5 (resize in window_api) + 4 + 2 (ui) = 879
+  - Checked live: no system frame, drag by the header, minimize and restore, close without errors,
+    resize by the right edge / bottom edge / corner (minimum respected), text input, X2.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -623,7 +640,7 @@
 
 
 ## Next
-Stage 14 candidates (ask the user): window: left logo strip, frameless window with its own buttons,
+Stage 14 candidates (ask the user): window:
 circles reacting to her own voice while she speaks, wave by mood, a window or area screenshot instead of the whole
 screen, shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak;
 the user left it as is for now). X2 push-to-talk stays in any case.

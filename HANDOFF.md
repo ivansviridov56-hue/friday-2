@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 853 passed).
+2. Ask the user to run `pytest` and paste the result (expect 879 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -29,6 +29,7 @@ Stage 13g done: Latin words are spelled in Cyrillic before the Silero voice (fri
 Stage 15a done: new window design (friday/ui/: index.html, styles.css, app.js), circle colour follows the state.
 Stage 15b done: circles follow the microphone loudness while listening (level_meter.py, level_publisher.py).
 Stage 16 done: text input in the window (friday/text_input.py, field under the chat); typed text goes the same way as a phrase from the wake listener.
+Stage 17 done: frameless window with own minimize / close buttons, drag by the header, resize by the right / bottom edge and corner (friday/window_controls.py, friday/window_api.py).
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -115,3 +116,6 @@ Next: see the Next section of PROGRESS.md.
   stays in the field (the field flashes red). Maximum 500 characters; the text is never logged. The look
   of the field is temporary until the window design is decided (the user explored a black glass design
   in Figma and went back; nothing from it is in the code).
+- Window frame (17): no system frame; only minimize and close (the user does not want maximize).
+  Resizing works only from the right edge, the bottom edge and the corner (variant A, chosen by the user);
+  left and top edges are not supported. The page can call only the methods listed in WindowApi.
