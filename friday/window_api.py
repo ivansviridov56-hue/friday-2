@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 
+from friday.settings_service import SettingsService
 from friday.text_input import TextInput
 from friday.window_controls import WindowControls
 
@@ -22,9 +23,15 @@ def _is_number(value: object) -> bool:
 
 
 class WindowApi:
-    def __init__(self, text_input: TextInput, controls: WindowControls) -> None:
+    def __init__(
+        self,
+        text_input: TextInput,
+        controls: WindowControls,
+        settings: SettingsService | None = None,
+    ) -> None:
         self._text_input = text_input
         self._controls = controls
+        self._settings = settings
 
     def submit_text(self, text: object) -> bool:
         if not isinstance(text, str):
@@ -41,3 +48,18 @@ class WindowApi:
         if not (_is_number(width) and _is_number(height)):
             return False
         return self._controls.resize(float(width), float(height))  # type: ignore[arg-type]
+
+    def get_settings(self) -> dict:
+        if self._settings is None:
+            return {}
+        return self._settings.snapshot()
+
+    def set_theme(self, name: object) -> bool:
+        if self._settings is None or not isinstance(name, str):
+            return False
+        return self._settings.set_theme(name)
+
+    def set_circles_style(self, name: object) -> bool:
+        if self._settings is None or not isinstance(name, str):
+            return False
+        return self._settings.set_circles(name)

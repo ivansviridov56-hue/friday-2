@@ -46,7 +46,15 @@ def test_close_is_forwarded():
 
 def test_public_methods_are_the_whole_page_api():
     names = {name for name in dir(WindowApi) if not name.startswith("_")}
-    assert names == {"submit_text", "minimize_window", "close_window", "resize_window"}
+    assert names == {
+        "submit_text",
+        "minimize_window",
+        "close_window",
+        "resize_window",
+        "get_settings",
+        "set_theme",
+        "set_circles_style",
+    }
 
 
 def test_resize_is_forwarded():

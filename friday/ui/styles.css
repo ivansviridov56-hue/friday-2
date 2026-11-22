@@ -368,3 +368,35 @@ body.state-idle, body.state-loading { --c1: var(--idle-1); --c2: var(--idle-2); 
 /* Until the theme is chosen the page stays hidden on a neutral background, so there is no colour flash at start. */
 :root:not([data-theme]) { --bg: #14161a; }
 :root:not([data-theme]) body { visibility: hidden; }
+
+
+/* Settings panel: slides in from the right, uses the theme variables. */
+.window-buttons #btn-settings svg { width: 16px; height: 16px; display: block; margin: auto; }
+#settings {
+  position: absolute; top: 64px; right: 16px; width: 270px; z-index: 5;
+  padding: 16px 18px 18px; border-radius: 20px;
+  background: var(--surface); border: 1px solid var(--stroke);
+  backdrop-filter: blur(18px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s, visibility 0s;
+}
+#settings.closed {
+  transform: translateX(24px); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s, visibility 0s 0.35s;
+}
+.settings-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.settings-head h2 { font-size: 15px; font-weight: 600; }
+#settings-close {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 0;
+  background: transparent; color: var(--muted); font-size: 13px; transition: background 0.2s, color 0.2s;
+}
+#settings-close:hover { background: var(--hover); color: var(--text); }
+#settings section + section { margin-top: 14px; }
+#settings h3 { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+.options { display: flex; flex-wrap: wrap; gap: 8px; }
+.option {
+  padding: 7px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px;
+  color: var(--text); background: transparent; border: 1px solid var(--stroke);
+  transition: background 0.2s, border-color 0.2s;
+}
+.option:hover { background: var(--hover); }
+.option.on { border-color: var(--stroke-open); background: var(--hover); }

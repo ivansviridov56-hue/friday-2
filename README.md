@@ -28,6 +28,7 @@ hear the answer. Not a finished product yet.
 - Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
 - Switchable look of the background circles (`CIRCLES=classic|blobs|equalizer|dots` in `.env`)
 - Colour themes of the window (`THEME=classic|windows|black` in `.env`)
+- Settings panel in the window (gear in the header): colour theme and the look of the background circles, saved between runs
 
 ## Privacy
 

@@ -12,7 +12,8 @@ import threading
 
 from pathlib import Path
 
-from friday.theme import parse_theme
+from friday.settings_service import SettingsService
+from friday.settings_store import SettingsStore
 from friday.text_input import TextInput
 from friday.window_api import WindowApi
 from friday.window_controls import WindowControls
@@ -45,14 +46,7 @@ from friday.stt import SpeechToText
 from friday.tts import speak_text
 from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
-from friday.ui_events import (
-    CirclesStyleChanged,
-    State,
-    StateChanged,
-    ThemeChanged,
-    UiEventBus,
-)
-from friday.circles_style import parse_circles_style
+from friday.ui_events import State, StateChanged, UiEventBus
 from friday.window import run_window
 from friday.music_search import TrackSearch
 from friday.command_chain import build_command_chain
@@ -220,8 +214,8 @@ def main() -> None:
     logging.getLogger("faster_whisper").setLevel(logging.WARNING)
 
     bus = UiEventBus()
-    bus.publish(CirclesStyleChanged(parse_circles_style(os.environ.get("CIRCLES"))))
-    bus.publish(ThemeChanged(parse_theme(os.environ.get("THEME"))))
+    settings = SettingsService(bus, SettingsStore(), os.environ)
+    settings.publish_initial()
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()
@@ -234,7 +228,7 @@ def main() -> None:
     worker.start()
     try:
         run_window(
-            bus, WindowApi(text_input, controls), controls
+            bus, WindowApi(text_input, controls, settings), controls
         )  # blocks until closed
     finally:
         stop.set()

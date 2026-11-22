@@ -588,6 +588,12 @@
   - windows: pink / lilac / mint / orange-red, calm and slightly dusty; black: the same hues, brighter and more saturated; classic keeps the old colours. Set at the end of themes/windows.css and themes/black.css.
   - The user: "leave it like this for now" (may be tuned later).
 
+- [x] Stage 22a: settings screen, 962 tests
+  - friday/settings_store.py (data/settings.json, git-ignored; only known keys and values are read or written; a missing, broken or odd file gives an empty dict; atomic write), friday/settings_service.py (saved choice wins over .env, publishes ThemeChanged / CirclesStyleChanged, saves, a failed save still applies the choice)
+  - WindowApi gets get_settings, set_theme, set_circles_style (strings only); the page can call nothing else (the guard test lists all page methods). voice.py builds the service and publishes the starting choices through it
+  - Page: gear button in the header, panel on the right (theme and circles look as pill buttons, current one highlighted); the lists of allowed values come from Python, so a new theme or look appears in the panel by itself, only its label goes into the dictionaries in app.js. Closes by the gear, the cross or Esc
+  - Checked live: the choice applies at once, survives a restart, and wins over .env.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -694,7 +700,8 @@
 - Circles: the equalizer and dots are drawn at the right edge of the window (cx = width - 30). Loudness reaches them only in the LISTENING state; her own voice does not move them yet. The blobs look uses blur(48px) on big shapes: watch for lag on weaker machines.
 - Known small issue (postponed by the user): the window jitters slightly when it appears at start. Idea for later: smooth fade-in or a start animation of the window.
 - Themes: the idle colours of the circles come from --idle-1/2/3 of the theme; the other states set --c1/--c2/--c3 per state (per theme in themes/*.css). The same THEME / CIRCLES pair will move into an in-app settings screen later.
+- Settings: only theme and circles look for now; new options go into CHOICES in settings_store.py, the service and the panel. The blobs look is very bright in the black theme (screen blending of a light grey): to be softened when the looks are tuned.
 
 
 ## Next
-Candidates (ask the user): a settings screen in the app (look of the circles, theme, and other options chosen without .env); tune each circles look one by one (size, position, brightness, speed, reaction to the voice); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); smooth appearance of the window (it jitters slightly at start); animations of the music circle and the island; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

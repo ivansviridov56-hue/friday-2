@@ -221,3 +221,86 @@ setTimeout(() => {
     window.fridayUi.setTheme("classic");
   }
 }, 3000);
+
+
+// Settings panel: the page only shows the choices and asks Python to change them.
+const THEME_LABELS = { classic: "Синяя", windows: "Серая", black: "Чёрная" };
+const CIRCLES_LABELS = {
+  classic: "Классика",
+  blobs: "Пятна",
+  equalizer: "Эквалайзер",
+  dots: "Точки",
+};
+
+const settingsPanel = document.getElementById("settings");
+const settingsButton = document.getElementById("btn-settings");
+let settingsData = null;
+
+function renderOptions(boxId, names, labels, current, apiMethod, key) {
+  const box = document.getElementById(boxId);
+  box.replaceChildren();
+  for (const name of names) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "option" + (name === current ? " on" : "");
+    button.textContent = labels[name] || name;
+    button.addEventListener("click", async () => {
+      const api = window.pywebview && window.pywebview.api;
+      if (!api || !api[apiMethod]) {
+        return;
+      }
+      try {
+        if (await api[apiMethod](name)) {
+          settingsData.current[key] = name;
+          renderSettings();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    box.appendChild(button);
+  }
+}
+
+function renderSettings() {
+  if (!settingsData || !settingsData.themes) {
+    return;
+  }
+  renderOptions("opt-theme", settingsData.themes, THEME_LABELS,
+                settingsData.current.theme, "set_theme", "theme");
+  renderOptions("opt-circles", settingsData.circles, CIRCLES_LABELS,
+                settingsData.current.circles, "set_circles_style", "circles");
+}
+
+async function openSettings() {
+  const api = window.pywebview && window.pywebview.api;
+  if (api && api.get_settings) {
+    try {
+      settingsData = await api.get_settings();
+      renderSettings();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  settingsPanel.classList.remove("closed");
+  settingsPanel.setAttribute("aria-hidden", "false");
+}
+
+function closeSettings() {
+  settingsPanel.classList.add("closed");
+  settingsPanel.setAttribute("aria-hidden", "true");
+}
+
+settingsButton.addEventListener("click", () => {
+  if (settingsPanel.classList.contains("closed")) {
+    openSettings();
+  } else {
+    closeSettings();
+  }
+});
+document.getElementById("settings-close").addEventListener("click", closeSettings);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeSettings();
+  }
+});
