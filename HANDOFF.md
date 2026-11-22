@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 962 passed).
+2. Ask the user to run `pytest` and paste the result (expect 980 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -37,6 +37,7 @@ Stage 20a done: the look of the background circles is switchable by CIRCLES in .
 Stage 21 done: colour themes (THEME in .env: classic, windows, black; one CSS file per theme in friday/ui/themes/) and state colours for the 
 grey themes; the choice in the app settings comes later.
 Stage 22a done: settings screen (gear in the header, panel on the right) with the theme and the look of the circles; the choice is saved in data/settings.json and wins over .env.
+Stage 23 done: theme "win11" with a real blurred window background (friday/backdrop_logic.py, friday/win_backdrop.py, friday/ui/themes/win11.css); the blur stays when the window is inactive. Accent is fixed for now.
 Next: see the Next section of PROGRESS.md.
 
 
@@ -138,3 +139,4 @@ Next: see the Next section of PROGRESS.md.
 - Circles looks (20a): four looks, chosen through .env for now (variant A, chosen by the user), a choice inside the app settings later. The user liked the blobs, the equalizer and the dots from the preview page and wants to tune each one separately. The window jitter at start is postponed by the user (smooth appearance later).
 - Themes (21): three themes, chosen through .env for now, in-app settings later (the user's wish, like the circles). Only colours change, not shapes or fonts (the user's decision). The grey theme has no blue anywhere. State colours are per theme: calm for windows, brighter for black; the user left them as they are for now.
 - Settings screen (22a): opens from a gear in the header, a panel slides in on the right (variant A, chosen by the user). A choice applies at once, no save button, and is saved in data/settings.json (git-ignored); a saved choice wins over THEME / CIRCLES in .env, which stay as the starting values. The page only asks; Python checks the value and writes the file. First version holds only the theme and the circles look.
+- Windows 11 theme (23): shapes as in the other themes; colours and accent follow the wallpaper like in Windows (the user's wish); blur and transparency are real, not drawn in CSS. Mica / Acrylic were rejected because they go flat when the window is inactive; the old acrylic with a "kick" is used instead. The blur is started on every launch, whatever the theme (the other themes paint an opaque page over it). Tint 60 %, set by the user (variant C): a slider in the settings later.

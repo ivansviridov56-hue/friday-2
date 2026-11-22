@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 HTML_PATH = Path(__file__).resolve().parent / "ui" / "index.html"
 
+TITLE = "Пятница"
+
 
 def run_window(
     bus: UiEventBus,
@@ -35,9 +37,10 @@ def run_window(
 ) -> None:
     """Show the window and block until it is closed. Must run on the main thread."""
     import webview
+    from friday.win_backdrop import start_backdrop
 
     window = webview.create_window(
-        "Пятница",
+        TITLE,
         url=str(HTML_PATH),
         width=1000,
         height=640,
@@ -45,6 +48,7 @@ def run_window(
         js_api=api,
         frameless=True,
         easy_drag=False,
+        transparent=True,
     )
     if window is None:
         raise RuntimeError("could not create the window")
@@ -53,6 +57,7 @@ def run_window(
     bridge = UiBridge(window.evaluate_js)
     bus.subscribe(bridge.on_event)
     window.events.loaded += bridge.mark_ready
+    window.events.loaded += lambda: start_backdrop(window, TITLE)
     try:
         webview.start()
     finally:

@@ -85,5 +85,5 @@ def test_save_failure_still_applies():
 def test_snapshot_lists_choices():
     service, _, _ = make()
     snap = service.snapshot()
-    assert snap["themes"] == ["classic", "windows", "black"]
+    assert snap["themes"] == ["classic", "windows", "black", "win11"]
     assert snap["circles"] == ["classic", "blobs", "equalizer", "dots"]

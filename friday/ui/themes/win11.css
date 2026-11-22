@@ -1,0 +1,42 @@
+/* Theme "win11": see-through window over the blurred wallpaper (friday/win_backdrop.py).
+   Only colours; shapes and fonts stay as they are. --accent is a fixed colour for now. */
+:root[data-theme="win11"] {
+  --accent: #4cc2ff;
+  --bg: transparent;
+  --text: #ffffff;
+  --muted: #c4c4c4;
+  --surface: rgba(255, 255, 255, 0.06);
+  --stroke: rgba(255, 255, 255, 0.08);
+  --stroke-open: rgba(255, 255, 255, 0.28);
+  --user-bg: linear-gradient(135deg, rgba(76, 194, 255, 0.38), rgba(76, 194, 255, 0.22));
+  --user-glow: none;
+  --bot-bg: rgba(255, 255, 255, 0.07);
+  --bot-stroke: rgba(255, 255, 255, 0.08);
+  --orb-bg: rgba(255, 255, 255, 0.08);
+  --orb-stroke: rgba(255, 255, 255, 0.12);
+  --orb-stroke-hover: rgba(255, 255, 255, 0.3);
+  --orb-glow: 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 12px rgba(255, 255, 255, 0.06);
+  --c4-bg: rgba(255, 255, 255, 0.05);
+  --c1-glow: 0 0 70px rgba(255, 255, 255, 0.05);
+  --hover: rgba(255, 255, 255, 0.1);
+  --scroll: rgba(255, 255, 255, 0.25);
+  --idle-1: #3aa6d8;
+  --idle-2: #1f6a8c;
+  --idle-3: #173a4a;
+}
+
+/* html and body must not paint over the blur. */
+:root[data-theme="win11"],
+:root[data-theme="win11"] body {
+  background: transparent;
+}
+
+:root[data-theme="win11"] body.state-listening { --c1: #e5719b; --c2: #8a4560; --c3: #3a2a31; }
+:root[data-theme="win11"] body.state-thinking  { --c1: #a995e8; --c2: #5d5290; --c3: #2f2c3d; }
+:root[data-theme="win11"] body.state-speaking  { --c1: #62cdb4; --c2: #2f7a6d; --c3: #243532; }
+:root[data-theme="win11"] body.state-error     { --c1: #ee6a45; --c2: #8f3a26; --c3: #382a26; }
+
+/* The settings panel sits over anything, so it gets a darker base. */
+:root[data-theme="win11"] #settings {
+  background: rgba(32, 32, 32, 0.78);
+}

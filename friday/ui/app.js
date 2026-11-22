@@ -224,7 +224,7 @@ setTimeout(() => {
 
 
 // Settings panel: the page only shows the choices and asks Python to change them.
-const THEME_LABELS = { classic: "Синяя", windows: "Серая", black: "Чёрная" };
+const THEME_LABELS = { classic: "Синяя", windows: "Серая", black: "Чёрная", win11: "Windows 11" };
 const CIRCLES_LABELS = {
   classic: "Классика",
   blobs: "Пятна",

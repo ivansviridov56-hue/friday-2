@@ -6,7 +6,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-THEMES = ("classic", "windows", "black")
+THEMES = ("classic", "windows", "black", "win11")
 DEFAULT_THEME = "classic"
 
 

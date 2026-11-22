@@ -594,6 +594,15 @@
   - Page: gear button in the header, panel on the right (theme and circles look as pill buttons, current one highlighted); the lists of allowed values come from Python, so a new theme or look appears in the panel by itself, only its label goes into the dictionaries in app.js. Closes by the gear, the cross or Esc
   - Checked live: the choice applies at once, survives a restart, and wins over .env.
 
+- [x] Stage 23a-23c: Windows 11 theme with a real blurred window background, 980 tests
+  - friday/backdrop_logic.py (pure: accent parsing, tint colour, build check, the "kick" steps; 17 tests)
+  - friday/win_backdrop.py (Windows calls, live-checked, no tests): old undocumented acrylic through
+    SetWindowCompositionAttribute, runs in a background thread after the page loads
+  - friday/window.py: transparent=True, backdrop started on the "loaded" event
+  - friday/ui/themes/win11.css; "win11" added to THEMES (label "Windows 11" in the settings panel)
+  - Checked live on build 26200: blur shows wallpaper colours, STAYS when the window is inactive,
+    drag / resize / buttons work, the other three themes look as before
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -701,7 +710,17 @@
 - Known small issue (postponed by the user): the window jitters slightly when it appears at start. Idea for later: smooth fade-in or a start animation of the window.
 - Themes: the idle colours of the circles come from --idle-1/2/3 of the theme; the other states set --c1/--c2/--c3 per state (per theme in themes/*.css). The same THEME / CIRCLES pair will move into an in-app settings screen later.
 - Settings: only theme and circles look for now; new options go into CHOICES in settings_store.py, the service and the panel. The blobs look is very bright in the black theme (screen blending of a light grey): to be softened when the looks are tuned.
+- Backdrop: Mica and Acrylic (DwmSetWindowAttribute) turn flat when the window is inactive and
+  after a wallpaper or accent change; this is Windows behaviour, same as the Settings app. The old
+  SetWindowCompositionAttribute acrylic (AccentState 4, tint 0x99202020) stays blurred when inactive,
+  but only if the frame is "kicked": apply with the glass extended, then without, then with again
+  (0.6 s between). Applying the same value twice does nothing. Extending the glass is NOT the problem.
+- PyWebView paints the form with background_color; with transparent=True the form is painted black
+  (win_backdrop._paint_form_black), because glass shows through pure black.
+- The accent colour in the win11 theme is fixed (#4cc2ff). The registry AccentColor / AccentPalette
+  follows the wallpaper slideshow; reading it every few seconds is the next step (23d).
+- The tint is fixed at 60 % (#202020). A slider in the settings is a later step.
 
 
 ## Next
-Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case. 23d: accent colour from the registry, re-read every few seconds; tint slider in the settings.
