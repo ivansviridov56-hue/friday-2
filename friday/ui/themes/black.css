@@ -1,0 +1,31 @@
+/* Theme "black": near-black, neutral greys. Only colours. */
+:root[data-theme="black"] {
+  --bg: #000000;
+  --text: #ececec;
+  --muted: #8a8a8a;
+  --surface: rgba(18, 18, 18, 0.92);
+  --stroke: #2a2a2a;
+  --stroke-open: #4a4a4a;
+  --user-bg: #262626;
+  --user-glow: none;
+  --bot-bg: #111111;
+  --bot-stroke: #262626;
+  --orb-bg: #0f0f0f;
+  --orb-stroke: #2a2a2a;
+  --orb-stroke-hover: #555555;
+  --orb-glow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  --c4-bg: rgba(24, 24, 24, 0.6);
+  --c1-glow: 0 0 70px rgba(255, 255, 255, 0.05);
+  --hover: rgba(255, 255, 255, 0.1);
+  --scroll: #333333;
+  --idle-1: #e6e6e6;
+  --idle-2: #4a4a4a;
+  --idle-3: #181818;
+}
+
+
+/* States for the black theme: brighter and more saturated, they read well on pure black. */
+:root[data-theme="black"] body.state-listening { --c1: #ff5c9a; --c2: #5c1d38; --c3: #1a0a11; }
+:root[data-theme="black"] body.state-thinking  { --c1: #a283ff; --c2: #40307d; --c3: #130e25; }
+:root[data-theme="black"] body.state-speaking  { --c1: #3de0b4; --c2: #145c4a; --c3: #09211b; }
+:root[data-theme="black"] body.state-error     { --c1: #ff5a32; --c2: #6e2110; --c3: #1f0d08; }

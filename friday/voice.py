@@ -12,6 +12,7 @@ import threading
 
 from pathlib import Path
 
+from friday.theme import parse_theme
 from friday.text_input import TextInput
 from friday.window_api import WindowApi
 from friday.window_controls import WindowControls
@@ -44,7 +45,13 @@ from friday.stt import SpeechToText
 from friday.tts import speak_text
 from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
-from friday.ui_events import CirclesStyleChanged, State, StateChanged, UiEventBus
+from friday.ui_events import (
+    CirclesStyleChanged,
+    State,
+    StateChanged,
+    ThemeChanged,
+    UiEventBus,
+)
 from friday.circles_style import parse_circles_style
 from friday.window import run_window
 from friday.music_search import TrackSearch
@@ -214,6 +221,7 @@ def main() -> None:
 
     bus = UiEventBus()
     bus.publish(CirclesStyleChanged(parse_circles_style(os.environ.get("CIRCLES"))))
+    bus.publish(ThemeChanged(parse_theme(os.environ.get("THEME"))))
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()

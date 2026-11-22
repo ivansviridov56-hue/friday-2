@@ -63,6 +63,9 @@ window.fridayUi = {
   setCirclesStyle(name) {
     window.fridayCircles.use(name);
   },
+  setTheme(name) {
+    document.documentElement.dataset.theme = name;
+  },
 };
 
 // Text input: the page hands typed text to Python (friday/text_input.py).
@@ -210,3 +213,11 @@ textInput.addEventListener("keydown", (event) => {
     composer.requestSubmit();
   }
 });
+
+
+// Safety net: if no theme arrives, show the page with the classic one.
+setTimeout(() => {
+  if (!document.documentElement.dataset.theme) {
+    window.fridayUi.setTheme("classic");
+  }
+}, 3000);

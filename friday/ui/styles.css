@@ -327,3 +327,44 @@ body[data-circles]:not([data-circles="classic"]) .circles-anchor { display: none
 
 /* No flash of the classic circles at start: hidden until a style has been chosen. */
 body:not([data-circles]) .circles-anchor { visibility: hidden; }
+
+
+/* Themes: colours as variables. These are the classic (blue) values; friday/ui/themes/*.css override them. */
+:root {
+  --surface: rgba(14, 18, 42, 0.55);
+  --stroke: rgba(150, 165, 255, 0.14);
+  --stroke-open: rgba(150, 165, 255, 0.28);
+  --user-bg: linear-gradient(135deg, #3b5bf0, #5b2fd6);
+  --user-glow: 0 0 24px rgba(70, 90, 255, 0.35);
+  --bot-bg: rgba(16, 20, 46, 0.85);
+  --bot-stroke: rgba(120, 140, 255, 0.14);
+  --orb-bg: rgba(8, 11, 30, 0.82);
+  --orb-stroke: rgba(6, 198, 212, 0.2);
+  --orb-stroke-hover: rgba(6, 198, 212, 0.45);
+  --orb-glow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 12px rgba(6, 198, 212, 0.2);
+  --c4-bg: rgba(14, 18, 46, 0.6);
+  --c1-glow: 0 0 70px rgba(47, 94, 241, 0.22);
+  --hover: rgba(120, 140, 255, 0.16);
+  --scroll: #232a52;
+  --idle-1: #2f5ef1;
+  --idle-2: #192b77;
+  --idle-3: #131b3d;
+}
+body.state-idle, body.state-loading { --c1: var(--idle-1); --c2: var(--idle-2); --c3: var(--idle-3); }
+.c4 { background: var(--c4-bg); }
+.c1 { box-shadow: var(--c1-glow); }
+#chat { scrollbar-color: var(--scroll) transparent; }
+.msg.user { background: var(--user-bg); box-shadow: var(--user-glow); }
+.msg.assistant { background: var(--bot-bg); border-color: var(--bot-stroke); }
+#composer { background: var(--surface); border-color: var(--stroke); }
+#composer:hover,
+#composer:focus-within,
+#composer:has(#text-input:not(:placeholder-shown)) { border-color: var(--stroke-open); }
+#music-orb { background: var(--orb-bg); border-color: var(--orb-stroke); }
+#music-orb:hover { border-color: var(--orb-stroke-hover); box-shadow: var(--orb-glow); }
+#send:hover { background: var(--hover); }
+.window-buttons button:hover { background: var(--hover); }
+
+/* Until the theme is chosen the page stays hidden on a neutral background, so there is no colour flash at start. */
+:root:not([data-theme]) { --bg: #14161a; }
+:root:not([data-theme]) body { visibility: hidden; }

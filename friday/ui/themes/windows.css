@@ -1,0 +1,31 @@
+/* Theme "windows": dark grey, no blue. Only colours; shapes and fonts stay as they are. */
+:root[data-theme="windows"] {
+  --bg: #202020;
+  --text: #f2f2f2;
+  --muted: #9d9d9d;
+  --surface: rgba(48, 48, 48, 0.6);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --stroke-open: rgba(255, 255, 255, 0.28);
+  --user-bg: linear-gradient(135deg, #4d4d4d, #383838);
+  --user-glow: none;
+  --bot-bg: rgba(45, 45, 45, 0.9);
+  --bot-stroke: rgba(255, 255, 255, 0.08);
+  --orb-bg: rgba(30, 30, 30, 0.85);
+  --orb-stroke: rgba(255, 255, 255, 0.12);
+  --orb-stroke-hover: rgba(255, 255, 255, 0.3);
+  --orb-glow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 12px rgba(255, 255, 255, 0.08);
+  --c4-bg: rgba(44, 44, 44, 0.6);
+  --c1-glow: 0 0 70px rgba(255, 255, 255, 0.06);
+  --hover: rgba(255, 255, 255, 0.1);
+  --scroll: #444444;
+  --idle-1: #8c8c8c;
+  --idle-2: #444444;
+  --idle-3: #2c2c2c;
+}
+
+
+/* States for the grey theme: calm, slightly dusty colours. */
+:root[data-theme="windows"] body.state-listening { --c1: #e5719b; --c2: #6a3547; --c3: #2d2428; }
+:root[data-theme="windows"] body.state-thinking  { --c1: #a995e8; --c2: #4a4270; --c3: #28262f; }
+:root[data-theme="windows"] body.state-speaking  { --c1: #62cdb4; --c2: #28645a; --c3: #212b29; }
+:root[data-theme="windows"] body.state-error     { --c1: #ee6a45; --c2: #7a3020; --c3: #2f2220; }

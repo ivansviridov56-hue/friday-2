@@ -27,6 +27,7 @@ hear the answer. Not a finished product yet.
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
 - Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
 - Switchable look of the background circles (`CIRCLES=classic|blobs|equalizer|dots` in `.env`)
+- Colour themes of the window (`THEME=classic|windows|black` in `.env`)
 
 ## Privacy
 

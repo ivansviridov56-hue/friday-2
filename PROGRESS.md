@@ -577,6 +577,17 @@
   - No flash of the old circles at start: .circles-anchor is hidden until body has data-circles
   - Checked live: all four looks work, colour follows the state, loudness moves them while listening. The user will tune each look later.
 
+- [x] Stage 21a: colour themes of the window, 938 tests
+  - friday/theme.py (THEME from .env: classic / windows / black; empty or unknown gives classic with a warning)
+  - ThemeChanged event in ui_events.py (the bus remembers the last one and replays it first), UiBridge calls window.fridayUi.setTheme(name), voice.py publishes it at start
+  - styles.css: the colours moved into variables (values of the classic blue theme, nothing changed visually); friday/ui/themes/windows.css (dark grey, no blue) and black.css (near-black) only override colours. Shapes, sizes and fonts are the same in all themes (the user's decision). A new theme = one new CSS file + one link line in index.html + a name in THEMES
+  - The page stays hidden until a theme arrives (3 s safety net in app.js applies classic), so there is no colour flash at start
+  - Checked live: all three themes work with all four circle looks.
+
+- [x] Stage 21b: state colours for the grey themes
+  - windows: pink / lilac / mint / orange-red, calm and slightly dusty; black: the same hues, brighter and more saturated; classic keeps the old colours. Set at the end of themes/windows.css and themes/black.css.
+  - The user: "leave it like this for now" (may be tuned later).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -682,7 +693,8 @@
 - Yandex Music gives its cover through SMTC as a 150x150 PNG (about 52 KB), also while paused. The cover is read only when the track (title + artist) changes. Animations of the circle are postponed by the user.
 - Circles: the equalizer and dots are drawn at the right edge of the window (cx = width - 30). Loudness reaches them only in the LISTENING state; her own voice does not move them yet. The blobs look uses blur(48px) on big shapes: watch for lag on weaker machines.
 - Known small issue (postponed by the user): the window jitters slightly when it appears at start. Idea for later: smooth fade-in or a start animation of the window.
+- Themes: the idle colours of the circles come from --idle-1/2/3 of the theme; the other states set --c1/--c2/--c3 per state (per theme in themes/*.css). The same THEME / CIRCLES pair will move into an in-app settings screen later.
 
 
 ## Next
-Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); a settings screen in the app where the circles look (and other options) can be chosen; smooth appearance of the window; animations of the music circle and the island; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): a settings screen in the app (look of the circles, theme, and other options chosen without .env); tune each circles look one by one (size, position, brightness, speed, reaction to the voice); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); smooth appearance of the window (it jitters slightly at start); animations of the music circle and the island; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

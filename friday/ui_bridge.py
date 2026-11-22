@@ -16,6 +16,7 @@ from friday.ui_events import (
     LevelChanged,
     MessageAdded,
     StateChanged,
+    ThemeChanged,
     UiEvent,
 )
 
@@ -64,6 +65,8 @@ class UiBridge:
             return f"window.fridayUi.setCover({json.dumps(event.image)})"
         if isinstance(event, CirclesStyleChanged):
             return f"window.fridayUi.setCirclesStyle({json.dumps(event.name)})"
+        if isinstance(event, ThemeChanged):
+            return f"window.fridayUi.setTheme({json.dumps(event.name)})"
         logger.warning("unknown UI event %r", event)
         return None
 

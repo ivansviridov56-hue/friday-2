@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 924 passed).
+2. Ask the user to run `pytest` and paste the result (expect 938 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -34,6 +34,7 @@ Stage 18 done: window layout (chat column on the left, island input bar, music c
 Stage 18b done: input island (compact, opens on hover / focus / text, grows with the text, Enter sends, Shift+Enter adds a line). Slight text jitter on fast typing is a known postponed issue.
 Stage 18c done: input island smaller, slower opening, raised. Stage 19a done: the music circle shows the cover of the current Yandex Music track (hidden when Music is closed, stays on pause); friday/cover_publisher.py + cover_source.py; animations of the circle postponed.
 Stage 20a done: the look of the background circles is switchable by CIRCLES in .env (classic, blobs, equalizer, dots); each look is one file in friday/ui/circles/; the choice in the app settings comes later.
+Stage 21 done: colour themes (THEME in .env: classic, windows, black; one CSS file per theme in friday/ui/themes/) and state colours for the grey themes; the choice in the app settings comes later.
 Next: see the Next section of PROGRESS.md.
 
 ## Decisions made
@@ -132,3 +133,4 @@ Next: see the Next section of PROGRESS.md.
 - Input island (18c): closed 220 px, open 400 px, slow opening, raised; the user is happy (take 7 in styles.css).
 - Music circle (19a): cover first, control later as 19b (chosen by the user). On pause the circle stays; it is hidden only when there is no cover or Music is closed. Animations are postponed by the user.
 - Circles looks (20a): four looks, chosen through .env for now (variant A, chosen by the user), a choice inside the app settings later. The user liked the blobs, the equalizer and the dots from the preview page and wants to tune each one separately. The window jitter at start is postponed by the user (smooth appearance later).
+- Themes (21): three themes, chosen through .env for now, in-app settings later (the user's wish, like the circles). Only colours change, not shapes or fonts (the user's decision). The grey theme has no blue anywhere. State colours are per theme: calm for windows, brighter for black; the user left them as they are for now.

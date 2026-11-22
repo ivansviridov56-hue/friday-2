@@ -19,6 +19,7 @@ from friday.ui_events import (
     MessageAdded,
     State,
     StateChanged,
+    ThemeChanged,
     UiEventBus,
 )
 
@@ -77,6 +78,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
     bus = UiEventBus()
     bus.publish(CirclesStyleChanged("classic"))
+    bus.publish(ThemeChanged("classic"))
     threading.Thread(target=_demo, args=(bus,), daemon=True).start()
     controls = WindowControls()
     run_window(bus, WindowApi(TextInput(), controls), controls)

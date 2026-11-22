@@ -55,8 +55,20 @@ class CirclesStyleChanged:
     name: str
 
 
+@dataclass(frozen=True)
+class ThemeChanged:
+    """Colour theme of the window (see friday/theme.py); remembered by the bus."""
+
+    name: str
+
+
 UiEvent = (
-    StateChanged | MessageAdded | LevelChanged | CoverChanged | CirclesStyleChanged
+    StateChanged
+    | MessageAdded
+    | LevelChanged
+    | CoverChanged
+    | CirclesStyleChanged
+    | ThemeChanged
 )
 Listener = Callable[[UiEvent], None]
 
@@ -73,6 +85,7 @@ class UiEventBus:
         self._last_state: StateChanged | None = None
         self._last_cover: CoverChanged | None = None
         self._last_style: CirclesStyleChanged | None = None
+        self._last_theme: ThemeChanged | None = None
         self._lock = threading.Lock()
 
     def subscribe(self, listener: Listener) -> None:
@@ -80,7 +93,12 @@ class UiEventBus:
             self._listeners.append(listener)
             replay = [
                 e
-                for e in (self._last_state, self._last_cover, self._last_style)
+                for e in (
+                    self._last_theme,
+                    self._last_state,
+                    self._last_cover,
+                    self._last_style,
+                )
                 if e is not None
             ]
         for event in replay:
@@ -99,6 +117,8 @@ class UiEventBus:
                 self._last_cover = event
             elif isinstance(event, CirclesStyleChanged):
                 self._last_style = event
+            elif isinstance(event, ThemeChanged):
+                self._last_theme = event
             listeners = list(self._listeners)
         for listener in listeners:
             self._deliver(listener, event)
