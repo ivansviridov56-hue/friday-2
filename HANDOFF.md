@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1075 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1083 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -43,6 +43,8 @@ Stage 23e done: a dark veil hides the abrupt blur redraw when the wallpaper chan
 Stage 24 done: window transparency slider in the settings, saved per theme (friday/transparency.py, friday/backdrop_tint.py, class Backdrop in friday/win_backdrop.py); in win11 it moves the Windows tint, in the other themes it thins the page background over a fixed tint.
 Stage 24e done: each theme has its own colour under the transparent page (TINT_COLORS and tint_for in friday/backdrop_logic.py: classic #0c0f1d, windows #202020, black #010101, win11 #202020); the page no longer paints its own background; at 100 % only the blur is left. Black uses #010101, because a fully black tint with opacity 0 makes Windows draw its own black (guarded by a test).
 Stage 24f done: the wallpaper veil works in every theme, not only in win11 (the win11-only check was removed from coverWallpaperChange in friday/ui/app.js; the veil rules moved from themes/win11.css to styles.css; the veil colour follows the theme: classic #0c0f1d, black #010101, others #202020).
+Stage 25a done: tray icon (friday/tray.py, pystray + pillow) with the menu "Открыть" / "Выйти"; the window's X button and Alt+F4 only hide the window, the app exits only through the tray "Выйти" (friday/window_lifecycle.py, wired in friday/window.py and friday/voice.py). Voice, wake word and X2 keep working with the window hidden. The minimize button still minimizes to the taskbar.
+Next idea (the user's wish): an "island" at the top edge of the screen while the window is hidden (25b: a small always-on-top frameless window showing the state; 25c: when it appears, hover behaviour, what it shows).
 Next: see the Next section of PROGRESS.md.
 
 
@@ -149,3 +151,4 @@ Next: see the Next section of PROGRESS.md.
 - Wallpaper change (23e): the blur snap of Windows cannot be removed, so it is hidden under a veil that fades in on the wallpaper file change and out after the new accent arrives (the user's idea, chosen by the user over redrawing the blur in CSS). Opacity 0.99 (checked live). A short dark pause on every wallpaper change is accepted by the user.
 - Transparency (24e): one slider, 0-100 %, each theme keeps its own value (user's wish); defaults 0 % except win11 40 % (= the old 60 % tint). The slider changes only the density of the theme's own tint colour under the transparent page, so at 100 % only the blurred wallpaper is left (the user's wish after seeing the grey glass in the colour themes). Win11 is unchanged. A fully transparent window without blur is not needed, and the bright white spot of the blobs look is dropped (both by the user). The slider previews at once and saves on release.
 - Wallpaper veil (24f): works in every theme (the user's wish), its colour follows the theme tint.
+- Tray (25a): X hides the window to the tray, exit only through the tray menu (variant A, chosen by the user). Closing is cancelled by the window's closing event; if the window cannot be hidden, closing is allowed so the user is never trapped. pystray and pillow live in requirements-local.txt only (CI stays light). The tray icon is a drawn blue circle for now. The minimize button is unchanged until the island is designed (25b).

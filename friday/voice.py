@@ -12,6 +12,8 @@ import threading
 
 from pathlib import Path
 
+from friday.tray import Tray
+from friday.window_lifecycle import WindowLifecycle
 from friday.wallpaper_source import FileWallpaperSource
 from friday.wallpaper_watcher import WallpaperWatcher
 from friday.accent_publisher import AccentPublisher
@@ -229,6 +231,9 @@ def main() -> None:
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()
+    lifecycle = WindowLifecycle()
+    tray = Tray(lifecycle.show, lifecycle.quit)
+    tray.start()
     worker = threading.Thread(
         target=_start_assistant,
         args=(bus, stop, text_input),
@@ -238,9 +243,10 @@ def main() -> None:
     worker.start()
     try:
         run_window(
-            bus, WindowApi(text_input, controls, settings), controls
-        )  # blocks until closed
+            bus, WindowApi(text_input, controls, settings), controls, lifecycle
+        )  # blocks until the tray "Выйти"
     finally:
+        tray.close()
         stop.set()
         accent_publisher.close()
         wallpaper_watcher.close()

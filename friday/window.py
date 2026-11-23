@@ -10,6 +10,7 @@ import threading
 import time
 from pathlib import Path
 
+from friday.window_lifecycle import WindowLifecycle
 from friday.backdrop_tint import BackdropTint
 from friday.text_input import TextInput
 from friday.window_api import WindowApi
@@ -35,6 +36,7 @@ def run_window(
     bus: UiEventBus,
     api: WindowApi | None = None,
     controls: WindowControls | None = None,
+    lifecycle: WindowLifecycle | None = None,
 ) -> None:
     """Show the window and block until it is closed. Must run on the main thread."""
     import webview
@@ -54,7 +56,14 @@ def run_window(
     if window is None:
         raise RuntimeError("could not create the window")
     if controls is not None:
-        controls.bind(window.minimize, window.destroy, window.resize)
+        controls.bind(
+            window.minimize,
+            lifecycle.hide if lifecycle is not None else window.destroy,
+            window.resize,
+        )
+    if lifecycle is not None:
+        lifecycle.bind(window.show, window.hide, window.destroy)
+        window.events.closing += lifecycle.on_closing
     bridge = UiBridge(window.evaluate_js)
     bus.subscribe(bridge.on_event)
     backdrop = Backdrop(window, TITLE)
@@ -69,6 +78,8 @@ def run_window(
         bus.unsubscribe(tint.on_event)
         if controls is not None:
             controls.unbind()
+        if lifecycle is not None:
+            lifecycle.unbind()
 
 
 def _demo(bus: UiEventBus) -> None:

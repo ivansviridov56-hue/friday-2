@@ -665,6 +665,15 @@
     from --veil (classic #0c0f1d, black #010101, others #202020)
   - Checked live: the blur redraw is hidden in the classic and black themes
 
+- [x] Stage 25a: tray icon, 1083 tests
+  - friday/window_lifecycle.py (show / hide / quit, on_closing cancels the close until quit;
+    tested), friday/tray.py (pystray, menu "Открыть" / "Выйти"; live-checked, no tests)
+  - window.py binds the lifecycle and the closing event; voice.py starts the tray and
+    closes it in finally; WindowControls.close now hides the window
+  - requirements-local.txt: pystray, pillow
+  - Checked live: icon in the tray, X and Alt+F4 hide the window, voice works while hidden,
+    "Открыть" brings the window back with the blur and the theme intact, "Выйти" exits fully
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -795,7 +804,9 @@
   theme's own tint colour (tint_for / opacity_for). A tint colour must never be pure black:
   with opacity 0 the whole GradientColor becomes 0 and Windows draws its own black.
   in the other themes it stays 60 % and the slider only thins the page background over it.
+- Tray: the app now lives without a window; the only exit is the tray menu "Выйти". If the
+  tray icon is not visible, it is under the hidden icons arrow of the taskbar.
 
 
 ## Next
-Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): Island at the top edge of the screen while the window is hidden: 25b (small always-on-top frameless window with the state colour, centred at the top), 25c (appearing / disappearing, hover, what it shows, e.g. her answer while she speaks). Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
