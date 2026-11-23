@@ -740,8 +740,7 @@
 - On a very light accent the idle circle is almost white. Fine for now; tune the shades if it bothers.
 - Known: the blur under the window (drawn by Windows) changes abruptly when the window stands still after a
   wallpaper change, but smoothly while the window is dragged (Windows redraws it every frame then). One small
-  jerk was seen while dragging during the change; its cause is not known (suspect: Windows redrawing the blur
-  cache). A forced redraw during the wallpaper change is a possible idea, not tried.
+  jerk was seen while dragging during the change; it stays with the accent publisher switched off, so it comes from Windows, not from our code. A forced redraw during the wallpaper change is a possible idea, not tried.
 
 
 ## Next
