@@ -44,3 +44,6 @@
 }
 
 :root[data-theme="win11"] .option.on { border-color: var(--accent); }
+
+/* While the accent fades, the page does it by itself: no extra CSS transition on the circles. */
+:root.accent-fading #bg-layer * { transition: none !important; }

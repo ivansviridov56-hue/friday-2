@@ -610,6 +610,10 @@
   - window.fridayUi.setAccent writes a <style> rule limited to the win11 theme; the accent paints the
     user's message bubble, the idle circles and the border of the chosen settings option
   - Checked live: the colours follow a manual wallpaper change within about 3 s, the blur stays
+  - The page fades the colours (1.2 s, about 30 fps) in app.js: fadeAccent; the CSS transition of the
+    circles is switched off meanwhile (class accent-fading) so the circles and the bubble move together.
+    Polling every 0.5 s. Checked live: from a wallpaper change to the start of the fade about 1-2 s
+    (mostly Windows writing the registry late).
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -734,6 +738,10 @@
 - The accent publisher starts in voice.main(), not in the assistant thread, so the colour does not wait
   for the models to load. It works only under `python -m friday.voice` (not `python -m friday.window`).
 - On a very light accent the idle circle is almost white. Fine for now; tune the shades if it bothers.
+- Known: the blur under the window (drawn by Windows) changes abruptly when the window stands still after a
+  wallpaper change, but smoothly while the window is dragged (Windows redraws it every frame then). One small
+  jerk was seen while dragging during the change; its cause is not known (suspect: Windows redrawing the blur
+  cache). A forced redraw during the wallpaper change is a possible idea, not tried.
 
 
 ## Next

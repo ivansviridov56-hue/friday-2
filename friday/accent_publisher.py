@@ -11,7 +11,7 @@ from friday.ui_events import AccentChanged, UiEventBus
 
 log = logging.getLogger(__name__)
 
-POLL_SECONDS = 3.0
+POLL_SECONDS = 0.5
 
 
 class AccentSource(Protocol):

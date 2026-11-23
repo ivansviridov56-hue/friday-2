@@ -31,6 +31,82 @@ function stepLevel() {
   requestAnimationFrame(stepLevel);
 }
 
+// Accent colours: Python sends the final values, the page fades to them.
+const ACCENT_FADE_MS = 1200;
+let accentNow = null; // the values shown right now, so a new fade starts from them
+let accentFrame = 0;
+
+function parseAccentValue(value) {
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(value);
+  if (hex) {
+    return { kind: "hex", rgb: [1, 2, 3].map((i) => parseInt(hex[i], 16)) };
+  }
+  const triplet = /^(\d+), (\d+), (\d+)$/.exec(value);
+  if (triplet) {
+    return { kind: "triplet", rgb: [1, 2, 3].map((i) => Number(triplet[i])) };
+  }
+  return null;
+}
+
+function formatAccentValue(kind, rgb) {
+  const c = rgb.map((v) => Math.round(Math.min(255, Math.max(0, v))));
+  if (kind === "hex") {
+    return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+  }
+  return c.join(", ");
+}
+
+function writeAccent(vars) {
+  let style = document.getElementById("accent-style");
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "accent-style";
+    document.head.appendChild(style);
+  }
+  const rules = Object.entries(vars).map(([k, v]) => k + ": " + v + ";").join(" ");
+  style.textContent = ':root[data-theme="win11"] { ' + rules + " }";
+}
+
+function fadeAccent(target) {
+  cancelAnimationFrame(accentFrame);
+  if (!accentNow) {
+    // The first accent is applied at once, there is nothing to fade from.
+    accentNow = target;
+    writeAccent(target);
+    return;
+  }
+  const from = accentNow;
+  const start = performance.now();
+  let lastWrite = 0;
+  // While the colours fade, the circles must not run their own 1.4 s CSS transition on top.
+  root.classList.add("accent-fading");
+  function step(now) {
+    const t = Math.min(1, (now - start) / ACCENT_FADE_MS);
+    if (t < 1 && now - lastWrite < 33) {
+      accentFrame = requestAnimationFrame(step);
+      return;
+    }
+    lastWrite = now;
+    const eased = t * t * (3 - 2 * t);
+    const frame = {};
+    for (const [name, to] of Object.entries(target)) {
+      const a = parseAccentValue(from[name] !== undefined ? from[name] : to);
+      const b = parseAccentValue(to);
+      frame[name] = a && b && a.kind === b.kind
+        ? formatAccentValue(b.kind, b.rgb.map((v, i) => a.rgb[i] + (v - a.rgb[i]) * eased))
+        : to;
+    }
+    accentNow = frame;
+    writeAccent(frame);
+    if (t < 1) {
+      accentFrame = requestAnimationFrame(step);
+    } else {
+      root.classList.remove("accent-fading");
+    }
+  }
+  accentFrame = requestAnimationFrame(step);
+}
+
 window.fridayUi = {
   setState(state) {
     document.body.className = "state-" + state;
@@ -67,14 +143,7 @@ window.fridayUi = {
     document.documentElement.dataset.theme = name;
   },
   setAccent(vars) {
-    let style = document.getElementById("accent-style");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "accent-style";
-      document.head.appendChild(style);
-    }
-    const rules = Object.entries(vars).map(([k, v]) => k + ": " + v + ";").join(" ");
-    style.textContent = ':root[data-theme="win11"] { ' + rules + " }";
+    fadeAccent(vars);
   },
 };
 
