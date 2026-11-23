@@ -53,6 +53,7 @@ def test_public_methods_are_the_whole_page_api():
         "resize_window",
         "get_settings",
         "set_theme",
+        "set_transparency",
         "set_circles_style",
     }
 
@@ -68,3 +69,26 @@ def test_resize_rejects_non_numbers(value):
     api, _, calls = make_api()
     assert api.resize_window(value, 600) is False
     assert calls == []
+
+
+def test_set_transparency_is_forwarded():
+    from friday.settings_service import SettingsService
+    from friday.ui_events import UiEventBus
+
+    class Store:
+        def load(self):
+            return {}
+
+        def save(self, values):
+            pass
+
+    service = SettingsService(UiEventBus(), Store(), {})
+    api = WindowApi(TextInput(), WindowControls(), service)
+    assert api.set_transparency(30) is True
+    assert service.snapshot()["percents"]["classic"] == 30
+
+
+@pytest.mark.parametrize("value", [None, "30", True, float("nan"), 101])
+def test_set_transparency_rejects_bad_values(value):
+    api, _, _ = make_api()
+    assert api.set_transparency(value) is False

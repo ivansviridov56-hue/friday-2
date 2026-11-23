@@ -63,3 +63,8 @@ class WindowApi:
         if self._settings is None or not isinstance(name, str):
             return False
         return self._settings.set_circles(name)
+
+    def set_transparency(self, percent: object) -> bool:
+        if self._settings is None or not _is_number(percent):
+            return False
+        return self._settings.set_transparency(percent)

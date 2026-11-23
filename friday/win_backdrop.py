@@ -7,7 +7,14 @@ import logging
 import sys
 import threading
 
-from friday.backdrop_logic import enable_backdrop, make_tint
+from friday.backdrop_logic import (
+    CHANGE_STEPS,
+    DEFAULT_OPACITY,
+    DEFAULT_TINT,
+    enable_backdrop,
+    make_tint,
+    run_steps,
+)
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +63,7 @@ def _paint_form_black(window: object) -> None:
         log.exception("could not set the form colour")
 
 
-def _apply_once(title: str, extend: bool) -> bool:
+def _apply_once(title: str, extend: bool, color: str, opacity: float) -> bool:
     """One application of the blur. `extend` says whether the glass covers the whole window."""
     user32 = ctypes.windll.user32
     dwm = ctypes.windll.dwmapi
@@ -90,7 +97,9 @@ def _apply_once(title: str, extend: bool) -> bool:
         hwnd, ctypes.byref(_Margins(side, side, side, side))
     )
 
-    policy = _AccentPolicy(ACCENT_ENABLE_ACRYLIC, ACCENT_FLAGS, make_tint(), 0)
+    policy = _AccentPolicy(
+        ACCENT_ENABLE_ACRYLIC, ACCENT_FLAGS, make_tint(color, opacity)
+    )
     data = _CompositionData(
         WCA_ACCENT_POLICY,
         ctypes.cast(ctypes.byref(policy), ctypes.c_void_p),
@@ -99,20 +108,65 @@ def _apply_once(title: str, extend: bool) -> bool:
     return bool(user32.SetWindowCompositionAttribute(hwnd, ctypes.byref(data)))
 
 
-def start_backdrop(window: object, title: str) -> None:
-    """Turn the blur on in a background thread (the steps include a short pause)."""
+class Backdrop:
+    """The blurred window background; its tint can change while the window runs."""
 
-    def apply(extend: bool) -> bool:
-        ok = _apply_once(title, extend)
-        _paint_form_black(window)
+    def __init__(self, window: object, title: str) -> None:
+        self._window = window
+        self._title = title
+        self._lock = threading.Lock()
+        self._wanted: tuple[str, float] = (DEFAULT_TINT, DEFAULT_OPACITY)
+        self._applied: tuple[str, float] | None = None
+        self._enabled = False
+        self._worker: threading.Thread | None = None
+
+    def start(self) -> None:
+        """Turn the blur on in a background thread (the steps include a short pause)."""
+        with self._lock:
+            if self._worker is None and not self._enabled:
+                self._launch(self._first_run)
+
+    def set_tint(self, color: str, opacity: float) -> None:
+        """Ask for a new tint (colour '#rrggbb', opacity 0..1). Any thread, also before start()."""
+        with self._lock:
+            self._wanted = (color, opacity)
+            if self._enabled and self._worker is None and self._wanted != self._applied:
+                self._launch(self._change_loop)
+
+    def _launch(self, target) -> None:  # the caller holds the lock
+        thread = threading.Thread(target=target, daemon=True, name="backdrop")
+        self._worker = thread
+        thread.start()
+
+    def _apply_step(self, extend: bool) -> bool:
+        with self._lock:
+            color, opacity = self._wanted
+        ok = _apply_once(self._title, extend, color, opacity)
+        _paint_form_black(self._window)
+        if ok:
+            with self._lock:
+                self._applied = (color, opacity)
         return ok
 
-    def work() -> None:
+    def _first_run(self) -> None:
         try:
-            enabled = enable_backdrop(apply, sys.getwindowsversion().build)
+            enabled = enable_backdrop(self._apply_step, sys.getwindowsversion().build)
         except Exception:
             log.exception("backdrop failed")
-            return
+            enabled = False
         log.info("backdrop: %s", "on" if enabled else "off (plain window)")
+        with self._lock:
+            self._enabled = enabled
+        self._change_loop()
 
-    threading.Thread(target=work, daemon=True, name="backdrop").start()
+    def _change_loop(self) -> None:
+        while True:
+            with self._lock:
+                if not self._enabled or self._wanted == self._applied:
+                    self._worker = None
+                    return
+            if not run_steps(self._apply_step, CHANGE_STEPS):
+                log.warning("could not change the tint")
+                with self._lock:
+                    self._worker = None
+                return

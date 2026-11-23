@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1010 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1075 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -39,7 +39,10 @@ grey themes; the choice in the app settings comes later.
 Stage 22a done: settings screen (gear in the header, panel on the right) with the theme and the look of the circles; the choice is saved in data/settings.json and wins over .env.
 Stage 23 done: theme "win11" with a real blurred window background (friday/backdrop_logic.py, friday/win_backdrop.py, friday/ui/themes/win11.css); the blur stays when the window is inactive. Accent is fixed for now.
 Stage 23d done: the accent colour of the win11 theme follows the Windows accent (friday/accent_*.py), re-read every 3 s.
-Stage 23e done: a dark veil hides the abrupt blur redraw when the wallpaper changes (friday/wallpaper_source.py, friday/wallpaper_watcher.py, event WallpaperChanging); win11 theme only.
+Stage 23e done: a dark veil hides the abrupt blur redraw when the wallpaper changes (friday/wallpaper_source.py, friday/wallpaper_watcher.py, event WallpaperChanging); now works in every theme (stage 24f).
+Stage 24 done: window transparency slider in the settings, saved per theme (friday/transparency.py, friday/backdrop_tint.py, class Backdrop in friday/win_backdrop.py); in win11 it moves the Windows tint, in the other themes it thins the page background over a fixed tint.
+Stage 24e done: each theme has its own colour under the transparent page (TINT_COLORS and tint_for in friday/backdrop_logic.py: classic #0c0f1d, windows #202020, black #010101, win11 #202020); the page no longer paints its own background; at 100 % only the blur is left. Black uses #010101, because a fully black tint with opacity 0 makes Windows draw its own black (guarded by a test).
+Stage 24f done: the wallpaper veil works in every theme, not only in win11 (the win11-only check was removed from coverWallpaperChange in friday/ui/app.js; the veil rules moved from themes/win11.css to styles.css; the veil colour follows the theme: classic #0c0f1d, black #010101, others #202020).
 Next: see the Next section of PROGRESS.md.
 
 
@@ -141,6 +144,8 @@ Next: see the Next section of PROGRESS.md.
 - Circles looks (20a): four looks, chosen through .env for now (variant A, chosen by the user), a choice inside the app settings later. The user liked the blobs, the equalizer and the dots from the preview page and wants to tune each one separately. The window jitter at start is postponed by the user (smooth appearance later).
 - Themes (21): three themes, chosen through .env for now, in-app settings later (the user's wish, like the circles). Only colours change, not shapes or fonts (the user's decision). The grey theme has no blue anywhere. State colours are per theme: calm for windows, brighter for black; the user left them as they are for now.
 - Settings screen (22a): opens from a gear in the header, a panel slides in on the right (variant A, chosen by the user). A choice applies at once, no save button, and is saved in data/settings.json (git-ignored); a saved choice wins over THEME / CIRCLES in .env, which stay as the starting values. The page only asks; Python checks the value and writes the file. First version holds only the theme and the circles look.
-- Windows 11 theme (23): shapes as in the other themes; colours and accent follow the wallpaper like in Windows (the user's wish); blur and transparency are real, not drawn in CSS. Mica / Acrylic were rejected because they go flat when the window is inactive; the old acrylic with a "kick" is used instead. The blur is started on every launch, whatever the theme (the other themes paint an opaque page over it). Tint 60 %, set by the user (variant C): a slider in the settings later.
+- Windows 11 theme (23): shapes as in the other themes; colours and accent follow the wallpaper like in Windows (the user's wish); blur and transparency are real, not drawn in CSS. Mica / Acrylic were rejected because they go flat when the window is inactive; the old acrylic with a "kick" is used instead. Tint 60 %, set by the user (variant C): a slider in the settings later.
 - Accent (23d): index 1 of AccentPalette is the accent, index 0 the light shade. It paints only the user's bubble, the idle circles and the chosen option in the settings; everything else stays neutral (variant chosen by Claude, the user accepted it after seeing it). It applies only in the win11 theme. Colours fade smoothly (1.2 s); polling 0.5 s.
 - Wallpaper change (23e): the blur snap of Windows cannot be removed, so it is hidden under a veil that fades in on the wallpaper file change and out after the new accent arrives (the user's idea, chosen by the user over redrawing the blur in CSS). Opacity 0.99 (checked live). A short dark pause on every wallpaper change is accepted by the user.
+- Transparency (24e): one slider, 0-100 %, each theme keeps its own value (user's wish); defaults 0 % except win11 40 % (= the old 60 % tint). The slider changes only the density of the theme's own tint colour under the transparent page, so at 100 % only the blurred wallpaper is left (the user's wish after seeing the grey glass in the colour themes). Win11 is unchanged. A fully transparent window without blur is not needed, and the bright white spot of the blobs look is dropped (both by the user). The slider previews at once and saves on release.
+- Wallpaper veil (24f): works in every theme (the user's wish), its colour follows the theme tint.

@@ -109,7 +109,7 @@ function fadeAccent(target) {
 
 // Wallpaper change: Windows redraws the blur under the window abruptly, about 1.1 s after the
 // wallpaper file changes. The page covers the window with a dark veil before that and lifts it
-// smoothly once the new accent has arrived. Only in the win11 theme.
+// smoothly once the new accent has arrived. Works in every theme.
 const VEIL_FALLBACK_MS = 4000; // lifts by itself if no new accent comes (same accent as before)
 const VEIL_RELEASE_DELAY_MS = 500; // after the accent arrives, give Windows time to finish
 let veil = null;
@@ -123,9 +123,6 @@ function releaseVeil() {
 }
 
 function coverWallpaperChange() {
-  if (document.documentElement.dataset.theme !== "win11") {
-    return;
-  }
   if (!veil) {
     veil = document.createElement("div");
     veil.id = "wallpaper-veil";
@@ -179,6 +176,18 @@ window.fridayUi = {
   },
   setTheme(name) {
     document.documentElement.dataset.theme = name;
+  },
+  setTransparency(percent) {
+    const value = Math.min(100, Math.max(0, Math.round(Number(percent) || 0)));
+    root.style.setProperty("--transparency", String(value));
+    const slider = document.getElementById("transparency");
+    const label = document.getElementById("transparency-value");
+    if (slider) {
+      slider.value = String(value);
+    }
+    if (label) {
+      label.textContent = value + "%";
+    }
   },
   setAccent(vars) {
     fadeAccent(vars);
@@ -423,5 +432,24 @@ document.getElementById("settings-close").addEventListener("click", closeSetting
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeSettings();
+  }
+});
+
+// Transparency slider: the page previews at once, Python saves when the slider is released.
+const transparencySlider = document.getElementById("transparency");
+
+transparencySlider.addEventListener("input", () => {
+  window.fridayUi.setTransparency(transparencySlider.value);
+});
+
+transparencySlider.addEventListener("change", async () => {
+  const api = window.pywebview && window.pywebview.api;
+  if (!api || !api.set_transparency) {
+    return;
+  }
+  try {
+    await api.set_transparency(Number(transparencySlider.value));
+  } catch (error) {
+    console.error(error);
   }
 });

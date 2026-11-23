@@ -47,20 +47,3 @@
 
 /* While the accent fades, the page does it by itself: no extra CSS transition on the circles. */
 :root.accent-fading #bg-layer * { transition: none !important; }
-
-/* Wallpaper change: a dark veil behind the content hides the abrupt blur redraw of Windows.
-   Fades in over 0.8 s (before the blur snaps) and out over 1 s. Tint colour as in win_backdrop. */
-#wallpaper-veil {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: #202020;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-
-#wallpaper-veil.on {
-  opacity: 0.99;
-  transition-duration: 0.8s;
-}

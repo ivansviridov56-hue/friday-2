@@ -10,6 +10,7 @@ import threading
 import time
 from pathlib import Path
 
+from friday.backdrop_tint import BackdropTint
 from friday.text_input import TextInput
 from friday.window_api import WindowApi
 from friday.window_controls import WindowControls
@@ -37,7 +38,7 @@ def run_window(
 ) -> None:
     """Show the window and block until it is closed. Must run on the main thread."""
     import webview
-    from friday.win_backdrop import start_backdrop
+    from friday.win_backdrop import Backdrop
 
     window = webview.create_window(
         TITLE,
@@ -56,12 +57,16 @@ def run_window(
         controls.bind(window.minimize, window.destroy, window.resize)
     bridge = UiBridge(window.evaluate_js)
     bus.subscribe(bridge.on_event)
+    backdrop = Backdrop(window, TITLE)
+    tint = BackdropTint(backdrop.set_tint)
+    bus.subscribe(tint.on_event)
     window.events.loaded += bridge.mark_ready
-    window.events.loaded += lambda: start_backdrop(window, TITLE)
+    window.events.loaded += backdrop.start
     try:
         webview.start()
     finally:
         bus.unsubscribe(bridge.on_event)
+        bus.unsubscribe(tint.on_event)
         if controls is not None:
             controls.unbind()
 

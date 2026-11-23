@@ -624,6 +624,47 @@
   - Checked live: veil opacity 0.99 hides the blur snap completely (0.9 was not enough);
     the user is fine with the short dark pause
 
+- [x] Stage 24a: window transparency per theme, storage and logic, 1041 tests
+  - friday/transparency.py (percent 0..100 per theme, defaults: win11 40 = the old 60 % tint,
+    the other themes 0; parse_percent, clean_percents, percent_for), settings_store keeps a
+    "transparency" dict in data/settings.json, bad values are dropped, old files still load
+  - Decisions (user): range 0-100 %; in classic / windows / black the slider makes the page
+    background see-through over the acrylic base (clear glass there is postponed); in win11 it
+    moves the Windows tint (tint = 100 - transparency)
+  - Next: 24b service + WindowApi.set_transparency + event, 24c slider in the page,
+    24d win11 tint through win_backdrop (the same value is not re-applied, may need a "kick")
+
+- [x] Stage 24a-24d: window transparency per theme, 1077 tests
+  - friday/transparency.py (percent 0..100 per theme; defaults: win11 40 = the old 60 % tint,
+    other themes 0), settings_store keeps a "transparency" dict in data/settings.json (bad values
+    dropped, old files still load), SettingsService.set_transparency (each theme keeps its own
+    value; TransparencyChanged is sent after every theme change), WindowApi.set_transparency
+  - Page: slider "Прозрачность" in the settings panel; app.js previews while dragging and saves
+    on release; classic / windows / black: page background = --bg mixed with transparent
+    (color-mix in styles.css), the acrylic base under it stays at the fixed 60 % tint
+  - win11: friday/backdrop_logic.py opacity_for (tint = 100 - transparency), CHANGE_STEPS,
+    friday/backdrop_tint.py (BackdropTint: events -> opacity), friday/win_backdrop.py is now the
+    class Backdrop (start / set_opacity, changes the tint in a worker thread); window.py wires it
+  - Checked live: 0 % opaque and 100 % clear glass in win11, per-theme values, slider value
+    shown in the panel
+  - Not checked: blur stays when the window is inactive after a tint change (if it goes flat,
+    use KICK_STEPS instead of CHANGE_STEPS); restart keeps the value; the wallpaper veil is
+    still #202020 (may look darker than the window at high transparency)
+  - Postponed (user): clear glass in classic / windows / black (needs the acrylic tint to follow
+    the slider there too)
+
+- [x] Stage 24e: own tint colour per theme under the transparent page, 1075 tests
+  - friday/backdrop_logic.py (TINT_COLORS, tint_for, opacity_for), friday/backdrop_tint.py,
+    class Backdrop in friday/win_backdrop.py (set_tint), friday/window.py, styles.css
+    (html, body background is transparent)
+  - Found live: tint #000000 with opacity 0 makes Windows ignore the tint; black uses
+    #010101, guarded by test_no_theme_gives_a_zero_gradient_value
+  - Checked live: every theme changes with the slider
+- [x] Stage 24f: wallpaper veil in every theme
+  - app.js coverWallpaperChange without the win11 check; veil rules in styles.css, colour
+    from --veil (classic #0c0f1d, black #010101, others #202020)
+  - Checked live: the blur redraw is hidden in the classic and black themes
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -740,7 +781,6 @@
   (win_backdrop._paint_form_black), because glass shows through pure black.
 - The accent colour in the win11 theme is fixed (#4cc2ff). The registry AccentColor / AccentPalette
   follows the wallpaper slideshow; reading it every few seconds is the next step (23d).
-- The tint is fixed at 60 % (#202020). A slider in the settings is a later step.
 - AccentPalette in the registry holds 8 shades from the lightest to the darkest (4 bytes each: R, G, B,
   unused). Index 1 is the accent, index 0 the light one (matches the Settings app in dark mode, checked
   on the user's wallpaper). The last shade is always #881798 and is not used.
@@ -751,7 +791,11 @@
   registry and before the blur snaps (measured, same for manual and slideshow changes); the file
   event comes as a burst of 2-4 writes. Windows cannot be stopped from snapping the blur, so the page
   hides it under a veil. The veil must be nearly opaque (0.99): at 0.9 the snap was still visible.
+- Transparency: the page is transparent in every theme; the slider changes the opacity of the
+  theme's own tint colour (tint_for / opacity_for). A tint colour must never be pure black:
+  with opacity 0 the whole GradientColor becomes 0 and Windows draws its own black.
+  in the other themes it stays 60 % and the slider only thins the page background over it.
 
 
 ## Next
-Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case. 23B: tint slider in the settings.
+Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

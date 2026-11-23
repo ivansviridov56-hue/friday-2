@@ -34,6 +34,31 @@ KICK_STEPS: tuple[Step, ...] = (
 )
 
 
+# Changing only the tint: one step. If the blur goes flat after a change while the window
+# is inactive, use KICK_STEPS here instead (the window blinks, like at start).
+CHANGE_STEPS: tuple[Step, ...] = (Step(True, 0.0),)
+
+# Tint colour of the Windows acrylic per theme: the colour the window had when it was opaque.
+# No colour may be pure black: with opacity 0 the whole GradientColor would be 0, and Windows
+# then ignores the tint and draws its own black (found live: the black theme never changed).
+TINT_COLORS: dict[str, str] = {
+    "classic": "#0c0f1d",
+    "windows": "#202020",
+    "black": "#0E0E0E",
+    "win11": "#202020",
+}
+
+
+def tint_for(theme: str) -> str:
+    return TINT_COLORS.get(theme, DEFAULT_TINT)
+
+
+def opacity_for(percent: int) -> float:
+    """Opacity of the Windows tint (0..1): 0 % transparency is opaque, 100 % has no tint."""
+    clamped = min(max(percent, 0), 100)
+    return round((100 - clamped) / 100, 2)
+
+
 def parse_accent(raw: int) -> str:
     """Convert the registry AccentColor DWORD (0xAABBGGRR) to '#rrggbb'."""
     if not 0 <= raw <= 0xFFFFFFFF:

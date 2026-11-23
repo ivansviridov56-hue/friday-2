@@ -75,6 +75,13 @@ class WallpaperChanging:
     """The wallpaper is about to change; the page covers the blur snap. Not remembered by the bus."""
 
 
+@dataclass(frozen=True)
+class TransparencyChanged:
+    """Window transparency of the current theme, percent 0..100; remembered by the bus."""
+
+    percent: int
+
+
 UiEvent = (
     StateChanged
     | MessageAdded
@@ -83,6 +90,7 @@ UiEvent = (
     | CirclesStyleChanged
     | ThemeChanged
     | AccentChanged
+    | TransparencyChanged
     | WallpaperChanging
 )
 Listener = Callable[[UiEvent], None]
@@ -102,6 +110,7 @@ class UiEventBus:
         self._last_style: CirclesStyleChanged | None = None
         self._last_theme: ThemeChanged | None = None
         self._last_accent: AccentChanged | None = None
+        self._last_transparency: TransparencyChanged | None = None
         self._lock = threading.Lock()
 
     def subscribe(self, listener: Listener) -> None:
@@ -111,6 +120,7 @@ class UiEventBus:
                 e
                 for e in (
                     self._last_theme,
+                    self._last_transparency,
                     self._last_accent,
                     self._last_state,
                     self._last_cover,
@@ -136,6 +146,8 @@ class UiEventBus:
                 self._last_style = event
             elif isinstance(event, ThemeChanged):
                 self._last_theme = event
+            elif isinstance(event, TransparencyChanged):
+                self._last_transparency = event
             elif isinstance(event, AccentChanged):
                 self._last_accent = event
             listeners = list(self._listeners)

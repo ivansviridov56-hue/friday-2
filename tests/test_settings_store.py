@@ -56,3 +56,33 @@ def test_no_temp_file_is_left(tmp_path):
     path = tmp_path / "settings.json"
     SettingsStore(path).save({"theme": "black"})
     assert [p.name for p in tmp_path.iterdir()] == ["settings.json"]
+
+
+def test_transparency_round_trip(tmp_path):
+    store = SettingsStore(tmp_path / "settings.json")
+    store.save({"theme": "black", "transparency": {"black": 25, "win11": 70}})
+    assert store.load() == {
+        "theme": "black",
+        "transparency": {"black": 25, "win11": 70},
+    }
+
+
+def test_bad_transparency_is_dropped_on_load(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text(
+        json.dumps({"transparency": {"classic": 999, "pink": 10, "black": "x"}}),
+        encoding="utf-8",
+    )
+    assert SettingsStore(path).load() == {}
+
+
+def test_transparency_that_is_not_an_object_is_dropped(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text(json.dumps({"transparency": 40}), encoding="utf-8")
+    assert SettingsStore(path).load() == {}
+
+
+def test_old_file_without_transparency_still_loads(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text(json.dumps({"theme": "win11"}), encoding="utf-8")
+    assert SettingsStore(path).load() == {"theme": "win11"}

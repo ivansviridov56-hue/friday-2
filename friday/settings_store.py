@@ -7,7 +7,9 @@ import logging
 import os
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
+from friday.transparency import clean_percents
 from friday.circles_style import CIRCLE_STYLES
 from friday.theme import THEMES
 
@@ -19,21 +21,25 @@ DEFAULT_PATH = Path(__file__).resolve().parent.parent / "data" / "settings.json"
 CHOICES: dict[str, tuple[str, ...]] = {"theme": THEMES, "circles": CIRCLE_STYLES}
 
 
-def _clean(raw: object) -> dict[str, str]:
+def _clean(raw: object) -> dict[str, Any]:
     if not isinstance(raw, Mapping):
         return {}
-    return {
+    cleaned: dict[str, Any] = {
         key: value
         for key, value in raw.items()
         if key in CHOICES and isinstance(value, str) and value in CHOICES[key]
     }
+    percents = clean_percents(raw.get("transparency"))
+    if percents:
+        cleaned["transparency"] = percents
+    return cleaned
 
 
 class SettingsStore:
     def __init__(self, path: Path = DEFAULT_PATH) -> None:
         self._path = path
 
-    def load(self) -> dict[str, str]:
+    def load(self) -> dict[str, Any]:
         """Saved choices; a missing, broken or odd file gives an empty dict."""
         try:
             raw = json.loads(self._path.read_text(encoding="utf-8"))
@@ -44,7 +50,7 @@ class SettingsStore:
             return {}
         return _clean(raw)
 
-    def save(self, values: Mapping[str, str]) -> None:
+    def save(self, values: Mapping[str, Any]) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self._path.with_suffix(".json.tmp")
         tmp.write_text(

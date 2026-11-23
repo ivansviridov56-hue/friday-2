@@ -18,6 +18,7 @@ from friday.ui_events import (
     MessageAdded,
     StateChanged,
     ThemeChanged,
+    TransparencyChanged,
     AccentChanged,
     WallpaperChanging,
     UiEvent,
@@ -73,6 +74,8 @@ class UiBridge:
         if isinstance(event, AccentChanged):
             payload = json.dumps(accent_vars(event.accent, event.light))
             return f"window.fridayUi.setAccent({payload})"
+        if isinstance(event, TransparencyChanged):
+            return f"window.fridayUi.setTransparency({int(event.percent)})"
         if isinstance(event, WallpaperChanging):
             return "window.fridayUi.wallpaperChanging()"
         logger.warning("unknown UI event %r", event)
