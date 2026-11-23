@@ -62,6 +62,14 @@ class ThemeChanged:
     name: str
 
 
+@dataclass(frozen=True)
+class AccentChanged:
+    """Accent colours of Windows (see friday/accent_logic.py); remembered by the bus."""
+
+    accent: str
+    light: str
+
+
 UiEvent = (
     StateChanged
     | MessageAdded
@@ -69,6 +77,7 @@ UiEvent = (
     | CoverChanged
     | CirclesStyleChanged
     | ThemeChanged
+    | AccentChanged
 )
 Listener = Callable[[UiEvent], None]
 
@@ -86,6 +95,7 @@ class UiEventBus:
         self._last_cover: CoverChanged | None = None
         self._last_style: CirclesStyleChanged | None = None
         self._last_theme: ThemeChanged | None = None
+        self._last_accent: AccentChanged | None = None
         self._lock = threading.Lock()
 
     def subscribe(self, listener: Listener) -> None:
@@ -95,6 +105,7 @@ class UiEventBus:
                 e
                 for e in (
                     self._last_theme,
+                    self._last_accent,
                     self._last_state,
                     self._last_cover,
                     self._last_style,
@@ -119,6 +130,8 @@ class UiEventBus:
                 self._last_style = event
             elif isinstance(event, ThemeChanged):
                 self._last_theme = event
+            elif isinstance(event, AccentChanged):
+                self._last_accent = event
             listeners = list(self._listeners)
         for listener in listeners:
             self._deliver(listener, event)

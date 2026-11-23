@@ -10,6 +10,7 @@ import logging
 import threading
 from typing import Callable
 
+from friday.accent_logic import accent_vars
 from friday.ui_events import (
     CirclesStyleChanged,
     CoverChanged,
@@ -17,6 +18,7 @@ from friday.ui_events import (
     MessageAdded,
     StateChanged,
     ThemeChanged,
+    AccentChanged,
     UiEvent,
 )
 
@@ -67,6 +69,9 @@ class UiBridge:
             return f"window.fridayUi.setCirclesStyle({json.dumps(event.name)})"
         if isinstance(event, ThemeChanged):
             return f"window.fridayUi.setTheme({json.dumps(event.name)})"
+        if isinstance(event, AccentChanged):
+            payload = json.dumps(accent_vars(event.accent, event.light))
+            return f"window.fridayUi.setAccent({payload})"
         logger.warning("unknown UI event %r", event)
         return None
 

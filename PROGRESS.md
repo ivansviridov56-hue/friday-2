@@ -603,6 +603,14 @@
   - Checked live on build 26200: blur shows wallpaper colours, STAYS when the window is inactive,
     drag / resize / buttons work, the other three themes look as before
 
+- [x] Stage 23d: accent colour of the win11 theme follows Windows, 998 tests
+  - friday/accent_logic.py (pure: palette parsing, accent and light picked from the palette, shades; 10 tests)
+  - friday/accent_source.py (registry read, live-checked), friday/accent_publisher.py (polls every 3 s,
+    publishes AccentChanged only when it changes; 6 tests), AccentChanged in ui_events.py / ui_bridge.py
+  - window.fridayUi.setAccent writes a <style> rule limited to the win11 theme; the accent paints the
+    user's message bubble, the idle circles and the border of the chosen settings option
+  - Checked live: the colours follow a manual wallpaper change within about 3 s, the blur stays
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -720,7 +728,13 @@
 - The accent colour in the win11 theme is fixed (#4cc2ff). The registry AccentColor / AccentPalette
   follows the wallpaper slideshow; reading it every few seconds is the next step (23d).
 - The tint is fixed at 60 % (#202020). A slider in the settings is a later step.
+- AccentPalette in the registry holds 8 shades from the lightest to the darkest (4 bytes each: R, G, B,
+  unused). Index 1 is the accent, index 0 the light one (matches the Settings app in dark mode, checked
+  on the user's wallpaper). The last shade is always #881798 and is not used.
+- The accent publisher starts in voice.main(), not in the assistant thread, so the colour does not wait
+  for the models to load. It works only under `python -m friday.voice` (not `python -m friday.window`).
+- On a very light accent the idle circle is almost white. Fine for now; tune the shades if it bothers.
 
 
 ## Next
-Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case. 23d: accent colour from the registry, re-read every few seconds; tint slider in the settings.
+Candidates (ask the user): tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case. 23B: tint slider in the settings.

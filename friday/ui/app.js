@@ -66,6 +66,16 @@ window.fridayUi = {
   setTheme(name) {
     document.documentElement.dataset.theme = name;
   },
+  setAccent(vars) {
+    let style = document.getElementById("accent-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "accent-style";
+      document.head.appendChild(style);
+    }
+    const rules = Object.entries(vars).map(([k, v]) => k + ": " + v + ";").join(" ");
+    style.textContent = ':root[data-theme="win11"] { ' + rules + " }";
+  },
 };
 
 // Text input: the page hands typed text to Python (friday/text_input.py).

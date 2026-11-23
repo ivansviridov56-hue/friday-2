@@ -12,6 +12,8 @@ import threading
 
 from pathlib import Path
 
+from friday.accent_publisher import AccentPublisher
+from friday.accent_source import RegistryAccentSource
 from friday.settings_service import SettingsService
 from friday.settings_store import SettingsStore
 from friday.text_input import TextInput
@@ -216,6 +218,8 @@ def main() -> None:
     bus = UiEventBus()
     settings = SettingsService(bus, SettingsStore(), os.environ)
     settings.publish_initial()
+    accent_publisher = AccentPublisher(bus, RegistryAccentSource())
+    accent_publisher.start()
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()
@@ -232,6 +236,7 @@ def main() -> None:
         )  # blocks until closed
     finally:
         stop.set()
+        accent_publisher.close()
         worker.join(timeout=5)
 
 
