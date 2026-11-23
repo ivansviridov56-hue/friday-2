@@ -615,6 +615,15 @@
     Polling every 0.5 s. Checked live: from a wallpaper change to the start of the fade about 1-2 s
     (mostly Windows writing the registry late).
 
+- [x] Stage 23e: veil over the abrupt blur redraw on wallpaper change, 1010 tests
+  - friday/wallpaper_source.py (change time of TranscodedWallpaper), friday/wallpaper_watcher.py
+    (polls 0.1 s, first write of a 2-4 write burst is the signal, 2 s minimum gap, errors survive)
+  - UI event WallpaperChanging (ui_events.py, ui_bridge.py) -> window.fridayUi.wallpaperChanging()
+  - app.js: a dark veil (#wallpaper-veil, win11 theme only) fades in over ~0.8 s, is lifted
+    0.5 s after the new accent arrives, or by itself after 4 s if the accent does not change
+  - Checked live: veil opacity 0.99 hides the blur snap completely (0.9 was not enough);
+    the user is fine with the short dark pause
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -738,9 +747,10 @@
 - The accent publisher starts in voice.main(), not in the assistant thread, so the colour does not wait
   for the models to load. It works only under `python -m friday.voice` (not `python -m friday.window`).
 - On a very light accent the idle circle is almost white. Fine for now; tune the shades if it bothers.
-- Known: the blur under the window (drawn by Windows) changes abruptly when the window stands still after a
-  wallpaper change, but smoothly while the window is dragged (Windows redraws it every frame then). One small
-  jerk was seen while dragging during the change; it stays with the accent publisher switched off, so it comes from Windows, not from our code. A forced redraw during the wallpaper change is a possible idea, not tried.
+- Wallpaper change (23e): the wallpaper file is rewritten about 1.1 s BEFORE the accent changes in the
+  registry and before the blur snaps (measured, same for manual and slideshow changes); the file
+  event comes as a burst of 2-4 writes. Windows cannot be stopped from snapping the blur, so the page
+  hides it under a veil. The veil must be nearly opaque (0.99): at 0.9 the snap was still visible.
 
 
 ## Next

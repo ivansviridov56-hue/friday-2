@@ -12,6 +12,8 @@ import threading
 
 from pathlib import Path
 
+from friday.wallpaper_source import FileWallpaperSource
+from friday.wallpaper_watcher import WallpaperWatcher
 from friday.accent_publisher import AccentPublisher
 from friday.accent_source import RegistryAccentSource
 from friday.settings_service import SettingsService
@@ -48,7 +50,7 @@ from friday.stt import SpeechToText
 from friday.tts import speak_text
 from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
-from friday.ui_events import State, StateChanged, UiEventBus
+from friday.ui_events import State, StateChanged, UiEventBus, WallpaperChanging
 from friday.window import run_window
 from friday.music_search import TrackSearch
 from friday.command_chain import build_command_chain
@@ -220,6 +222,10 @@ def main() -> None:
     settings.publish_initial()
     accent_publisher = AccentPublisher(bus, RegistryAccentSource())
     accent_publisher.start()
+    wallpaper_watcher = WallpaperWatcher(
+        FileWallpaperSource(), lambda: bus.publish(WallpaperChanging())
+    )
+    wallpaper_watcher.start()
     stop = threading.Event()
     text_input = TextInput()
     controls = WindowControls()
@@ -237,6 +243,7 @@ def main() -> None:
     finally:
         stop.set()
         accent_publisher.close()
+        wallpaper_watcher.close()
         worker.join(timeout=5)
 
 

@@ -70,6 +70,11 @@ class AccentChanged:
     light: str
 
 
+@dataclass(frozen=True)
+class WallpaperChanging:
+    """The wallpaper is about to change; the page covers the blur snap. Not remembered by the bus."""
+
+
 UiEvent = (
     StateChanged
     | MessageAdded
@@ -78,6 +83,7 @@ UiEvent = (
     | CirclesStyleChanged
     | ThemeChanged
     | AccentChanged
+    | WallpaperChanging
 )
 Listener = Callable[[UiEvent], None]
 

@@ -107,6 +107,44 @@ function fadeAccent(target) {
   accentFrame = requestAnimationFrame(step);
 }
 
+// Wallpaper change: Windows redraws the blur under the window abruptly, about 1.1 s after the
+// wallpaper file changes. The page covers the window with a dark veil before that and lifts it
+// smoothly once the new accent has arrived. Only in the win11 theme.
+const VEIL_FALLBACK_MS = 4000; // lifts by itself if no new accent comes (same accent as before)
+const VEIL_RELEASE_DELAY_MS = 500; // after the accent arrives, give Windows time to finish
+let veil = null;
+let veilTimer = 0;
+
+function releaseVeil() {
+  clearTimeout(veilTimer);
+  if (veil) {
+    veil.classList.remove("on");
+  }
+}
+
+function coverWallpaperChange() {
+  if (document.documentElement.dataset.theme !== "win11") {
+    return;
+  }
+  if (!veil) {
+    veil = document.createElement("div");
+    veil.id = "wallpaper-veil";
+    document.body.appendChild(veil);
+    void veil.offsetHeight; // so the first fade-in is animated too
+  }
+  veil.classList.add("on");
+  clearTimeout(veilTimer);
+  veilTimer = setTimeout(releaseVeil, VEIL_FALLBACK_MS);
+}
+
+function releaseVeilSoon() {
+  if (!veil || !veil.classList.contains("on")) {
+    return;
+  }
+  clearTimeout(veilTimer);
+  veilTimer = setTimeout(releaseVeil, VEIL_RELEASE_DELAY_MS);
+}
+
 window.fridayUi = {
   setState(state) {
     document.body.className = "state-" + state;
@@ -144,6 +182,10 @@ window.fridayUi = {
   },
   setAccent(vars) {
     fadeAccent(vars);
+    releaseVeilSoon();
+  },
+  wallpaperChanging() {
+    coverWallpaperChange();
   },
 };
 

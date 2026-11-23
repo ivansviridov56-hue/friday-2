@@ -19,6 +19,7 @@ from friday.ui_events import (
     StateChanged,
     ThemeChanged,
     AccentChanged,
+    WallpaperChanging,
     UiEvent,
 )
 
@@ -38,7 +39,7 @@ class UiBridge:
             return
         with self._lock:
             if not self._ready:
-                if not isinstance(event, LevelChanged):
+                if not isinstance(event, (LevelChanged, WallpaperChanging)):
                     self._pending.append(script)
                 return
             self._run(script)
@@ -72,6 +73,8 @@ class UiBridge:
         if isinstance(event, AccentChanged):
             payload = json.dumps(accent_vars(event.accent, event.light))
             return f"window.fridayUi.setAccent({payload})"
+        if isinstance(event, WallpaperChanging):
+            return "window.fridayUi.wallpaperChanging()"
         logger.warning("unknown UI event %r", event)
         return None
 

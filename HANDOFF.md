@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 998 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1010 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -39,6 +39,7 @@ grey themes; the choice in the app settings comes later.
 Stage 22a done: settings screen (gear in the header, panel on the right) with the theme and the look of the circles; the choice is saved in data/settings.json and wins over .env.
 Stage 23 done: theme "win11" with a real blurred window background (friday/backdrop_logic.py, friday/win_backdrop.py, friday/ui/themes/win11.css); the blur stays when the window is inactive. Accent is fixed for now.
 Stage 23d done: the accent colour of the win11 theme follows the Windows accent (friday/accent_*.py), re-read every 3 s.
+Stage 23e done: a dark veil hides the abrupt blur redraw when the wallpaper changes (friday/wallpaper_source.py, friday/wallpaper_watcher.py, event WallpaperChanging); win11 theme only.
 Next: see the Next section of PROGRESS.md.
 
 
@@ -142,3 +143,4 @@ Next: see the Next section of PROGRESS.md.
 - Settings screen (22a): opens from a gear in the header, a panel slides in on the right (variant A, chosen by the user). A choice applies at once, no save button, and is saved in data/settings.json (git-ignored); a saved choice wins over THEME / CIRCLES in .env, which stay as the starting values. The page only asks; Python checks the value and writes the file. First version holds only the theme and the circles look.
 - Windows 11 theme (23): shapes as in the other themes; colours and accent follow the wallpaper like in Windows (the user's wish); blur and transparency are real, not drawn in CSS. Mica / Acrylic were rejected because they go flat when the window is inactive; the old acrylic with a "kick" is used instead. The blur is started on every launch, whatever the theme (the other themes paint an opaque page over it). Tint 60 %, set by the user (variant C): a slider in the settings later.
 - Accent (23d): index 1 of AccentPalette is the accent, index 0 the light shade. It paints only the user's bubble, the idle circles and the chosen option in the settings; everything else stays neutral (variant chosen by Claude, the user accepted it after seeing it). It applies only in the win11 theme. Colours fade smoothly (1.2 s); polling 0.5 s.
+- Wallpaper change (23e): the blur snap of Windows cannot be removed, so it is hidden under a veil that fades in on the wallpaper file change and out after the new accent arrives (the user's idea, chosen by the user over redrawing the blur in CSS). Opacity 0.99 (checked live). A short dark pause on every wallpaper change is accepted by the user.
