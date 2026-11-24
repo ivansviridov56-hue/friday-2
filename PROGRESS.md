@@ -756,26 +756,6 @@
     unused island_position / ISLAND_WIDTH from island_logic.py; clock / weather and the wavy
     bottom from the user's reference picture are only an idea.
 
-- [~] Stage 25b-7: moving wavy bottom edge of the island (IN PROGRESS, not finished)
-  - Idea from the Island app (exuupery/island, closed source, only its README was read, no code
-    was taken): the bottom edge of the island is wavy and always moves, also in idle; a thin light
-    line follows the edge a little later. The user's screenshots showed a wavy edge with a thin
-    light line under it.
-  - Decisions (user): wave without sound first (variant A); the real microphone loudness through a
-    new stdin command "level <number>" is a separate later stage; her own voice stays out (variant B).
-  - Given in the chat (pasted by the user, result of pytest NOT reported yet):
-    friday/island_logic.py: WaveParams, WAVE_BY_STATE (amplitude, speed, spatial per state),
-    wave_params, wave_offset, edge_gap, ease_params, MAX_WAVE_AMPLITUDE, LINE_GAP, WAVE_PAD;
-    tests/test_island_wave.py; friday/island_qt.py: QTimer every 16 ms moves the phase, the window is
-    WAVE_PAD px taller, paintEvent draws the wavy edge and the light line (h = height - WAVE_PAD).
-  - BUG, found live by the user: after these edits the island became TRANSPARENT. Cause not found
-    yet. Not yet known: whether the whole island or only the body is see-through, whether the wave
-    itself is drawn. Things to check first: the paintEvent edit (h = self.height() - WAVE_PAD,
-    the fillPath of the body, the order of drawing), then revert step 2.6 only and see if the body
-    comes back, then the geometry change (setGeometry height + WAVE_PAD).
-  - Not checked: pytest result after the change (expect the old 1153 plus the new wave tests),
-    CPU load of the 16 ms timer (if high, use 33 ms), how the wave looks in each state.
-
 - [x] Stage 25b-7: moving wavy bottom edge of the island, done
   - island_logic.py (WaveParams, WAVE_BY_STATE, wave_params, wave_offset, edge_gap, ease_params),
     island_qt.py (16 ms timer, WAVE_PAD, paintEvent draws the wavy edge and the light line).
@@ -791,20 +771,45 @@
     when the state leaves SPEAKING the island gets "done" and shows the whole text, then hides it after 1.5 s.
   - Checked live: words go with the voice, the island height does not jump.
 
-- [~] Stage 27: smoother island (IN PROGRESS)
-  - 27a done (1243 tests): wave timer 6 ms (about 165 fps, monitor is 165 Hz) with Qt.PreciseTimer;
-    wave easing made frame-rate independent (island_logic.blend_factor, WAVE_EASE_RATE).
-  - 27b done (expected 1249 tests, the user said "ok"): island opening runs on the wave timer, not on
-    QVariantAnimation (island_logic.smoothstep, step_toward; EXPAND_SECONDS 0.45 in island_qt.py);
-    the window width is kept even so the centre does not jump by 1 px. The user: still looks like
-    less than 60 fps.
-  - 27c GIVEN, NOT CHECKED: fixed-size island window (never resized, the island is drawn inside it in
-    paintEvent, WindowTransparentForInput flag, _place() instead of _apply_geometry resizing) plus an fps
-    counter (env FRIDAY_ISLAND_FPS=1 prints "island fps: N" to stderr). Ask the user whether the edits
-    were applied, the pytest result (expect 1249) and how it looks. If the island is invisible or cut,
-    check _max_body_h in island_qt.py.
-  - Still to do: 27d the island width follows the text (max 440 px, max 2 lines, the user's limit);
-    27e every word fades in (alpha by progress, no jump).
+- [x] Stage 27a-27c: smoother island, 1249 tests
+  - 27a: wave timer 6 ms (about 165 fps, monitor is 165 Hz) with Qt.PreciseTimer; wave easing is
+    frame-rate independent (island_logic.blend_factor, WAVE_EASE_RATE).
+  - 27b: island opening runs on the wave timer, not on QVariantAnimation (island_logic.smoothstep,
+    step_toward; EXPAND_SECONDS 0.45); the window width is kept even.
+  - 27c: fixed-size island window (never resized, the island is drawn inside it in paintEvent,
+    WindowTransparentForInput, _place()), fps counter (env FRIDAY_ISLAND_FPS=1 writes
+    "island fps: N" to data/island_fps.txt, one line per second).
+  - Found with the counter: the colour and pulse animations called update() on their own, so in the
+    listening state the window repainted 222-230 times a second. _on_color and _on_pulse no longer
+    call update(); only the wave tick repaints.
+  - Measured live in the running app (idle, listening, opening under the answer text): 166-167
+    paintEvent calls a second, equal to the monitor rate.
+  - KNOWN ISSUE (open, the user: "smoothness is strange", still looks like less than 60 fps): the
+    counter counts paintEvent calls, not frames that reach the screen. Hypothesis, NOT verified: a
+    Qt window with per-pixel transparency on Windows is presented through UpdateLayeredWindow (CPU
+    path, not tied to the monitor refresh), so frames may be dropped or uneven. Only variant B can
+    check it: draw through OpenGL or Qt Quick with vertical sync; a big change, transparency and
+    edges would have to be re-checked (they broke once in 25b-7). Postponed by the user.
+    - Still to do: 27e every word fades in (alpha by progress, no jump). Postponed together with the
+    smoothness work below.
+
+- [x] Stage 27d: the island follows the text, 1264 tests
+  - Width: the body grows with the revealed text, from 150 px up to 440 px (island_logic.target_body_width,
+    ease_width); the text is always wrapped at the widest layout width (WRAP_W), so lines do not jump.
+  - Height: follows the visible lines, one line at first, two at most (island_logic.visible_lines_height);
+    before this, a long answer opened the island to two lines at once.
+  - Text scroll: when the text is longer than two lines it moves up smoothly (island_logic.scroll_for,
+    SCROLL_EASE_RATE 10); WIDTH_EASE_RATE 14 is shared by width and height.
+  - Tried and rolled back: the text drawn once into a QPixmap and moved by fractions of a pixel
+    (hypothesis: Qt snaps text to whole pixels). No visible change, so it was removed.
+  - KNOWN ISSUE (open, the user: "it always jitters", also in idle, and "the island looks not
+    optimized"): the whole island window jitters, not only the text. This fits the layered-window
+    hypothesis from stage 27 (UpdateLayeredWindow, CPU path, not tied to the monitor refresh), but it is
+    still NOT verified. Ideas for later, the user decides: variant B (OpenGL or Qt Quick with vertical
+    sync; transparency and edges must be re-checked) and lighter drawing (the window is fixed at the
+    biggest size and repainted 166 times a second on the CPU; repaint only the changed area, or lower
+    the tick when nothing moves, or a larger WAVE_STEP). Postponed by the user.
+    
 
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
@@ -941,7 +946,10 @@
 - Island: Qt in a separate process (stdin protocol: "state <name>", "quit"). The window has no
   link to the app except the pipe. Blur under the island (like the win11 theme) is not done: Qt
   does not give it, it would need the same Windows calls as win_backdrop.py.
+- Island fps counter: FRIDAY_ISLAND_FPS=1 writes to data/island_fps.txt (the island process has no
+  visible console in the app: it starts with CREATE_NO_WINDOW). Standalone, `python -m friday.island_qt`
+  also works. The file grows on every run: delete it when it is not needed.
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next (island: 27e words fade in, the smoothness / optimization work with variant B, see KNOWN ISSUE in 27d). Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

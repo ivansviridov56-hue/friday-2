@@ -47,8 +47,14 @@ Stage 25a done: tray icon (friday/tray.py, pystray + pillow) with the menu "От
 Stage 25b done: the top-edge island is a Qt (PySide6) window in its own process (friday/island_qt.py window, island_process.py control, island_bridge.py forwarding of state, theme and answer text, island_logic.py colours and clip_text); hangs from the top edge like a notch, colours follow the window theme, shows her answer (up to two lines) and hides it 1.5 s after she stops speaking; always visible for now. Next: replace the dot, island settings.
 Stage 25b-7 done (wavy edge of the island, transparency fixed). Stage 26 done: the island reveals the
 answer text in step with her voice (text_reveal.py, SpeechChunkStarted, reveal / chunk / done channels).
-Stage 27 in progress (smoother island), see PROGRESS.md. 25b-7 and 26 are done; if PROGRESS.md still shows
-25b-7 as in progress, fix it first.
+Stage 27a-27c done: smoother island (6 ms wave timer, fixed-size window, fps counter FRIDAY_ISLAND_FPS=1
+writing to data/island_fps.txt). The app repaints the island at the monitor rate (166-167 a second), but
+the user still finds the smoothness strange; open hypothesis about the layered window, see PROGRESS.md
+(KNOWN ISSUE in 27). Stage 27a-27d done: the island follows the revealed text (width, height, smooth scroll); the repaint rate
+is 166-167 a second (counter: FRIDAY_ISLAND_FPS=1 writes to data/island_fps.txt). The whole island window
+still jitters, also in idle (the user), and the drawing is heavy; the layered-window hypothesis and the
+ideas for a fix (variant B, lighter drawing) are in PROGRESS.md under 27d. Postponed by the user.
+Next: 27e (words fade in) or the smoothness work, ask the user.
 Next: see the Next section of PROGRESS.md.
 
 

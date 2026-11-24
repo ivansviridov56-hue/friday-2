@@ -41,6 +41,10 @@ from friday.island_logic import (
     blend_factor,
     smoothstep,
     step_toward,
+    ease_width,
+    target_body_width,
+    visible_lines_height,
+    scroll_for,
 )
 from friday.text_reveal import progress_at, reveal_end
 
@@ -61,6 +65,9 @@ WAVE_STEP = 3  # px between the points of the wavy edge
 WAVE_LAG = 0.5  # the light line follows the edge a little later (radians)
 WAVE_TICK_MS = 6  # about 165 frames per second
 EXPAND_SECONDS = 0.45  # how long the island takes to open or close
+WRAP_W = EXP_W - TEXT_LEFT - TEXT_RIGHT  # text is always wrapped at the widest size
+WIDTH_EASE_RATE = 14.0  # how fast the island width follows the text (bigger = faster)
+SCROLL_EASE_RATE = 10.0  # how fast the text scrolls up (bigger = faster)
 
 
 def _lerp(a: float, b: float, t: float) -> float:
@@ -103,6 +110,13 @@ class IslandWidget(QWidget):
         self._target_h = CAP_H
         self._lines_h = 0
         self._full_h = 0
+        self._open_w = float(CAP_W)  # body width when open (follows the text)
+        self._target_w = float(CAP_W)
+        self._width_key = -1  # length of the text the target width was measured for
+        self._open_lines_h = 0.0  # height of the visible text block (eased)
+        self._target_lines_h = 0.0
+        self._scroll = 0.0  # how far the text is moved up now (eased)
+        self._target_scroll = 0.0
         self._screen_x = 0
         self._screen_w = 0
         self._screen_y = 0
@@ -167,6 +181,11 @@ class IslandWidget(QWidget):
         self._reveal = False
         self._text = text
         self._measure()
+        self._width_key = -1
+        self._update_target_width()
+        self._open_w = self._target_w
+        self._open_lines_h = self._target_lines_h
+        self._scroll = self._target_scroll
         self._animate_expand(1.0)
         self._apply_geometry()
 
@@ -180,6 +199,14 @@ class IslandWidget(QWidget):
         self._base = 0
         self._active = None
         self._measure()
+        self._width_key = -1
+        self._open_w = float(CAP_W)
+        self._target_w = float(CAP_W)
+        line_h = float(QFontMetrics(self._font).lineSpacing())
+        self._open_lines_h = line_h
+        self._target_lines_h = line_h
+        self._scroll = 0.0
+        self._target_scroll = 0.0
         self._animate_expand(1.0)
         self._apply_geometry()
 
@@ -210,6 +237,26 @@ class IslandWidget(QWidget):
             shown = max(shown, reveal_end(self._text, start, end, progress))
         self._shown = shown
 
+    def _text_box(self, text: str) -> tuple[float, float]:
+        if not text:
+            return 0.0, 0.0
+        flags = int(Qt.TextFlag.TextWordWrap | Qt.AlignmentFlag.AlignLeft)
+        rect = QFontMetrics(self._font).boundingRect(0, 0, WRAP_W, 10000, flags, text)
+        return float(rect.width()), float(rect.height())
+
+    def _update_target_width(self) -> None:
+        text = self._text[: self._shown] if self._reveal else self._text
+        if len(text) == self._width_key:
+            return
+        self._width_key = len(text)
+        width, height = self._text_box(text)
+        self._target_w = target_body_width(width, CAP_W, EXP_W, TEXT_LEFT, TEXT_RIGHT)
+        line_h = float(QFontMetrics(self._font).lineSpacing())
+        self._target_lines_h = max(
+            line_h, visible_lines_height(height, line_h, MAX_LINES)
+        )
+        self._target_scroll = scroll_for(height, line_h, MAX_LINES)
+
     def _measure(self) -> None:
         metrics = QFontMetrics(self._font)
         text_w = EXP_W - TEXT_LEFT - TEXT_RIGHT
@@ -238,6 +285,11 @@ class IslandWidget(QWidget):
             self._text = ""
             self._reveal = False
             self._active = None
+            self._open_w = float(CAP_W)
+            self._target_w = float(CAP_W)
+            self._width_key = -1
+            self._scroll = 0.0
+            self._target_scroll = 0.0
 
     def _place(self) -> None:
         """The window has a fixed size (the biggest the island can be); it never resizes."""
@@ -251,7 +303,6 @@ class IslandWidget(QWidget):
 
     def _on_color(self, value) -> None:
         self._color = QColor(value)
-        self.update()
 
     def _on_wave_tick(self) -> None:
         now = time.monotonic()
@@ -262,17 +313,28 @@ class IslandWidget(QWidget):
         self._phase += dt * self._wave.speed
         self._step_expand(dt)
         self._update_reveal()
+        self._update_target_width()
+        self._open_w = ease_width(self._open_w, self._target_w, dt, WIDTH_EASE_RATE)
+        self._open_lines_h = ease_width(
+            self._open_lines_h, self._target_lines_h, dt, WIDTH_EASE_RATE
+        )
+        self._scroll = ease_width(
+            self._scroll, self._target_scroll, dt, SCROLL_EASE_RATE
+        )
         self.update()
 
     def _on_pulse(self, value) -> None:
         self._pulse = float(value)
-        self.update()
 
     def _count_frame(self) -> None:
         self._frames += 1
         now = time.monotonic()
         if now - self._fps_t >= 1.0:
-            print(f"island fps: {self._frames}", file=sys.stderr, flush=True)
+            from pathlib import Path
+
+            log = Path(__file__).resolve().parent.parent / "data" / "island_fps.txt"
+            with open(log, "a", encoding="utf-8") as f:
+                f.write(f"island fps: {self._frames}\n")
             self._frames = 0
             self._fps_t = now
 
@@ -283,8 +345,9 @@ class IslandWidget(QWidget):
         if self._fps_on:
             self._count_frame()
         t = self._expand
-        h = _lerp(CAP_H, self._target_h, t)
-        body_w = _lerp(CAP_W, EXP_W, t)
+        lines_h = self._open_lines_h
+        h = _lerp(CAP_H, max(CAP_H, lines_h + 2 * PAD_V), t)
+        body_w = _lerp(CAP_W, self._open_w, t)
         x0 = (self.width() - (body_w + 2 * FLARE)) / 2
         left, right = x0 + FLARE, x0 + FLARE + body_w
         path = QPainterPath()
@@ -338,9 +401,10 @@ class IslandWidget(QWidget):
             color.setAlpha(int(255 * min(1.0, (t - 0.5) * 2)))
             p.setPen(color)
             p.setFont(self._font)
-            text_w = body_w - TEXT_LEFT - TEXT_RIGHT
-            top = (h - self._lines_h) / 2
-            clip = QRectF(left + TEXT_LEFT, top, text_w, self._lines_h)
+            text_w = WRAP_W  # the layout width never changes, so the lines do not jump
+            clip_w = body_w - TEXT_LEFT - TEXT_RIGHT
+            top = (h - lines_h) / 2
+            clip = QRectF(left + TEXT_LEFT, top, clip_w, lines_h)
             p.setClipRect(clip)
             flags = int(Qt.TextFlag.TextWordWrap | Qt.AlignmentFlag.AlignLeft)
             visible = self._text[: self._shown] if self._reveal else self._text
@@ -354,8 +418,8 @@ class IslandWidget(QWidget):
                     else 0
                 )
             # when the text is longer than two lines, the END stays visible
-            y = top + self._lines_h - full_h if full_h > self._lines_h else top
-            area = QRectF(left + TEXT_LEFT, y, text_w, max(full_h, self._lines_h))
+            y = top - self._scroll
+            area = QRectF(left + TEXT_LEFT, y, text_w, max(full_h, lines_h))
             p.drawText(area, flags, visible)
         p.end()
 

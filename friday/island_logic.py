@@ -195,3 +195,31 @@ def step_toward(current: float, target: float, dt: float, duration: float) -> fl
     if target > current:
         return min(current + step, target)
     return max(current - step, target)
+
+
+def target_body_width(
+    text_width: float, cap_w: float, exp_w: float, text_left: float, text_right: float
+) -> float:
+    """Width of the island body for a text of the given width, within [cap_w, exp_w]."""
+    wanted = text_width + text_left + text_right
+    return max(cap_w, min(exp_w, wanted))
+
+
+def ease_width(current: float, target: float, dt: float, rate: float) -> float:
+    """Move the width toward the target; independent of the frame rate."""
+    if dt <= 0:
+        return current
+    new = current + (target - current) * (1 - math.exp(-rate * dt))
+    return target if abs(target - new) < 0.25 else new
+
+
+def visible_lines_height(
+    text_height: float, line_height: float, max_lines: int
+) -> float:
+    """Height of the visible text block, at most max_lines lines."""
+    return max(0.0, min(text_height, line_height * max_lines))
+
+
+def scroll_for(text_height: float, line_height: float, max_lines: int) -> float:
+    """How far the text is moved up so that its END stays visible."""
+    return max(0.0, text_height - line_height * max_lines)
