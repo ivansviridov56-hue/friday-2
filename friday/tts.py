@@ -10,6 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from friday.tts_fallback import synthesize_local
+from friday.audio_duration import audio_seconds
 
 log = logging.getLogger(__name__)
 
@@ -150,8 +151,11 @@ async def speak_async(
     communicate=None,
     local: Callable[[str], bytes] | None = None,
     engine: Callable[[str], bytes] | None = None,
+    on_chunk: Callable[[str, float], None] | None = None,
 ) -> int:
     """Speak `text` piece by piece. Returns how many pieces were played.
+
+    `on_chunk(text, seconds)` is called just before a piece starts to sound.
 
     With `engine` (e.g. Silero) every piece is voiced by it and Edge is not used.
     """
@@ -180,6 +184,7 @@ async def speak_async(
                 len(chunks),
                 int((time.perf_counter() - begun) * 1000),
             )
+            _announce(on_chunk, chunk, audio)
             await asyncio.to_thread(play, audio)
             played += 1
     finally:
@@ -188,12 +193,30 @@ async def speak_async(
     return played
 
 
+def _announce(on_chunk, chunk: str, audio: bytes) -> None:
+    """Tell the outside which piece sounds now; a broken callback never stops the speech."""
+    if on_chunk is None:
+        return
+    try:
+        on_chunk(chunk, audio_seconds(audio, chunk))
+    except Exception:
+        log.exception("on_chunk failed")
+
+
 def speak_text(
     text: str,
     play,
     settings: TtsSettings = TtsSettings(),
     engine: Callable[[str], bytes] | None = None,
+    on_chunk: Callable[[str, float], None] | None = None,
 ) -> int:
     return asyncio.run(
-        speak_async(text, play, settings, local=synthesize_local, engine=engine)
+        speak_async(
+            text,
+            play,
+            settings,
+            local=synthesize_local,
+            engine=engine,
+            on_chunk=on_chunk,
+        )
     )

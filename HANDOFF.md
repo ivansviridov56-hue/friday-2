@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1083 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1238 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -44,7 +44,9 @@ Stage 24 done: window transparency slider in the settings, saved per theme (frid
 Stage 24e done: each theme has its own colour under the transparent page (TINT_COLORS and tint_for in friday/backdrop_logic.py: classic #0c0f1d, windows #202020, black #010101, win11 #202020); the page no longer paints its own background; at 100 % only the blur is left. Black uses #010101, because a fully black tint with opacity 0 makes Windows draw its own black (guarded by a test).
 Stage 24f done: the wallpaper veil works in every theme, not only in win11 (the win11-only check was removed from coverWallpaperChange in friday/ui/app.js; the veil rules moved from themes/win11.css to styles.css; the veil colour follows the theme: classic #0c0f1d, black #010101, others #202020).
 Stage 25a done: tray icon (friday/tray.py, pystray + pillow) with the menu "Открыть" / "Выйти"; the window's X button and Alt+F4 only hide the window, the app exits only through the tray "Выйти" (friday/window_lifecycle.py, wired in friday/window.py and friday/voice.py). Voice, wake word and X2 keep working with the window hidden. The minimize button still minimizes to the taskbar.
-Next idea (the user's wish): an "island" at the top edge of the screen while the window is hidden (25b: a small always-on-top frameless window showing the state; 25c: when it appears, hover behaviour, what it shows).
+Stage 25b done: the top-edge island is a Qt (PySide6) window in its own process (friday/island_qt.py window, island_process.py control, island_bridge.py forwarding of state, theme and answer text, island_logic.py colours and clip_text); hangs from the top edge like a notch, colours follow the window theme, shows her answer (up to two lines) and hides it 1.5 s after she stops speaking; always visible for now. Next: replace the dot, island settings.
+Stage 25b-7 done (wavy edge of the island, transparency fixed). Stage 26 done: the island reveals the
+answer text in step with her voice (text_reveal.py, SpeechChunkStarted, reveal / chunk / done channels).
 Next: see the Next section of PROGRESS.md.
 
 
@@ -152,3 +154,11 @@ Next: see the Next section of PROGRESS.md.
 - Transparency (24e): one slider, 0-100 %, each theme keeps its own value (user's wish); defaults 0 % except win11 40 % (= the old 60 % tint). The slider changes only the density of the theme's own tint colour under the transparent page, so at 100 % only the blurred wallpaper is left (the user's wish after seeing the grey glass in the colour themes). Win11 is unchanged. A fully transparent window without blur is not needed, and the bright white spot of the blobs look is dropped (both by the user). The slider previews at once and saves on release.
 - Wallpaper veil (24f): works in every theme (the user's wish), its colour follows the theme tint.
 - Tray (25a): X hides the window to the tray, exit only through the tray menu (variant A, chosen by the user). Closing is cancelled by the window's closing event; if the window cannot be hidden, closing is allowed so the user is never trapped. pystray and pillow live in requirements-local.txt only (CI stays light). The tray icon is a drawn blue circle for now. The minimize button is unchanged until the island is designed (25b).
+- Island (25b): built and checked on its own first, wired in later (the user's decision after a long failed attempt in an earlier chat). tkinter was tried first and dropped (no smooth edges, no glow); the island is now Qt (PySide6) in a separate process, chosen by the user after comparing Qt with an HTML window (the user: "I want the best, many ideas later"). The main window stays on PyWebView. Always visible for now (variant A, chosen by the user).
+- Island look and text (25b-5/6, user): no glow, minimal, like the window; colours follow the window theme (all four themes); the answer text is shown (up to two lines) and disappears 1.5 s after she stops speaking; the minimize button stays as it is; "always visible" for now; the text mode and the attachment style go to the settings later; the dot will be replaced later.
+- Island wave (25b-7, user): the bottom edge of the island is wavy and always moves (also in idle); the
+  idea comes from the Island app (closed source, only ideas, no code or art copied). First without
+  sound; the microphone loudness channel ("level") is a separate later stage. The characters in
+  place of the dot (eyes etc.) and event cards were offered and are postponed.
+- Text reveal (26c, user): replies without speech and chunks not found in the text are shown whole /
+  ignored; the hide timer (1.5 s after SPEAKING ends) stays as it is.

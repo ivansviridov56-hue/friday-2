@@ -8,6 +8,7 @@ pywinauto
 pystray
 pillow
 silero>=0.5
+PySide6>=6.6
 nvidia-cublas-cu12; sys_platform == "win32"
 nvidia-cudnn-cu12==9.*; sys_platform == "win32"
 winsdk; sys_platform == "win32"

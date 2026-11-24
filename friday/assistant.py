@@ -87,7 +87,9 @@ class Assistant:
         self._events.publish(MessageAdded("user", heard))
         local = self._try_command(heard)
         if local is not None:
-            self._events.publish(MessageAdded("assistant", local.text))
+            self._events.publish(
+                MessageAdded("assistant", local.text, spoken=local.spoken)
+            )
             if local.spoken:
                 self._say(local.text)
             return Turn(heard, None, local_reply=local.text)

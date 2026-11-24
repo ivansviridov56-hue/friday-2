@@ -30,8 +30,20 @@ class StateChanged:
 
 @dataclass(frozen=True)
 class MessageAdded:
+    """`spoken=False`: the answer is only shown, it will not be voiced."""
+
     role: Literal["user", "assistant"]
     text: str
+    spoken: bool = True
+
+
+@dataclass(frozen=True)
+class SpeechChunkStarted:
+    """One piece of her answer starts to sound: its text (as cleaned for speech) and its
+    length in seconds. Not remembered by the bus."""
+
+    text: str
+    seconds: float
 
 
 @dataclass(frozen=True)
@@ -85,6 +97,7 @@ class TransparencyChanged:
 UiEvent = (
     StateChanged
     | MessageAdded
+    | SpeechChunkStarted
     | LevelChanged
     | CoverChanged
     | CirclesStyleChanged

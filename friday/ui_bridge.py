@@ -16,6 +16,7 @@ from friday.ui_events import (
     CoverChanged,
     LevelChanged,
     MessageAdded,
+    SpeechChunkStarted,
     StateChanged,
     ThemeChanged,
     TransparencyChanged,
@@ -78,6 +79,8 @@ class UiBridge:
             return f"window.fridayUi.setTransparency({int(event.percent)})"
         if isinstance(event, WallpaperChanging):
             return "window.fridayUi.wallpaperChanging()"
+        if isinstance(event, SpeechChunkStarted):
+            return None  # only the island uses speech chunks
         logger.warning("unknown UI event %r", event)
         return None
 

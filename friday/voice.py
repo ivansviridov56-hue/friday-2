@@ -13,6 +13,8 @@ import threading
 from pathlib import Path
 
 from friday.tray import Tray
+from friday.island_process import IslandProcess
+from friday.island_bridge import IslandBridge
 from friday.window_lifecycle import WindowLifecycle
 from friday.wallpaper_source import FileWallpaperSource
 from friday.wallpaper_watcher import WallpaperWatcher
@@ -50,6 +52,7 @@ from friday.push_to_talk import PushToTalk
 from friday.recorder import Recorder
 from friday.stt import SpeechToText
 from friday.tts import speak_text
+from friday.speech_events import make_chunk_publisher
 from friday.tts_choice import choose_tts
 from friday.turn_runner import TurnRunner
 from friday.ui_events import State, StateChanged, UiEventBus, WallpaperChanging
@@ -109,8 +112,15 @@ def _start_assistant(
 
         player = PygamePlayer()
 
+        publish_chunk = make_chunk_publisher(bus)
+
         def speak(text: str) -> None:
-            speak_text(text, player.play, engine=tts_choice.engine)
+            speak_text(
+                text,
+                player.play,
+                engine=tts_choice.engine,
+                on_chunk=publish_chunk,
+            )
 
         vision_client = build_vision_client()
         token = os.environ.get("YM_TOKEN")
@@ -234,6 +244,13 @@ def main() -> None:
     lifecycle = WindowLifecycle()
     tray = Tray(lifecycle.show, lifecycle.quit)
     tray.start()
+    island = IslandProcess()
+    island_bridge = None
+    if island.start():
+        island_bridge = IslandBridge(bus, island)
+        island_bridge.start()
+    else:
+        log.warning("island is not available, continuing without it")
     worker = threading.Thread(
         target=_start_assistant,
         args=(bus, stop, text_input),
@@ -246,6 +263,9 @@ def main() -> None:
             bus, WindowApi(text_input, controls, settings), controls, lifecycle
         )  # blocks until the tray "Выйти"
     finally:
+        if island_bridge is not None:
+            island_bridge.close()
+        island.stop()
         tray.close()
         stop.set()
         accent_publisher.close()

@@ -674,6 +674,123 @@
   - Checked live: icon in the tray, X and Alt+F4 hide the window, voice works while hidden,
     "Открыть" brings the window back with the blur and the theme intact, "Выйти" exits fully
 
+- [x] Stage 25b-1/25b-2: the top-edge island as a standalone module, 1111 tests
+  - friday/island_logic.py (pure: size 120x32, centred at the top with an 8 px margin, colour per
+    state; 16 tests), friday/island.py (Island: its own thread owns the window, start / stop /
+    set_state; set_state is safe from any thread through a queue, ignored when not running; a build
+    failure gives start() == False; 12 tests with a fake view), friday/island_view.py (tkinter
+    window, live-checked, no tests: frameless, always on top, transparent corners, never takes the
+    focus, out of Alt+Tab), friday/island_probe.py (python -m friday.island_probe: cycles the states)
+  - Checked live (standalone, not wired into the app): capsule at the top centre, stays above other
+    windows, does not steal the focus, the dot changes colour per state.
+  - Not wired yet: voice.py, window_lifecycle.py, UiEventBus. Open risk: tkinter in a background
+    thread next to PyWebView (not checked together). Fallback: run the island as a separate process.
+  - Next: 25b-3 wiring (island follows StateChanged), 25c (shown only while the window is hidden,
+    hover, what it shows).
+
+- [x] Stage 25b-3: the island is wired into the app, 1117 tests
+  - friday/island_bridge.py (IslandBridge: subscribes to UiEventBus, forwards StateChanged to
+    Island.set_state; a late subscriber gets the last state from the bus; close is safe without
+    start; 6 tests)
+  - voice.py: Island is started in main() after the tray; if it does not start, the app goes on
+    without it (a warning in the log); the bridge and the island are closed in finally before the tray
+  - Checked live: the island appears at the top centre, the window opens normally, the dot follows
+    the states (loading / idle, listening, thinking, speaking), the island stays when the window is
+    hidden to the tray, "Выйти" removes it and the process ends cleanly.
+  - tkinter in its own thread works next to PyWebView (the risk noted in 25b-1/2 did not happen).
+  - For now the island is shown ALWAYS while the app runs (variant A, chosen by the user).
+  - Next: 25c (show only while the window is hidden, hover, what it shows).
+
+- [x] Stage 25b-4: the island is a Qt window in its own process, 1117 tests
+  - Reason: tkinter has no smooth edges and no soft glow (colour-key transparency only); the user
+    wants room for many later ideas (hover, answer text, animations), so the island moved to Qt
+    (PySide6) instead of patching tkinter. The main window stays on PyWebView (not touched).
+  - friday/island_qt.py (the window, live-checked, no tests: frameless, always on top, never takes
+    the focus, per-pixel transparency, smooth edges, soft glow, thin light border, state colour
+    fades in 350 ms, the dot and the glow pulse while listening / speaking; commands arrive on
+    stdin: "state <name>" / "quit"; prints "ready" when shown; exits when stdin closes, so a dead
+    parent never leaves an orphan window)
+  - friday/island_process.py (IslandProcess: starts `python -m friday.island_qt`, waits for
+    "ready" up to 15 s, set_state writes a line, stop sends quit and kills a hanging process;
+    same interface as the old Island: start / stop / set_state; 12 tests with a fake process)
+  - voice.py: IslandProcess instead of Island; IslandBridge is unchanged. PySide6>=6.6 added to
+    requirements-local.txt (CI stays light).
+  - Removed: friday/island.py, island_view.py, island_probe.py, tests/test_island.py (the tkinter
+    version). friday/island_logic.py stays: the Qt window takes the state colours from it.
+  - Checked live: the island appears at the top centre with smooth edges and a glow, follows the
+    states, stays when the window is hidden to the tray, disappears on "Выйти".
+  - Next: 25c (show only while the window is hidden, hover, what it shows); the look of the island
+    can still be tuned (size, glow, body colour).
+
+- [x] Stage 25b-5: the island look and the themes, 1135 tests
+  - Look: the island hangs from the top edge like a "notch" (straight part 150x34, concave
+    shoulders of 10 px join it to the screen edge, bottom corners rounded 14 px), no glow, a
+    plain dot of the state colour (it pulses lightly while listening / speaking). The dot is to be
+    replaced by something else later (the user's wish). Clock / weather and the wavy bottom from
+    the user's reference picture are NOT done (maybe later); the choice of the attachment style
+    will move to the settings.
+  - Themes: island_logic.py has STATE_COLORS_BY_THEME, BODY_COLORS (same as TINT_COLORS of the
+    window), TEXT_COLORS, color_for(state, theme), body_for, text_color_for; the island process
+    gets "theme <name>" through the stdin channel (IslandProcess.set_theme), IslandBridge forwards
+    ThemeChanged (the bus replays the theme before the state to a late subscriber). Values are
+    taken from the window's CSS: classic, windows, black, win11 (win11 idle dot is the fixed blue
+    #3aa6d8, following the Windows accent is not done).
+  - Checked live: all four themes, the colours follow the settings and survive a restart.
+  - Next: 25b-6 the answer text in the island (two lines, font "Rubik", "Segoe UI", disappears
+    1.5 s after she stops speaking, always visible island; the text option will go to the settings).
+
+- [x] Stage 25b-6: the answer text in the island, 1153 tests
+  - Channel: IslandProcess.show_text (base64 over stdin, never logged) / clear_text;
+    island_logic.clip_text (collapses whitespace, keeps the END of a long text, 160 chars);
+    IslandBridge forwards MessageAdded of the assistant, cancels the hide timer while she speaks
+    (State.SPEAKING) and hides the text 1.5 s after the state leaves SPEAKING (also for replies
+    that are not spoken); 18 new tests with fake island and fake timers.
+  - Window (friday/island_qt.py, live-checked, no tests): the island expands in 0.35 s to 440 px,
+    the dot moves left, the text sits on the right, up to two lines (the END of a longer text
+    stays visible), font "Rubik" / "Segoe UI" 13 px, text colour from the theme, collapses back
+    to the dot after clear.
+  - Checked live: the user confirmed it works. Sizes (width 440, font 13, paddings, speed) are
+    left as they are; the user stopped here because of message limits.
+  - Next: replace the dot with something else (the user's wish); the text on/off option and the
+    attachment style in the settings; win11 island following the Windows accent; remove the
+    unused island_position / ISLAND_WIDTH from island_logic.py; clock / weather and the wavy
+    bottom from the user's reference picture are only an idea.
+
+- [~] Stage 25b-7: moving wavy bottom edge of the island (IN PROGRESS, not finished)
+  - Idea from the Island app (exuupery/island, closed source, only its README was read, no code
+    was taken): the bottom edge of the island is wavy and always moves, also in idle; a thin light
+    line follows the edge a little later. The user's screenshots showed a wavy edge with a thin
+    light line under it.
+  - Decisions (user): wave without sound first (variant A); the real microphone loudness through a
+    new stdin command "level <number>" is a separate later stage; her own voice stays out (variant B).
+  - Given in the chat (pasted by the user, result of pytest NOT reported yet):
+    friday/island_logic.py: WaveParams, WAVE_BY_STATE (amplitude, speed, spatial per state),
+    wave_params, wave_offset, edge_gap, ease_params, MAX_WAVE_AMPLITUDE, LINE_GAP, WAVE_PAD;
+    tests/test_island_wave.py; friday/island_qt.py: QTimer every 16 ms moves the phase, the window is
+    WAVE_PAD px taller, paintEvent draws the wavy edge and the light line (h = height - WAVE_PAD).
+  - BUG, found live by the user: after these edits the island became TRANSPARENT. Cause not found
+    yet. Not yet known: whether the whole island or only the body is see-through, whether the wave
+    itself is drawn. Things to check first: the paintEvent edit (h = self.height() - WAVE_PAD,
+    the fillPath of the body, the order of drawing), then revert step 2.6 only and see if the body
+    comes back, then the geometry change (setGeometry height + WAVE_PAD).
+  - Not checked: pytest result after the change (expect the old 1153 plus the new wave tests),
+    CPU load of the 16 ms timer (if high, use 33 ms), how the wave looks in each state.
+
+- [x] Stage 25b-7: moving wavy bottom edge of the island, done
+  - island_logic.py (WaveParams, WAVE_BY_STATE, wave_params, wave_offset, edge_gap, ease_params),
+    island_qt.py (16 ms timer, WAVE_PAD, paintEvent draws the wavy edge and the light line).
+  - The transparency bug is gone (checked live). The "level" channel (microphone loudness for the wave)
+    is still a separate later stage.
+
+- [x] Stage 26a: friday/text_reveal.py (pure logic: chunk_spans, reveal_end, progress_at, scroll_target, ease_toward)
+- [x] Stage 26b: event SpeechChunkStarted (text and duration of each spoken chunk); ui_bridge ignores it silently
+- [x] Stage 26c: the island reveals the answer text in step with her voice, 1238 tests
+  - IslandProcess: reveal / chunk / done channels (reveal_chunk, finish_reveal); IslandBridge computes
+    chunk spans and sends them; island_qt.py draws the revealed part (start_reveal, reveal_chunk, finish_reveal).
+  - Unspoken replies and texts over 2500 chars are shown at once; a chunk not found in the text is ignored;
+    when the state leaves SPEAKING the island gets "done" and shows the whole text, then hides it after 1.5 s.
+  - Checked live: words go with the voice, the island height does not jump.
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.
@@ -806,7 +923,10 @@
   in the other themes it stays 60 % and the slider only thins the page background over it.
 - Tray: the app now lives without a window; the only exit is the tray menu "Выйти". If the
   tray icon is not visible, it is under the hidden icons arrow of the taskbar.
+- Island: Qt in a separate process (stdin protocol: "state <name>", "quit"). The window has no
+  link to the app except the pipe. Blur under the island (like the win11 theme) is not done: Qt
+  does not give it, it would need the same Windows calls as win_backdrop.py.
 
 
 ## Next
-Candidates (ask the user): Island at the top edge of the screen while the window is hidden: 25b (small always-on-top frameless window with the state colour, centred at the top), 25c (appearing / disappearing, hover, what it shows, e.g. her answer while she speaks). Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

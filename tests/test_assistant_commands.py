@@ -86,7 +86,7 @@ def test_silent_command_is_shown_but_not_spoken():
     assert events == [
         StateChanged(State.THINKING),
         MessageAdded("user", "пауза"),
-        MessageAdded("assistant", "Поставила на паузу."),
+        MessageAdded("assistant", "Поставила на паузу.", spoken=False),
         StateChanged(State.IDLE),
     ]
 
