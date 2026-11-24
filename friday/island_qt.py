@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 import binascii
 import sys
+import os
 import time
 import threading
 
@@ -36,6 +37,10 @@ from friday.island_logic import (
     text_color_for,
     wave_offset,
     wave_params,
+    WAVE_EASE_RATE,
+    blend_factor,
+    smoothstep,
+    step_toward,
 )
 from friday.text_reveal import progress_at, reveal_end
 
@@ -54,7 +59,8 @@ MAX_PAYLOAD = 8000  # base64 characters accepted per text command
 PULSING = {"listening", "speaking"}
 WAVE_STEP = 3  # px between the points of the wavy edge
 WAVE_LAG = 0.5  # the light line follows the edge a little later (radians)
-WAVE_TICK_MS = 16
+WAVE_TICK_MS = 6  # about 165 frames per second
+EXPAND_SECONDS = 0.45  # how long the island takes to open or close
 
 
 def _lerp(a: float, b: float, t: float) -> float:
@@ -69,6 +75,7 @@ class IslandWidget(QWidget):
             | Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.Tool
             | Qt.WindowType.WindowDoesNotAcceptFocus
+            | Qt.WindowType.WindowTransparentForInput
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
@@ -91,6 +98,8 @@ class IslandWidget(QWidget):
             None  # start, end, seconds, t0
         )
         self._expand = 0.0
+        self._expand_target = 0.0
+        self._expand_p = 0.0  # linear progress 0..1; self._expand is its eased value
         self._target_h = CAP_H
         self._lines_h = 0
         self._full_h = 0
@@ -101,6 +110,12 @@ class IslandWidget(QWidget):
         self._font = QFont()
         self._font.setFamilies(["Rubik", "Segoe UI", "sans-serif"])
         self._font.setPixelSize(FONT_PX)
+        self._max_body_h = (
+            QFontMetrics(self._font).lineSpacing() * MAX_LINES + 2 * PAD_V
+        )
+        self._fps_on = os.environ.get("FRIDAY_ISLAND_FPS") == "1"
+        self._frames = 0
+        self._fps_t = time.monotonic()
 
         self._color_anim = QVariantAnimation(self)
         self._color_anim.setDuration(350)
@@ -116,22 +131,17 @@ class IslandWidget(QWidget):
         self._pulse_anim.setLoopCount(-1)
         self._pulse_anim.valueChanged.connect(self._on_pulse)
 
-        self._expand_anim = QVariantAnimation(self)
-        self._expand_anim.setDuration(350)
-        self._expand_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
-        self._expand_anim.valueChanged.connect(self._on_expand)
-        self._expand_anim.finished.connect(self._on_expand_finished)
-
         self._wave_timer = QTimer(self)
         self._wave_timer.setInterval(WAVE_TICK_MS)
+        self._wave_timer.setTimerType(Qt.TimerType.PreciseTimer)
         self._wave_timer.timeout.connect(self._on_wave_tick)
         self._wave_timer.start()
-        self._apply_geometry()
+        self._place()
 
     def set_screen(self, x: int, y: int, width: int) -> None:
         """Remember where the top edge of the screen is, to keep the island centred."""
         self._screen_x, self._screen_y, self._screen_w = x, y, width
-        self._apply_geometry()
+        self._place()
 
     def set_state(self, state: str) -> None:
         self._state = state
@@ -210,14 +220,18 @@ class IslandWidget(QWidget):
         self._target_h = max(CAP_H, self._lines_h + 2 * PAD_V)
 
     def _animate_expand(self, target: float) -> None:
-        self._expand_anim.stop()
-        self._expand_anim.setStartValue(self._expand)
-        self._expand_anim.setEndValue(target)
-        self._expand_anim.start()
+        self._expand_target = target
 
-    def _on_expand(self, value) -> None:
-        self._expand = float(value)
+    def _step_expand(self, dt: float) -> None:
+        if self._expand_p == self._expand_target:
+            return
+        self._expand_p = step_toward(
+            self._expand_p, self._expand_target, dt, EXPAND_SECONDS
+        )
+        self._expand = smoothstep(self._expand_p)
         self._apply_geometry()
+        if self._expand_p == self._expand_target:
+            self._on_expand_finished()
 
     def _on_expand_finished(self) -> None:
         if self._expand <= 0.0:
@@ -225,13 +239,15 @@ class IslandWidget(QWidget):
             self._reveal = False
             self._active = None
 
-    def _apply_geometry(self) -> None:
-        body_w = _lerp(CAP_W, EXP_W, self._expand)
-        height = _lerp(CAP_H, self._target_h, self._expand)
-        width = int(round(body_w + 2 * FLARE))
+    def _place(self) -> None:
+        """The window has a fixed size (the biggest the island can be); it never resizes."""
+        width = EXP_W + 2 * FLARE
+        height = max(CAP_H, self._max_body_h) + WAVE_PAD
         x = self._screen_x + (self._screen_w - width) // 2
-        self.setGeometry(x, self._screen_y, width, int(round(height)) + WAVE_PAD)
-        self.update()
+        self.setGeometry(x, self._screen_y, width, height)
+
+    def _apply_geometry(self) -> None:
+        self.update()  # the island is drawn inside the fixed window, only a repaint is needed
 
     def _on_color(self, value) -> None:
         self._color = QColor(value)
@@ -241,8 +257,10 @@ class IslandWidget(QWidget):
         now = time.monotonic()
         dt = min(now - self._last_tick, 0.1)
         self._last_tick = now
-        self._wave = ease_params(self._wave, wave_params(self._state), 0.06)
+        k = blend_factor(dt, WAVE_EASE_RATE)
+        self._wave = ease_params(self._wave, wave_params(self._state), k)
         self._phase += dt * self._wave.speed
+        self._step_expand(dt)
         self._update_reveal()
         self.update()
 
@@ -250,15 +268,27 @@ class IslandWidget(QWidget):
         self._pulse = float(value)
         self.update()
 
+    def _count_frame(self) -> None:
+        self._frames += 1
+        now = time.monotonic()
+        if now - self._fps_t >= 1.0:
+            print(f"island fps: {self._frames}", file=sys.stderr, flush=True)
+            self._frames = 0
+            self._fps_t = now
+
     def paintEvent(self, _event) -> None:
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        h = self.height() - WAVE_PAD
-        body_w = self.width() - 2 * FLARE
-        left, right = FLARE, FLARE + body_w
+        if self._fps_on:
+            self._count_frame()
+        t = self._expand
+        h = _lerp(CAP_H, self._target_h, t)
+        body_w = _lerp(CAP_W, EXP_W, t)
+        x0 = (self.width() - (body_w + 2 * FLARE)) / 2
+        left, right = x0 + FLARE, x0 + FLARE + body_w
         path = QPainterPath()
-        path.moveTo(0, 0)
+        path.moveTo(x0, 0)
         path.quadTo(left, 0, left, FLARE)
         path.lineTo(left, h - RADIUS)
         edge_x0, edge_x1 = left + RADIUS, right - RADIUS

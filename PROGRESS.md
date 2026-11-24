@@ -791,6 +791,21 @@
     when the state leaves SPEAKING the island gets "done" and shows the whole text, then hides it after 1.5 s.
   - Checked live: words go with the voice, the island height does not jump.
 
+- [~] Stage 27: smoother island (IN PROGRESS)
+  - 27a done (1243 tests): wave timer 6 ms (about 165 fps, monitor is 165 Hz) with Qt.PreciseTimer;
+    wave easing made frame-rate independent (island_logic.blend_factor, WAVE_EASE_RATE).
+  - 27b done (expected 1249 tests, the user said "ok"): island opening runs on the wave timer, not on
+    QVariantAnimation (island_logic.smoothstep, step_toward; EXPAND_SECONDS 0.45 in island_qt.py);
+    the window width is kept even so the centre does not jump by 1 px. The user: still looks like
+    less than 60 fps.
+  - 27c GIVEN, NOT CHECKED: fixed-size island window (never resized, the island is drawn inside it in
+    paintEvent, WindowTransparentForInput flag, _place() instead of _apply_geometry resizing) plus an fps
+    counter (env FRIDAY_ISLAND_FPS=1 prints "island fps: N" to stderr). Ask the user whether the edits
+    were applied, the pytest result (expect 1249) and how it looks. If the island is invisible or cut,
+    check _max_body_h in island_qt.py.
+  - Still to do: 27d the island width follows the text (max 440 px, max 2 lines, the user's limit);
+    27e every word fades in (alpha by progress, no jump).
+
 ## Notes
 - RTX 5050 (Blackwell) works with CTranslate2 4.9 once cuBLAS/cuDNN come from pip
   (nvidia-cublas-cu12, nvidia-cudnn-cu12); cuda_dlls.py registers their DLL dirs.

@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1238 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1249 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -47,6 +47,8 @@ Stage 25a done: tray icon (friday/tray.py, pystray + pillow) with the menu "От
 Stage 25b done: the top-edge island is a Qt (PySide6) window in its own process (friday/island_qt.py window, island_process.py control, island_bridge.py forwarding of state, theme and answer text, island_logic.py colours and clip_text); hangs from the top edge like a notch, colours follow the window theme, shows her answer (up to two lines) and hides it 1.5 s after she stops speaking; always visible for now. Next: replace the dot, island settings.
 Stage 25b-7 done (wavy edge of the island, transparency fixed). Stage 26 done: the island reveals the
 answer text in step with her voice (text_reveal.py, SpeechChunkStarted, reveal / chunk / done channels).
+Stage 27 in progress (smoother island), see PROGRESS.md. 25b-7 and 26 are done; if PROGRESS.md still shows
+25b-7 as in progress, fix it first.
 Next: see the Next section of PROGRESS.md.
 
 

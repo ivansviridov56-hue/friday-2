@@ -167,3 +167,31 @@ def ease_params(current: WaveParams, target: WaveParams, k: float) -> WaveParams
     if not 0.0 <= k <= 1.0:
         raise ValueError("k must be between 0 and 1")
     return WaveParams(*(c + (t - c) * k for c, t in zip(current, target)))
+
+
+WAVE_EASE_RATE = 3.9  # 1/s; about 6 % per frame at 62 fps, the old fixed step
+
+
+def blend_factor(dt: float, rate: float) -> float:
+    """Share (0..1) of the way to a target to move in `dt` seconds, whatever the frame rate."""
+    if dt <= 0 or rate <= 0:
+        return 0.0
+    return 1.0 - math.exp(-rate * dt)
+
+
+def smoothstep(p: float) -> float:
+    """Ease-in-out curve for a progress p; clamped to 0..1."""
+    p = min(max(p, 0.0), 1.0)
+    return p * p * (3.0 - 2.0 * p)
+
+
+def step_toward(current: float, target: float, dt: float, duration: float) -> float:
+    """Move `current` toward `target` at a constant speed: the whole way takes `duration` s."""
+    if duration <= 0:
+        return target
+    if dt <= 0:
+        return current
+    step = dt / duration
+    if target > current:
+        return min(current + step, target)
+    return max(current - step, target)
