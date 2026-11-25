@@ -14,6 +14,7 @@ from friday.accent_logic import accent_vars
 from friday.ui_events import (
     CirclesStyleChanged,
     CoverChanged,
+    IslandLookChanged,
     LevelChanged,
     MessageAdded,
     SpeechChunkStarted,
@@ -79,8 +80,8 @@ class UiBridge:
             return f"window.fridayUi.setTransparency({int(event.percent)})"
         if isinstance(event, WallpaperChanging):
             return "window.fridayUi.wallpaperChanging()"
-        if isinstance(event, SpeechChunkStarted):
-            return None  # only the island uses speech chunks
+        if isinstance(event, (SpeechChunkStarted, IslandLookChanged)):
+            return None  # only the island uses these events
         logger.warning("unknown UI event %r", event)
         return None
 

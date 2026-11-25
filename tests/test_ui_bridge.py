@@ -1,7 +1,8 @@
 import json
+import logging
 
 from friday.ui_bridge import UiBridge
-from friday.ui_events import MessageAdded, State, StateChanged
+from friday.ui_events import IslandLookChanged, MessageAdded, State, StateChanged
 
 
 def state_js(name):
@@ -55,3 +56,14 @@ def test_error_state_reaches_the_page():
     bridge.mark_ready()
     bridge.on_event(StateChanged(State.ERROR))
     assert scripts == [state_js("error")]
+
+
+def test_island_look_event_is_ignored_without_a_warning(caplog):
+    scripts = []
+    bridge = UiBridge(scripts.append)
+    with caplog.at_level(logging.WARNING, logger="friday.ui_bridge"):
+        bridge.on_event(IslandLookChanged("eyes"))
+        bridge.mark_ready()
+        bridge.on_event(IslandLookChanged("equalizer"))
+    assert scripts == []
+    assert caplog.records == []
