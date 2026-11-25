@@ -15,6 +15,9 @@ Shape = tuple[float, float, float, float, float]
 LOOKS = ("dot", "eyes", "equalizer", "blobs")
 DEFAULT_LOOK = "dot"
 
+# Looks drawn as soft spots (radial fade) instead of hard-edged rounded rectangles.
+SOFT_LOOKS = frozenset({"blobs"})
+
 # dot
 DOT_RADIUS = 5.0
 DOT_PULSE = 1.5
@@ -94,6 +97,11 @@ BLOB_PULSE_GROW = 0.35
 def look_or_default(name: str | None) -> str:
     """A known look name, or DEFAULT_LOOK for an empty or unknown one."""
     return name if name in LOOKS else DEFAULT_LOOK
+
+
+def is_soft_look(name: str | None) -> bool:
+    """True when the look is drawn with soft (faded) edges."""
+    return look_or_default(name) in SOFT_LOOKS
 
 
 def _dot(state: str, t: float, pulse: float) -> list[Shape]:

@@ -1,6 +1,6 @@
 import math
 
-from friday.island_looks import DEFAULT_LOOK, LOOKS, look_shapes
+from friday.island_looks import DEFAULT_LOOK, LOOKS, is_soft_look, look_shapes
 
 STATES = ("idle", "listening", "thinking", "speaking", "loading", "error")
 
@@ -50,3 +50,15 @@ def test_pulse_is_clamped():
     assert look_shapes("blobs", "speaking", 0.0, 5.0) == look_shapes(
         "blobs", "speaking", 0.0, 1.0
     )
+
+
+def test_only_blobs_is_soft():
+    assert is_soft_look("blobs")
+    for name in ("dot", "eyes", "equalizer"):
+        assert not is_soft_look(name)
+
+
+def test_unknown_or_empty_look_is_not_soft():
+    assert not is_soft_look(None)
+    assert not is_soft_look("")
+    assert not is_soft_look("nonsense")

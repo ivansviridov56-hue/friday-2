@@ -362,7 +362,7 @@ const CIRCLES_LABELS = {
   dots: "Точки",
 };
 
-const ISLAND_LABELS = { dot: "Точка", eyes: "Глаза", equalizer: "Эквалайзер" };
+const ISLAND_LABELS = { dot: "Точка", eyes: "Глаза", equalizer: "Эквалайзер", blobs: "Пятно" };
 
 const settingsPanel = document.getElementById("settings");
 const settingsButton = document.getElementById("btn-settings");

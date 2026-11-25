@@ -36,7 +36,8 @@ Item {
         Repeater {
             model: backend.iconCount
 
-            Rectangle {
+            Item {
+                id: blob
                 readonly property int base: index * 5
                 readonly property real sw: backend.iconData[base + 2] || 0
                 readonly property real sh: backend.iconData[base + 3] || 0
@@ -44,8 +45,39 @@ Item {
                 height: sh
                 x: (backend.iconData[base] || 0) - sw / 2
                 y: (backend.iconData[base + 1] || 0) - sh / 2
-                radius: backend.iconData[base + 4] || 0
-                color: backend.dotColor
+
+                Rectangle {
+                    anchors.fill: parent
+                    visible: !backend.iconSoft
+                    radius: backend.iconData[blob.base + 4] || 0
+                    color: backend.dotColor
+                }
+
+                Shape {
+                    anchors.fill: parent
+                    visible: backend.iconSoft
+                    preferredRendererType: Shape.GeometryRenderer
+
+                    ShapePath {
+                        strokeColor: "transparent"
+                        startX: 0
+                        startY: 0
+                        fillGradient: RadialGradient {
+                            centerX: blob.sw / 2
+                            centerY: blob.sh / 2
+                            centerRadius: blob.sw / 2
+                            focalX: blob.sw / 2
+                            focalY: blob.sh / 2
+                            GradientStop { position: 0.0; color: Qt.alpha(backend.dotColor, 0.9) }
+                            GradientStop { position: 0.55; color: Qt.alpha(backend.dotColor, 0.35) }
+                            GradientStop { position: 1.0; color: Qt.alpha(backend.dotColor, 0.0) }
+                        }
+                        PathLine { x: blob.sw; y: 0 }
+                        PathLine { x: blob.sw; y: blob.sh }
+                        PathLine { x: 0; y: blob.sh }
+                        PathLine { x: 0; y: 0 }
+                    }
+                }
             }
         }
     }

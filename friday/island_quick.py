@@ -42,6 +42,7 @@ from PySide6.QtGui import (
 from PySide6.QtQuick import QQuickView
 
 from friday.island_logic import WAVE_PAD
+from friday.island_looks import is_soft_look
 from friday.island_model import (
     CAP_H,
     EXP_W,
@@ -218,6 +219,10 @@ class IslandBackend(QObject):
     @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def iconData(self) -> list:  # noqa: N802
         return self._icon
+
+    @Property(bool, notify=changed)
+    def iconSoft(self) -> bool:  # noqa: N802
+        return is_soft_look(self._model.look)
 
     @Property(str, notify=changed)
     def markup(self) -> str:
