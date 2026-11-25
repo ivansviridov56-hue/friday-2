@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1293 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1318 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -50,8 +50,8 @@ answer text in step with her voice (text_reveal.py, SpeechChunkStarted, reveal /
 Stage 27 done (smoother island, fps counter FRIDAY_ISLAND_FPS=1). Stage 28 done: the island is a Qt Quick
 window (friday/island_quick.py, friday/ui/island.qml, island_model.py, island_shape.py), the old island_qt.py
 is removed; the jitter is gone (the layered-window hypothesis was right). The protocol (stdin) and
-island_process.py / island_bridge.py are unchanged. Postponed by the user.
-Next: ask the user (27e words fade in, island settings, see PROGRESS.md).
+island_process.py / island_bridge.py are unchanged. Postponed by the user. Stage 27e done: words fade in on the island (friday/word_fade.py, IslandModel.markup, StyledText in island.qml).
+Next: ask the user (island settings, replace the dot, see PROGRESS.md).
 Next: see the Next section of PROGRESS.md.
 
 

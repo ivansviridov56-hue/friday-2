@@ -831,6 +831,17 @@
   - 28d: friday/island_qt.py removed. The fps counter FRIDAY_ISLAND_FPS=1 still writes to
     data/island_fps.txt (now "island quick fps").
   - The probes island_web_probe.py, island_qtweb_probe.py, island_quick_probe.py are not committed.
+
+- [x] Stage 27e: every word fades in on the island, 1318 tests
+  - friday/word_fade.py (pure logic: spans (start, end, born), fade_alpha with a smooth start and end,
+    FADE_SECONDS 0.25, live_spans, build_markup: escaped StyledText with <font color> for the words that
+    are still fading); tests/test_word_fade.py (16), tests/test_island_fade.py (9).
+  - IslandModel.markup: the new part of the text is added as a span when the reveal moves on (and when
+    the reveal finishes, so the rest fades in too); the colour goes from the body colour to the text colour,
+    because the island body is opaque. Text shown at once has no fade.
+  - island_quick.py: property markup; island.qml: Text.StyledText with backend.markup.
+  - Checked live: words fade in smoothly, 2-3 words with different brightness in the tail, line breaks did not
+    change, no jitter, hide after 1.5 s as before.
     
 
 ## Notes
@@ -974,4 +985,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: 27e words fade in (now in island.qml / island_model.py), replace the dot, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
