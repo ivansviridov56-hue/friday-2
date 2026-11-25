@@ -860,8 +860,21 @@
   - Checked live: all three looks, the choice survives a restart, the island keeps its smoothness.
   - Open: the user will invent a third look of his own and describe it; the size, speed and amplitude of the
     eyes and the equalizer are constants at the top of island_looks.py.
-  - 29d: UiBridge ignores IslandLookChanged (only the island uses it), so the log no longer gets
-    "unknown UI event" on every look change; test in tests/test_ui_bridge.py.
+  - 29d: UiBridge ignores IslandLookChanged (only the island uses it), so the log has no "unknown UI event"
+    on every look change; test in tests/test_ui_bridge.py.
+  - The third look from "Open" is done as stage 30 (blobs).
+
+- [x] Stage 30: the "blobs" look of the island icon, 1408 tests
+  - friday/island_looks.py: look "blobs" (three soft circles drifting around the centre, speed and size per
+    state, grow with the voice pulse; constants BLOB_*), SOFT_LOOKS and is_soft_look(name) (which looks are
+    drawn with a faded edge); tests/test_island_blobs.py.
+  - island_quick.py: property iconSoft; island.qml: for a soft look each shape is a Shape with a
+    RadialGradient (centre 0.9, middle 0.35, edge 0 alpha of dotColor), other looks stay Rectangles.
+  - settings: the look is allowed through LOOKS in settings_store.py, the label "Пятно" is in ISLAND_LABELS
+    (app.js).
+  - Checked live: the look in the standalone island and in the app, chosen in the settings, survives a restart.
+  - The "TypeError: Cannot read property ... of null" lines on exit of the standalone island
+    (python -m friday.island_quick) are noise: backend disappears before QML stops reading it.
     
 
 ## Notes
@@ -1005,4 +1018,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: third island look (the user's own idea), island settings (text on/off, attachment style), win11 accent for the island, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), win11 accent for the island, a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

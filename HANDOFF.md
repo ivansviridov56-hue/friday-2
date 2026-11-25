@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1391 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1408 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -52,7 +52,8 @@ window (friday/island_quick.py, friday/ui/island.qml, island_model.py, island_sh
 is removed; the jitter is gone (the layered-window hypothesis was right). The protocol (stdin) and
 island_process.py / island_bridge.py are unchanged. Postponed by the user. Stage 27e done: words fade in on the island (friday/word_fade.py, IslandModel.markup, StyledText in island.qml).
 Stage 29 done: the island icon has three looks (dot, eyes, equalizer), chosen in the settings (friday/island_looks.py, island_look in data/settings.json).
-Next: ask the user (the third island look, island settings, see PROGRESS.md).
+Stage 30 done: the island icon has a fourth look "blobs" (soft spots, drawn with a radial gradient: SOFT_LOOKS / is_soft_look in friday/island_looks.py, iconSoft in friday/island_quick.py).
+Next: ask the user (island settings, see PROGRESS.md).
 Next: see the Next section of PROGRESS.md.
 
 
@@ -172,3 +173,6 @@ Next: see the Next section of PROGRESS.md.
   working transparency and frames matching the monitor rate; logic stays in Python and is tested, QML only draws.
 - Island icon (29, user): a choice of looks like the circles; eyes and equalizer first, a third look of the
   user's own comes later (he will describe it). The dot stays the default.
+- Island icon blobs (30, Claude on the user's "решай сам"): soft circles with a radial gradient, not a real
+  blur (a blur effect could bring the jitter of stage 28 back); one colour like the other looks, a
+  two-colour variant is possible later. The user checked it live and is happy.
