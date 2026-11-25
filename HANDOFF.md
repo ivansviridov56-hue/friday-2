@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1318 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1390 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -51,7 +51,8 @@ Stage 27 done (smoother island, fps counter FRIDAY_ISLAND_FPS=1). Stage 28 done:
 window (friday/island_quick.py, friday/ui/island.qml, island_model.py, island_shape.py), the old island_qt.py
 is removed; the jitter is gone (the layered-window hypothesis was right). The protocol (stdin) and
 island_process.py / island_bridge.py are unchanged. Postponed by the user. Stage 27e done: words fade in on the island (friday/word_fade.py, IslandModel.markup, StyledText in island.qml).
-Next: ask the user (island settings, replace the dot, see PROGRESS.md).
+Stage 29 done: the island icon has three looks (dot, eyes, equalizer), chosen in the settings (friday/island_looks.py, island_look in data/settings.json).
+Next: ask the user (the third island look, island settings, see PROGRESS.md).
 Next: see the Next section of PROGRESS.md.
 
 
@@ -169,3 +170,5 @@ Next: see the Next section of PROGRESS.md.
   ignored; the hide timer (1.5 s after SPEAKING ends) stays as it is.
 - Island on Qt Quick (28, user): moved from QWidget paintEvent to Qt Quick (QML Shape, D3D11, frame-synced) after a probe showed
   working transparency and frames matching the monitor rate; logic stays in Python and is tested, QML only draws.
+- Island icon (29, user): a choice of looks like the circles; eyes and equalizer first, a third look of the
+  user's own comes later (he will describe it). The dot stays the default.

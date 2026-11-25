@@ -842,6 +842,24 @@
   - island_quick.py: property markup; island.qml: Text.StyledText with backend.markup.
   - Checked live: words fade in smoothly, 2-3 words with different brightness in the tail, line breaks did not
     change, no jitter, hide after 1.5 s as before.
+
+- [x] Stage 29: looks of the island icon, chosen in the settings, 1390 tests
+  - 29a: friday/island_looks.py (pure logic: look_shapes(look, state, t, pulse) gives rounded rectangles
+    (cx, cy, w, h, radius) around the centre of the icon; looks: dot (the old circle, default), eyes (blink,
+    wide open while listening, look up and sway while thinking, grow with the voice while speaking),
+    equalizer (4 bars, still in idle, jumping while listening / speaking, a travelling wave while thinking);
+    LOOKS, DEFAULT_LOOK, look_or_default). A new look = one function + its name in LOOKS + a label in app.js.
+  - 29b: IslandModel.set_look / look / icon_shapes (icon time advances with the ticks, clamped like the
+    rest); island_quick.py: properties iconCount (changes only with the look) and iconData (flat list of
+    numbers, 5 per shape), stdin command "look <name>"; island.qml draws the shapes with a Repeater over
+    iconCount, so the frame does not recreate elements.
+  - 29c: IslandLookChanged event (remembered by the bus), settings key island_look (settings_store.CHOICES,
+    SettingsService.set_island_look, snapshot "island_looks"), WindowApi.set_island_look, IslandProcess.set_look,
+    IslandBridge forwards the event, a new section "Значок острова" in the settings panel (index.html, app.js).
+    The choice is saved in data/settings.json and applies at once.
+  - Checked live: all three looks, the choice survives a restart, the island keeps its smoothness.
+  - Open: the user will invent a third look of his own and describe it; the size, speed and amplitude of the
+    eyes and the equalizer are constants at the top of island_looks.py.
     
 
 ## Notes
@@ -985,4 +1003,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: third island look (the user's own idea), island settings (text on/off, attachment style), win11 accent for the island, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
