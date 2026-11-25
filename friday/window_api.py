@@ -64,6 +64,11 @@ class WindowApi:
             return False
         return self._settings.set_circles(name)
 
+    def set_island_look(self, name: object) -> bool:
+        if self._settings is None or not isinstance(name, str):
+            return False
+        return self._settings.set_island_look(name)
+
     def set_transparency(self, percent: object) -> bool:
         if self._settings is None or not _is_number(percent):
             return False

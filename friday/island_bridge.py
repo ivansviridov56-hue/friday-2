@@ -10,6 +10,7 @@ from typing import Any, Protocol
 from friday.island_logic import clip_text
 from friday.text_reveal import locate_chunk
 from friday.ui_events import (
+    IslandLookChanged,
     MessageAdded,
     SpeechChunkStarted,
     State,
@@ -35,6 +36,7 @@ def _squash(text: str) -> str:
 class StateShower(Protocol):
     def set_state(self, state: str) -> None: ...
     def set_theme(self, theme: str) -> None: ...
+    def set_look(self, look: str) -> None: ...
     def show_text(self, text: str) -> None: ...
     def clear_text(self) -> None: ...
     def start_reveal(self, text: str) -> None: ...
@@ -94,6 +96,8 @@ class IslandBridge:
                 self._island.finish_reveal()
         elif isinstance(event, ThemeChanged):
             self._island.set_theme(event.name)
+        elif isinstance(event, IslandLookChanged):
+            self._island.set_look(event.name)
         elif isinstance(event, MessageAdded) and event.role == "assistant":
             text = _squash(event.text)
             if not text:

@@ -55,6 +55,7 @@ def test_public_methods_are_the_whole_page_api():
         "set_theme",
         "set_transparency",
         "set_circles_style",
+        "set_island_look",
     }
 
 

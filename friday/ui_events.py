@@ -94,6 +94,13 @@ class TransparencyChanged:
     percent: int
 
 
+@dataclass(frozen=True)
+class IslandLookChanged:
+    """Look of the island icon (see friday/island_looks.py); remembered by the bus."""
+
+    name: str
+
+
 UiEvent = (
     StateChanged
     | MessageAdded
@@ -104,6 +111,7 @@ UiEvent = (
     | ThemeChanged
     | AccentChanged
     | TransparencyChanged
+    | IslandLookChanged
     | WallpaperChanging
 )
 Listener = Callable[[UiEvent], None]
@@ -124,6 +132,7 @@ class UiEventBus:
         self._last_theme: ThemeChanged | None = None
         self._last_accent: AccentChanged | None = None
         self._last_transparency: TransparencyChanged | None = None
+        self._last_island_look: IslandLookChanged | None = None
         self._lock = threading.Lock()
 
     def subscribe(self, listener: Listener) -> None:
@@ -134,6 +143,7 @@ class UiEventBus:
                 for e in (
                     self._last_theme,
                     self._last_transparency,
+                    self._last_island_look,
                     self._last_accent,
                     self._last_state,
                     self._last_cover,
@@ -163,6 +173,8 @@ class UiEventBus:
                 self._last_transparency = event
             elif isinstance(event, AccentChanged):
                 self._last_accent = event
+            elif isinstance(event, IslandLookChanged):
+                self._last_island_look = event
             listeners = list(self._listeners)
         for listener in listeners:
             self._deliver(listener, event)

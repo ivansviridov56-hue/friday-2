@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from friday.island_looks import LOOKS
 from friday.transparency import clean_percents
 from friday.circles_style import CIRCLE_STYLES
 from friday.theme import THEMES
@@ -18,7 +19,11 @@ log = logging.getLogger(__name__)
 DEFAULT_PATH = Path(__file__).resolve().parent.parent / "data" / "settings.json"
 
 # Every saved key and the values it may have. Anything else is dropped.
-CHOICES: dict[str, tuple[str, ...]] = {"theme": THEMES, "circles": CIRCLE_STYLES}
+CHOICES: dict[str, tuple[str, ...]] = {
+    "theme": THEMES,
+    "circles": CIRCLE_STYLES,
+    "island_look": LOOKS,
+}
 
 
 def _clean(raw: object) -> dict[str, Any]:

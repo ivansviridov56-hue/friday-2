@@ -49,7 +49,11 @@ def test_non_string_values_are_rejected():
     assert api.set_theme(5) is False
     assert api.set_theme(None) is False
     assert api.set_circles_style(["dots"]) is False
-    assert settings.snapshot()["current"] == {"theme": "classic", "circles": "classic"}
+    assert settings.snapshot()["current"] == {
+        "theme": "classic",
+        "circles": "classic",
+        "island_look": "dot",
+    }
 
 
 def test_set_without_service_returns_false():

@@ -7,6 +7,7 @@ import threading
 from collections.abc import Mapping
 from typing import Any, Callable, Protocol
 
+from friday.island_looks import DEFAULT_LOOK, LOOKS
 from friday.circles_style import CIRCLE_STYLES, parse_circles_style
 from friday.settings_store import CHOICES
 from friday.theme import THEMES, parse_theme
@@ -16,6 +17,7 @@ from friday.ui_events import (
     UiEvent,
     UiEventBus,
     TransparencyChanged,
+    IslandLookChanged,
 )
 from friday.transparency import clean_percents, parse_percent, percent_for
 
@@ -39,6 +41,7 @@ class SettingsService:
         self._values: dict[str, str] = {
             "theme": saved.get("theme") or parse_theme(env.get("THEME")),
             "circles": saved.get("circles") or parse_circles_style(env.get("CIRCLES")),
+            "island_look": saved.get("island_look") or DEFAULT_LOOK,
         }
         self._percents: dict[str, int] = clean_percents(saved.get("transparency"))
 
@@ -50,6 +53,7 @@ class SettingsService:
         self._bus.publish(CirclesStyleChanged(values["circles"]))
         self._bus.publish(ThemeChanged(values["theme"]))
         self._bus.publish(TransparencyChanged(percent))
+        self._bus.publish(IslandLookChanged(values["island_look"]))
 
     def set_theme(self, name: str) -> bool:
         if not self._set("theme", name, ThemeChanged):
@@ -74,6 +78,9 @@ class SettingsService:
     def set_circles(self, name: str) -> bool:
         return self._set("circles", name, CirclesStyleChanged)
 
+    def set_island_look(self, name: str) -> bool:
+        return self._set("island_look", name, IslandLookChanged)
+
     def snapshot(self) -> dict:
         """Current choices and the lists of allowed values, for the settings panel."""
         with self._lock:
@@ -83,6 +90,7 @@ class SettingsService:
             "current": current,
             "themes": list(THEMES),
             "circles": list(CIRCLE_STYLES),
+            "island_looks": list(LOOKS),
             "percents": percents,
         }
 

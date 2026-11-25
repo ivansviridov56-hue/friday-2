@@ -362,6 +362,8 @@ const CIRCLES_LABELS = {
   dots: "Точки",
 };
 
+const ISLAND_LABELS = { dot: "Точка", eyes: "Глаза", equalizer: "Эквалайзер" };
+
 const settingsPanel = document.getElementById("settings");
 const settingsButton = document.getElementById("btn-settings");
 let settingsData = null;
@@ -400,6 +402,8 @@ function renderSettings() {
                 settingsData.current.theme, "set_theme", "theme");
   renderOptions("opt-circles", settingsData.circles, CIRCLES_LABELS,
                 settingsData.current.circles, "set_circles_style", "circles");
+  renderOptions("opt-island", settingsData.island_looks || [], ISLAND_LABELS,
+                settingsData.current.island_look, "set_island_look", "island_look");
 }
 
 async function openSettings() {

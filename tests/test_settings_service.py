@@ -32,28 +32,40 @@ def make(data=None, env=None):
 
 def test_env_is_used_when_nothing_saved():
     service, _, _ = make(env={"THEME": "black", "CIRCLES": "dots"})
-    assert service.snapshot()["current"] == {"theme": "black", "circles": "dots"}
+    assert service.snapshot()["current"] == {
+        "theme": "black",
+        "circles": "dots",
+        "island_look": "dot",
+    }
 
 
 def test_saved_choice_wins_over_env():
     service, _, _ = make(
         data={"theme": "windows"}, env={"THEME": "black", "CIRCLES": "dots"}
     )
-    assert service.snapshot()["current"] == {"theme": "windows", "circles": "dots"}
+    assert service.snapshot()["current"] == {
+        "theme": "windows",
+        "circles": "dots",
+        "island_look": "dot",
+    }
 
 
 def test_unknown_env_gives_defaults():
     service, _, _ = make(env={"THEME": "pink", "CIRCLES": "sparkles"})
-    assert service.snapshot()["current"] == {"theme": "classic", "circles": "classic"}
+    assert service.snapshot()["current"] == {
+        "theme": "classic",
+        "circles": "classic",
+        "island_look": "dot",
+    }
 
 
-def test_publish_initial_sends_all_three():
+def test_publish_initial_sends_all_four():
     service, _, got = make(env={"THEME": "black", "CIRCLES": "blobs"})
     service.publish_initial()
     assert CirclesStyleChanged("blobs") in got
     assert ThemeChanged("black") in got
     assert TransparencyChanged(0) in got
-    assert len(got) == 3
+    assert len(got) == 4
 
 
 def test_set_theme_applies_and_saves():
@@ -77,7 +89,11 @@ def test_unknown_value_is_rejected():
     assert service.set_circles("sparkles") is False
     assert got == []
     assert store.saved == []
-    assert service.snapshot()["current"] == {"theme": "classic", "circles": "classic"}
+    assert service.snapshot()["current"] == {
+        "theme": "classic",
+        "circles": "classic",
+        "island_look": "dot",
+    }
 
 
 def test_save_failure_still_applies():

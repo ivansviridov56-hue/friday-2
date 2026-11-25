@@ -74,6 +74,10 @@ class IslandProcess:
         """Switch the colour theme. Ignored when the island is not running."""
         self._send_word("theme", theme)
 
+    def set_look(self, look: str) -> None:
+        """Switch the look of the icon (dot, eyes, equalizer). Ignored when not running."""
+        self._send_word("look", look)
+
     def show_text(self, text: str) -> None:
         """Show the answer text (sent as base64, never logged). Ignored when not running."""
         if not isinstance(text, str) or not text.strip():
