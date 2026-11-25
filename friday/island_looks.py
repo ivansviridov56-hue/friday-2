@@ -12,7 +12,7 @@ from typing import Callable
 
 Shape = tuple[float, float, float, float, float]
 
-LOOKS = ("dot", "eyes", "equalizer")
+LOOKS = ("dot", "eyes", "equalizer", "blobs")
 DEFAULT_LOOK = "dot"
 
 # dot
@@ -57,6 +57,38 @@ BAR_LEVEL = {  # (base level, swing) per state
 }
 BAR_LEVEL_DEFAULT = (0.12, 0.06)
 TRAVELLING = frozenset({"thinking", "loading"})
+
+
+# blobs (three soft spots drifting around the centre, like the circles look of the window)
+BLOB_RADIUS = (8.0, 9.5, 7.0)
+BLOB_PERIOD = (5.0, 7.0, 3.6)  # seconds per drift cycle
+BLOB_PHASE = (0.0, 2.1, 4.2)
+BLOB_DRIFT = {  # how far the spots wander from the centre, px
+    "idle": 3.0,
+    "listening": 4.5,
+    "thinking": 4.0,
+    "speaking": 4.0,
+    "loading": 4.0,
+    "error": 0.5,
+}
+BLOB_DRIFT_DEFAULT = 3.0
+BLOB_SPEED = {  # speed factor of the drift per state
+    "idle": 1.0,
+    "listening": 1.6,
+    "thinking": 2.6,
+    "speaking": 1.8,
+    "loading": 2.2,
+    "error": 0.0,
+}
+BLOB_SCALE = {  # size factor per state
+    "idle": 0.85,
+    "listening": 1.0,
+    "thinking": 0.9,
+    "speaking": 0.95,
+    "loading": 0.85,
+    "error": 0.5,
+}
+BLOB_PULSE_GROW = 0.35
 
 
 def look_or_default(name: str | None) -> str:
@@ -112,10 +144,26 @@ def _equalizer(state: str, t: float, pulse: float) -> list[Shape]:
     return shapes
 
 
+def _blobs(state: str, t: float, pulse: float) -> list[Shape]:
+    speed = BLOB_SPEED.get(state, 1.0)
+    drift = BLOB_DRIFT.get(state, BLOB_DRIFT_DEFAULT)
+    scale = BLOB_SCALE.get(state, 1.0)
+    scale *= 1.0 + BLOB_PULSE_GROW * min(max(pulse, 0.0), 1.0)
+    shapes: list[Shape] = []
+    for i in range(len(BLOB_RADIUS)):
+        angle = 2 * math.pi * t * speed / BLOB_PERIOD[i] + BLOB_PHASE[i]
+        x = drift * math.sin(angle)
+        y = drift * 0.7 * math.cos(angle * 0.77 + BLOB_PHASE[i])
+        r = BLOB_RADIUS[i] * scale
+        shapes.append((x, y, 2 * r, 2 * r, r))
+    return shapes
+
+
 _LOOK_FUNCTIONS: dict[str, Callable[[str, float, float], list[Shape]]] = {
     "dot": _dot,
     "eyes": _eyes,
     "equalizer": _equalizer,
+    "blobs": _blobs,
 }
 
 

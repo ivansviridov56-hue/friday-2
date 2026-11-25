@@ -21,7 +21,7 @@ def times():
 
 
 def test_the_known_looks():
-    assert set(LOOKS) == {"dot", "eyes", "equalizer"}
+    assert set(LOOKS) == {"dot", "eyes", "equalizer", "blobs"}
     assert DEFAULT_LOOK == "dot"
 
 
