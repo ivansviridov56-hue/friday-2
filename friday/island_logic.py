@@ -205,12 +205,17 @@ def target_body_width(
     return max(cap_w, min(exp_w, wanted))
 
 
-def ease_width(current: float, target: float, dt: float, rate: float) -> float:
-    """Move the width toward the target; independent of the frame rate."""
+def ease_width(
+    current: float, target: float, dt: float, rate: float, min_speed: float = 30.0
+) -> float:
+    """Move toward the target: fast at first, then at least min_speed px/s, so the tail does not crawl."""
     if dt <= 0:
         return current
-    new = current + (target - current) * (1 - math.exp(-rate * dt))
-    return target if abs(target - new) < 0.25 else new
+    distance = target - current
+    if abs(distance) < 0.5:
+        return target
+    step = max(abs(distance) * (1 - math.exp(-rate * dt)), min_speed * dt)
+    return current + math.copysign(min(step, abs(distance)), distance)
 
 
 def visible_lines_height(
