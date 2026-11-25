@@ -20,7 +20,7 @@ STOP_TIMEOUT = 3.0
 def _spawn() -> Any:
     flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
     return subprocess.Popen(
-        [sys.executable, "-m", "friday.island_qt"],
+        [sys.executable, "-m", "friday.island_quick"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True,
