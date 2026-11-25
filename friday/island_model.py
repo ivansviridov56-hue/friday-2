@@ -25,6 +25,7 @@ from friday.island_logic import (
     visible_lines_height,
     wave_params,
 )
+from friday.island_looks import DEFAULT_LOOK, Shape, look_or_default, look_shapes
 from friday.text_reveal import progress_at, reveal_end
 from friday.word_fade import Span, add_span, build_markup, live_spans
 
@@ -97,6 +98,8 @@ class IslandModel:
         self._width_key = -1
         self._spans: list[Span] = []
         self._now = 0.0
+        self._look = DEFAULT_LOOK
+        self._icon_t = 0.0
 
     # ---- what the window draws ----
     @property
@@ -167,6 +170,14 @@ class IslandModel:
     def _fade_color(self, alpha: float) -> str:
         return mix_hex(self._body, self._text_color, alpha)
 
+    @property
+    def look(self) -> str:
+        return self._look
+
+    @property
+    def icon_shapes(self) -> list[Shape]:
+        return look_shapes(self._look, self._state, self._icon_t, self.pulse)
+
     # ---- commands ----
     def set_state(self, state: str) -> None:
         was_pulsing = self._state in PULSING
@@ -182,6 +193,9 @@ class IslandModel:
         self._body = body_for(theme)
         self._text_color = text_color_for(theme)
         self.set_state(self._state)
+
+    def set_look(self, name: str) -> None:
+        self._look = look_or_default(name)
 
     def show_text(self, text: str) -> None:
         self._spans = []
@@ -239,6 +253,7 @@ class IslandModel:
         )
         self._phase += dt * self._wave.speed
         self._pulse_t += dt
+        self._icon_t += dt
         self._color_t = min(1.0, self._color_t + dt / COLOR_SECONDS)
         self._step_expand(dt)
         self._update_reveal(now)

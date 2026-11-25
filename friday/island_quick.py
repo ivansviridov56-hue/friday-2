@@ -77,6 +77,7 @@ class IslandBackend(QObject):
     """Holds the model; the page reads its properties after every frame."""
 
     changed = Signal()
+    iconCountChanged = Signal()  # noqa: N815
 
     def __init__(self, font: QFont) -> None:
         super().__init__()
@@ -93,6 +94,8 @@ class IslandBackend(QObject):
         self._height = math.ceil(max(CAP_H, line_h * MAX_LINES + 2 * PAD_V)) + WAVE_PAD
         self._outline: list[QPointF] = []
         self._line: list[QPointF] = []
+        self._icon: list[float] = []
+        self._icon_n = 0
         self._publish()
 
     def window_height(self) -> int:
@@ -103,6 +106,11 @@ class IslandBackend(QObject):
         args = (WINDOW_W, m.body_w, m.body_h, m.wave_amplitude, m.wave_spatial, m.phase)
         self._outline = [QPointF(x, y) for x, y in body_outline(*args)]
         self._line = [QPointF(x, y) for x, y in light_line(*args)]
+        shapes = m.icon_shapes
+        self._icon = [v for shape in shapes for v in shape]
+        if len(shapes) != self._icon_n:
+            self._icon_n = len(shapes)
+            self.iconCountChanged.emit()
         self.changed.emit()
 
     # ---- called by the page ----
@@ -117,6 +125,9 @@ class IslandBackend(QObject):
 
     def set_theme(self, theme: str) -> None:
         self._model.set_theme(theme)
+
+    def set_look(self, look: str) -> None:
+        self._model.set_look(look)
 
     def show_text(self, text: str) -> None:
         self._model.show_text(text)
@@ -200,6 +211,14 @@ class IslandBackend(QObject):
     def visibleText(self) -> str:  # noqa: N802
         return self._model.visible_text
 
+    @Property(int, notify=iconCountChanged)
+    def iconCount(self) -> int:  # noqa: N802
+        return self._icon_n
+
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
+    def iconData(self) -> list:  # noqa: N802
+        return self._icon
+
     @Property(str, notify=changed)
     def markup(self) -> str:
         return self._model.markup
@@ -226,6 +245,7 @@ class IslandBackend(QObject):
 class _Commands(QObject):
     state = Signal(str)
     theme = Signal(str)
+    look = Signal(str)
     text = Signal(str)
     clear = Signal()
     reveal = Signal(str)
@@ -253,6 +273,8 @@ def _read_stdin(commands: _Commands) -> None:
             commands.state.emit(arg)
         elif name == "theme" and arg:
             commands.theme.emit(arg)
+        elif name == "look" and arg:
+            commands.look.emit(arg)
         elif name in ("text", "reveal") and arg:
             text = _decode(arg)
             if text is not None:
@@ -329,6 +351,7 @@ def main() -> None:
     commands = _Commands()
     commands.state.connect(backend.set_state)
     commands.theme.connect(backend.set_theme)
+    commands.look.connect(backend.set_look)
     commands.text.connect(backend.show_text)
     commands.clear.connect(backend.clear_text)
     commands.reveal.connect(backend.start_reveal)

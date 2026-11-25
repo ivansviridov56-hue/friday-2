@@ -29,14 +29,25 @@ Item {
         }
     }
 
-    Rectangle {
-        readonly property real r: 5 + 1.5 * backend.pulse
-        width: 2 * r
-        height: 2 * r
-        radius: r
-        color: backend.dotColor
-        x: backend.dotX - r
-        y: backend.bodyH / 2 - r
+    Item {
+        x: backend.dotX
+        y: backend.bodyH / 2
+
+        Repeater {
+            model: backend.iconCount
+
+            Rectangle {
+                readonly property int base: index * 5
+                readonly property real sw: backend.iconData[base + 2] || 0
+                readonly property real sh: backend.iconData[base + 3] || 0
+                width: sw
+                height: sh
+                x: (backend.iconData[base] || 0) - sw / 2
+                y: (backend.iconData[base + 1] || 0) - sh / 2
+                radius: backend.iconData[base + 4] || 0
+                color: backend.dotColor
+            }
+        }
     }
 
     Item {
