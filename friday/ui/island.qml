@@ -51,11 +51,11 @@ Item {
             y: -backend.scroll
             width: backend.wrapW
             wrapMode: Text.WordWrap
-            textFormat: Text.PlainText
+            textFormat: Text.StyledText
             color: backend.textColor
             font.pixelSize: 13
             font.family: backend.fontFamily
-            text: backend.visibleText
+            text: backend.markup
         }
     }
 }

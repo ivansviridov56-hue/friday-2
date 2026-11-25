@@ -26,6 +26,7 @@ from friday.island_logic import (
     wave_params,
 )
 from friday.text_reveal import progress_at, reveal_end
+from friday.word_fade import Span, add_span, build_markup, live_spans
 
 Measure = Callable[[str], tuple[float, float]]
 
@@ -94,6 +95,8 @@ class IslandModel:
         self._scroll = 0.0
         self._target_scroll = 0.0
         self._width_key = -1
+        self._spans: list[Span] = []
+        self._now = 0.0
 
     # ---- what the window draws ----
     @property
@@ -157,6 +160,13 @@ class IslandModel:
             return 0.0
         return min(1.0, max(0.0, (self._expand - 0.5) * 2))
 
+    @property
+    def markup(self) -> str:
+        return build_markup(self.visible_text, self._spans, self._now, self._fade_color)
+
+    def _fade_color(self, alpha: float) -> str:
+        return mix_hex(self._body, self._text_color, alpha)
+
     # ---- commands ----
     def set_state(self, state: str) -> None:
         was_pulsing = self._state in PULSING
@@ -174,6 +184,7 @@ class IslandModel:
         self.set_state(self._state)
 
     def show_text(self, text: str) -> None:
+        self._spans = []
         self._reveal = False
         self._text = text
         self._width_key = -1
@@ -187,6 +198,7 @@ class IslandModel:
         self._expand_target = 0.0
 
     def start_reveal(self, text: str) -> None:
+        self._spans = []
         self._text = text
         self._reveal = True
         self._shown = 0
@@ -202,6 +214,7 @@ class IslandModel:
         self._expand_target = 1.0
 
     def reveal_chunk(self, start: int, end: int, seconds: float, now: float) -> None:
+        self._now = now
         if not self._reveal:
             return
         if self._active is not None:
@@ -215,10 +228,12 @@ class IslandModel:
             return
         self._reveal = False
         self._active = None
+        self._spans = add_span(self._spans, self._shown, len(self._text), self._now)
         self._shown = len(self._text)
 
     def tick(self, dt: float, now: float) -> None:
         dt = min(max(dt, 0.0), MAX_TICK)
+        self._now = now
         self._wave = ease_params(
             self._wave, wave_params(self._state), blend_factor(dt, WAVE_EASE_RATE)
         )
@@ -227,6 +242,7 @@ class IslandModel:
         self._color_t = min(1.0, self._color_t + dt / COLOR_SECONDS)
         self._step_expand(dt)
         self._update_reveal(now)
+        self._spans = live_spans(self._spans, now)
         self._update_targets()
         self._open_w = ease_width(self._open_w, self._target_w, dt, WIDTH_EASE_RATE)
         self._open_lines_h = ease_width(
@@ -248,6 +264,7 @@ class IslandModel:
             self._forget_text()
 
     def _forget_text(self) -> None:
+        self._spans = []
         self._text = ""
         self._reveal = False
         self._active = None
@@ -268,6 +285,8 @@ class IslandModel:
             start, end, seconds, t0 = self._active
             progress = progress_at(now - t0, seconds)
             shown = max(shown, reveal_end(self._text, start, end, progress))
+        if shown > self._shown:
+            self._spans = add_span(self._spans, self._shown, shown, now)
         self._shown = shown
 
     def _update_targets(self) -> None:

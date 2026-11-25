@@ -201,6 +201,10 @@ class IslandBackend(QObject):
         return self._model.visible_text
 
     @Property(str, notify=changed)
+    def markup(self) -> str:
+        return self._model.markup
+
+    @Property(str, notify=changed)
     def dotColor(self) -> str:  # noqa: N802
         return self._model.dot_color
 
