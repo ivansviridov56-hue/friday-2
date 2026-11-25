@@ -843,7 +843,7 @@
   - Checked live: words fade in smoothly, 2-3 words with different brightness in the tail, line breaks did not
     change, no jitter, hide after 1.5 s as before.
 
-- [x] Stage 29: looks of the island icon, chosen in the settings, 1390 tests
+- [x] Stage 29: looks of the island icon, chosen in the settings, 1391 tests
   - 29a: friday/island_looks.py (pure logic: look_shapes(look, state, t, pulse) gives rounded rectangles
     (cx, cy, w, h, radius) around the centre of the icon; looks: dot (the old circle, default), eyes (blink,
     wide open while listening, look up and sway while thinking, grow with the voice while speaking),
@@ -860,6 +860,8 @@
   - Checked live: all three looks, the choice survives a restart, the island keeps its smoothness.
   - Open: the user will invent a third look of his own and describe it; the size, speed and amplitude of the
     eyes and the equalizer are constants at the top of island_looks.py.
+  - 29d: UiBridge ignores IslandLookChanged (only the island uses it), so the log no longer gets
+    "unknown UI event" on every look change; test in tests/test_ui_bridge.py.
     
 
 ## Notes
