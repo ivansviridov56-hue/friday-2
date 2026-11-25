@@ -789,7 +789,7 @@
     Qt window with per-pixel transparency on Windows is presented through UpdateLayeredWindow (CPU
     path, not tied to the monitor refresh), so frames may be dropped or uneven. Only variant B can
     check it: draw through OpenGL or Qt Quick with vertical sync; a big change, transparency and
-    edges would have to be re-checked (they broke once in 25b-7). Postponed by the user.
+    edges would have to be re-checked (they broke once in 25b-7). Postponed by the user. Fixed in stage 28.
     - Still to do: 27e every word fades in (alpha by progress, no jump). Postponed together with the
     smoothness work below.
 
@@ -808,7 +808,29 @@
     still NOT verified. Ideas for later, the user decides: variant B (OpenGL or Qt Quick with vertical
     sync; transparency and edges must be re-checked) and lighter drawing (the window is fixed at the
     biggest size and repainted 166 times a second on the CPU; repaint only the changed area, or lower
-    the tick when nothing moves, or a larger WAVE_STEP). Postponed by the user.
+    the tick when nothing moves, or a larger WAVE_STEP). Postponed by the user. Fixed in stage 28.
+
+- [x] Stage 28: the island is a Qt Quick window, 1293 tests
+  - Reason: the jitter of the island (KNOWN ISSUE in 27 / 27d) fits the layered-window hypothesis:
+    a per-pixel transparent QWidget on Windows is presented through UpdateLayeredWindow (CPU path).
+    The Qt Quick window draws through Direct3D11 with vertical sync, and the jitter is gone (checked
+    live by the user, also under the answer text and in idle).
+  - 28a: friday/island_model.py (IslandModel: wave, reveal, width, height, scroll, colour and pulse in
+    one class without Qt; text is measured by a callable from outside), island_logic.ease_width with a
+    minimum speed (the tail of the movement does not crawl); tests/test_island_ease.py, test_island_model.py.
+  - 28b: friday/island_shape.py (body_outline and light_line as lists of points, pure geometry; tests/
+    test_island_shape.py), friday/ui/island.qml (Shape + PathPolyline, FrameAnimation calls backend.frame),
+    friday/island_quick.py (the window and the stdin reader, same protocol as the old island: state, theme,
+    text, clear, reveal, chunk, done, quit; prints "ready"), tests/test_island_quick_assets.py (every
+    backend.* name used by the QML exists in Python).
+  - PySide6 6.12.0 has no font.families in QML: the font family is picked in Python (pick_family,
+    backend.fontFamily).
+  - 28c: IslandProcess starts friday.island_quick instead of friday.island_qt; island_bridge.py and the
+    protocol are unchanged. Checked live in the running app: shape, colours, themes, text reveal with the
+    voice, hide after 1.5 s, exit through the tray, all as with the old island, without the jitter.
+  - 28d: friday/island_qt.py removed. The fps counter FRIDAY_ISLAND_FPS=1 still writes to
+    data/island_fps.txt (now "island quick fps").
+  - The probes island_web_probe.py, island_qtweb_probe.py, island_quick_probe.py are not committed.
     
 
 ## Notes
@@ -952,4 +974,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next (island: 27e words fade in, the smoothness / optimization work with variant B, see KNOWN ISSUE in 27d). Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: 27e words fade in (now in island.qml / island_model.py), replace the dot, settings for the island (text on/off, attachment style), win11 accent. ... Island: replace the dot, settings for the island (text on/off, attachment style), win11 accent, then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
