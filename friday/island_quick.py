@@ -158,11 +158,11 @@ class IslandBackend(QObject):
     def wrapW(self) -> int:  # noqa: N802
         return WRAP_W
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def outline(self) -> list:
         return self._outline
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def lightLine(self) -> list:  # noqa: N802
         return self._line
 
