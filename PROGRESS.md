@@ -875,6 +875,28 @@
   - Checked live: the look in the standalone island and in the app, chosen in the settings, survives a restart.
   - The "TypeError: Cannot read property ... of null" lines on exit of the standalone island
     (python -m friday.island_quick) are noise: backend disappears before QML stops reading it.
+
+- My Wave by mood (stage 14, in progress). API route rejected: the API sets seeds of
+  a new-style wave (settingMoodEnergy:active|fun|calm|sad) but the desktop app ignores them.
+  UI route works, checked on Yandex Music 5.128.0, all by invoke(), no mouse:
+  * panel opens with the button "Настроить Мою волну" (it sits in the tree with size 0x0
+    even when scrolled away; it exists ONLY when no mood is selected);
+  * mood buttons "Бодрое/Весёлое/Спокойное/Грустное" (get_toggle_state 1 = selected); pressing
+    a selected one unselects it; choosing a mood starts the music by itself;
+  * the panel stays open after the choice ("Закрыть меню настроек" closes it);
+  * while a mood plays, a plate above the player is a Button named
+    "Сбросить <Настроение> и включить Мою волну" (4 copies in the tree, one visible): it
+    reads the current mood and invoke() resets it, music keeps playing, the settings
+    button returns. Pause changes nothing.
+  Done (stage 14, 1492 tests passed, checked by voice by the user):
+  * wave_request.parse_wave_mood, wave_mood.py (WaveMoodLauncher, MoodStatus);
+  * wave_mood_ui.py (UiaWaveMoodUi, built from the live-checked ym_mood_press_probe);
+  * wave_mood_handler.py (status -> spoken answer, never None for a recognized mood phrase);
+  * command chain: "wave_mood" is asked before "wave" (COMMAND_ORDER in command_chain.py).
+  * Bug found by tests: _poll returns the value that passed the check, and a cleared mood is None,
+    so the reset check now polls a lambda that returns "current_mood() is None".
+  Open: same mood on pause (reset and choose again, by design); not confirmed live yet.
+  Probes: ym_mood_press_probe (--open-any, --mood, --reset), ym_settings_ui_dump_probe.
     
 
 ## Notes
@@ -1018,4 +1040,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), win11 accent for the island, a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; wave by mood; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), win11 accent for the island, a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

@@ -18,7 +18,15 @@ def _all_silent() -> dict:
 
 
 def test_command_order_has_every_handler() -> None:
-    assert COMMAND_ORDER == ("memory", "screen", "wave", "play", "artist", "music")
+    assert COMMAND_ORDER == (
+        "memory",
+        "screen",
+        "wave_mood",
+        "wave",
+        "play",
+        "artist",
+        "music",
+    )
 
 
 def test_missing_handler_raises() -> None:
@@ -85,4 +93,8 @@ def test_answer_stops_the_chain() -> None:
     handlers["wave"] = wave
     chain = build_command_chain(handlers)
     assert chain("включи мою волну") is reply
-    assert asked == ["memory", "screen", "wave"]
+    assert asked == ["memory", "screen", "wave_mood", "wave"]
+
+
+def test_wave_mood_is_asked_before_plain_wave() -> None:
+    assert COMMAND_ORDER.index("wave_mood") < COMMAND_ORDER.index("wave")

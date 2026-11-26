@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1408 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1492 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -53,9 +53,9 @@ is removed; the jitter is gone (the layered-window hypothesis was right). The pr
 island_process.py / island_bridge.py are unchanged. Postponed by the user. Stage 27e done: words fade in on the island (friday/word_fade.py, IslandModel.markup, StyledText in island.qml).
 Stage 29 done: the island icon has three looks (dot, eyes, equalizer), chosen in the settings (friday/island_looks.py, island_look in data/settings.json).
 Stage 30 done: the island icon has a fourth look "blobs" (soft spots, drawn with a radial gradient: SOFT_LOOKS / is_soft_look in friday/island_looks.py, iconSoft in friday/island_quick.py).
-Next: ask the user (island settings, see PROGRESS.md).
-Next: see the Next section of PROGRESS.md.
-
+Stage 14 done: My Wave by mood ("включи мою спокойную волну": active / fun / calm / sad). Files:
+friday/wave_mood.py (logic), wave_mood_ui.py (UI Automation), wave_mood_handler.py (spoken answers);
+the handler "wave_mood" stands before "wave" in friday/command_chain.py. Checked by voice.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -176,3 +176,8 @@ Next: see the Next section of PROGRESS.md.
 - Island icon blobs (30, Claude on the user's "решай сам"): soft circles with a radial gradient, not a real
   blur (a blur effect could bring the jitter of stage 28 back); one colour like the other looks, a
   two-colour variant is possible later. The user checked it live and is happy.
+- My Wave by mood (14): a separate handler "wave_mood" before "wave" in the chain (variant A, chosen by
+  Claude on the user's "делай как лучше"); a phrase without a mood returns None and goes on to the
+  plain wave handler. Chain by state: other mood selected -> reset, open the panel, press the mood,
+  check the button state and playback, close the panel. The same mood while playing -> "already
+  playing"; the same mood on pause -> reset and choose again.
