@@ -2,9 +2,10 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-13 done). It already works as a voice
-chat that can also control Yandex Music: hold the mouse side button X2, speak,
-hear the answer. Not a finished product yet.
+**Status:** early development (stages 0-31 done). It already works as a voice
+chat with a desktop window: hold the mouse side button X2 (or say "Пятница"),
+speak, hear the answer. It can also control Yandex Music, remember facts and
+describe the screen. Not a finished product yet.
 
 ## Goals
 
@@ -15,20 +16,25 @@ hear the answer. Not a finished product yet.
 ## Current features
 
 - Push-to-talk on the mouse side button X2
+- Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
+- Text input in the window: a typed phrase works like a spoken one, commands included
 - Speech recognition on the GPU (faster-whisper)
 - Cloud LLM with a fallback chain of free providers
 - Spoken answers: local Silero voice by default, Edge TTS as an option (`TTS_ENGINE=edge` in `.env`)
 - Short dialogue memory
-- Desktop window (PyWebView) with the chat and a state indicator
+- Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
 - Yandex Music control by voice (pause, play, next, previous, what's playing)
 - Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
 - Start My Wave in Yandex Music by voice: "включи мою волну" (works when the app is closed or minimized; if it is open on another page, open My Wave first)
-- Long-term memory by voice: "запомни, что ...", "что ты обо мне помнишь", "забудь про ..."
+- My Wave by mood: "включи мою спокойную волну" (active, fun, calm, sad)
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
-- Wake word (optional): say "Пятница, ..." instead of holding X2 (`WAKE_WORD=1` in `.env`, off by default)
-- Switchable look of the background circles (`CIRCLES=classic|blobs|equalizer|dots` in `.env`)
-- Colour themes of the window (`THEME=classic|windows|black` in `.env`)
-- Settings panel in the window (gear in the header): colour theme and the look of the background circles, saved between runs
+- Frameless desktop window (PyWebView) with the chat, a state indicator and the cover of the current Yandex Music track
+- Colour themes: classic, windows, black and win11 (a real blurred window background, the accent follows Windows)
+- Window transparency slider, kept separately for each theme
+- Switchable look of the background circles (classic, blobs, equalizer, dots)
+- Settings panel (gear in the header): theme, transparency, circles look and island icon, saved between runs (`THEME` and `CIRCLES` in `.env` are only the starting values)
+- Tray icon: closing the window hides it to the tray, voice keeps working; exit through the tray menu
+- Island at the top edge of the screen: shows her state and reveals the answer word by word in step with her voice; four icon looks (dot, eyes, equalizer, blobs)
 
 ## Privacy
 
@@ -62,7 +68,8 @@ Copy `.env.example` to `.env` and fill it in, then:
 
     python -m friday.voice
 
-Hold the mouse side button X2 and speak. Close the window to exit.
+Hold the mouse side button X2 and speak, or type in the window. Closing the
+window only hides it to the tray; to exit, choose "Выйти" in the tray icon menu.
 Speech recognition needs an NVIDIA GPU (tested on an RTX 5050).
 
 Русская версия: [README.ru.md](README.ru.md). License: MIT.

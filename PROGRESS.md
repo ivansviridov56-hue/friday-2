@@ -913,6 +913,9 @@
     wallpaper only with Settings -> Colours -> Accent colour = "Automatic".
   - Checked live: idle and loading in the accent, smooth change with the wallpaper, active states as before,
     classic / black unchanged, all four icon looks follow the accent.
+
+- [x] README (en, ru) updated: status 0-31, full feature list (text input, My Wave by mood, themes with win11,
+  transparency, settings, tray, island), exit through the tray menu.
     
 
 ## Notes
