@@ -897,6 +897,22 @@
     so the reset check now polls a lambda that returns "current_mood() is None".
   Open: same mood on pause (reset and choose again, by design); not confirmed live yet.
   Probes: ym_mood_press_probe (--open-any, --mood, --reset), ym_settings_ui_dump_probe.
+
+- [x] Stage 31: the island icon follows the Windows accent in the win11 theme, 1525 tests
+  - friday/island_logic.py: color_for(state, theme, accent=None), is_hex_color, ACCENT_THEME, ACCENT_STATES;
+    in the win11 theme the states "loading" and "idle" take the accent (both had the same colour, so the
+    switch from loading to idle does not jump); listening / thinking / speaking / error keep their colours;
+    other themes ignore the accent; a bad accent value is ignored; tests/test_island_accent.py.
+  - Wiring: IslandBridge forwards AccentChanged (the remembered one too) -> IslandProcess.set_accent sends
+    "accent <#rrggbb>" on the same stdin channel as theme and state (bad values are not sent) ->
+    island_quick.py -> IslandModel.set_accent (the colour fades in 0.35 s like a state change; the order of
+    accent and theme does not matter); tests/test_island_accent_wiring.py.
+  - Test note: IslandModel.tick caps one step at MAX_TICK (0.1 s), so a test must tick several times to
+    finish a fade (one tick(1.0) stops at about 20 % of the colour change).
+  - Found live: the accent did not change at first because Windows had a fixed accent; it follows the
+    wallpaper only with Settings -> Colours -> Accent colour = "Automatic".
+  - Checked live: idle and loading in the accent, smooth change with the wallpaper, active states as before,
+    classic / black unchanged, all four icon looks follow the accent.
     
 
 ## Notes
@@ -1040,4 +1056,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), win11 accent for the island, a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

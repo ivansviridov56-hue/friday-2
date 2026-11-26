@@ -72,6 +72,7 @@ class IslandModel:
         self._line_h = float(line_height)
         self._state = "idle"
         self._theme = DEFAULT_THEME
+        self._accent: str | None = None
         start = color_for("idle", DEFAULT_THEME)
         self._color_from = start
         self._color_to = start
@@ -182,7 +183,7 @@ class IslandModel:
     def set_state(self, state: str) -> None:
         was_pulsing = self._state in PULSING
         self._color_from = self.dot_color
-        self._color_to = color_for(state, self._theme)
+        self._color_to = color_for(state, self._theme, self._accent)
         self._color_t = 0.0
         self._state = state
         if state in PULSING and not was_pulsing:
@@ -192,6 +193,11 @@ class IslandModel:
         self._theme = theme
         self._body = body_for(theme)
         self._text_color = text_color_for(theme)
+        self.set_state(self._state)
+
+    def set_accent(self, accent: str) -> None:
+        """Windows accent colour; only the win11 theme uses it (see color_for)."""
+        self._accent = accent
         self.set_state(self._state)
 
     def set_look(self, name: str) -> None:

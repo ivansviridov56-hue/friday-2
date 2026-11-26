@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1492 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1525 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -56,6 +56,7 @@ Stage 30 done: the island icon has a fourth look "blobs" (soft spots, drawn with
 Stage 14 done: My Wave by mood ("включи мою спокойную волну": active / fun / calm / sad). Files:
 friday/wave_mood.py (logic), wave_mood_ui.py (UI Automation), wave_mood_handler.py (spoken answers);
 the handler "wave_mood" stands before "wave" in friday/command_chain.py. Checked by voice.
+Stage 31 done: in the win11 theme the island icon (idle and loading) follows the Windows accent (color_for with accent in friday/island_logic.py, command "accent" on the island stdin channel).
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -181,3 +182,4 @@ the handler "wave_mood" stands before "wave" in friday/command_chain.py. Checked
   plain wave handler. Chain by state: other mood selected -> reset, open the panel, press the mood,
   check the button state and playback, close the panel. The same mood while playing -> "already
   playing"; the same mood on pause -> reset and choose again.
+- Island accent (31): only the icon in idle and loading takes the Windows accent, other states keep their colours, like in the window (variant A, chosen by the user); loading was added by Claude so the start does not jump. Only the win11 theme.

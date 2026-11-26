@@ -127,6 +127,9 @@ class IslandBackend(QObject):
     def set_theme(self, theme: str) -> None:
         self._model.set_theme(theme)
 
+    def set_accent(self, accent: str) -> None:
+        self._model.set_accent(accent)
+
     def set_look(self, look: str) -> None:
         self._model.set_look(look)
 
@@ -250,6 +253,7 @@ class IslandBackend(QObject):
 class _Commands(QObject):
     state = Signal(str)
     theme = Signal(str)
+    accent = Signal(str)
     look = Signal(str)
     text = Signal(str)
     clear = Signal()
@@ -278,6 +282,8 @@ def _read_stdin(commands: _Commands) -> None:
             commands.state.emit(arg)
         elif name == "theme" and arg:
             commands.theme.emit(arg)
+        elif name == "accent" and arg:
+            commands.accent.emit(arg)
         elif name == "look" and arg:
             commands.look.emit(arg)
         elif name in ("text", "reveal") and arg:
@@ -356,6 +362,7 @@ def main() -> None:
     commands = _Commands()
     commands.state.connect(backend.set_state)
     commands.theme.connect(backend.set_theme)
+    commands.accent.connect(backend.set_accent)
     commands.look.connect(backend.set_look)
     commands.text.connect(backend.show_text)
     commands.clear.connect(backend.clear_text)

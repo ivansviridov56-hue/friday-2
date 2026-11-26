@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import math
+import re
 from typing import NamedTuple
 
 ISLAND_WIDTH = 120
@@ -76,8 +77,28 @@ def island_position(
     return max(0, (screen_width - width) // 2), top_margin
 
 
-def color_for(state: str, theme: str = DEFAULT_THEME) -> str:
-    """Colour of a state in a theme; unknown theme or state falls back to the defaults."""
+ACCENT_THEME = "win11"
+ACCENT_STATES = frozenset({"loading", "idle"})
+_HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
+
+
+def is_hex_color(value: str | None) -> bool:
+    """True for '#rrggbb'; used to check the accent that arrives through the pipe."""
+    return bool(value) and _HEX_COLOR.fullmatch(value) is not None
+
+
+def color_for(state: str, theme: str = DEFAULT_THEME, accent: str | None = None) -> str:
+    """Colour of a state in a theme; unknown theme or state falls back to the defaults.
+
+    In the win11 theme the calm states (loading, idle) take the Windows accent, if it is given.
+    """
+    if (
+        accent is not None
+        and theme == ACCENT_THEME
+        and state in ACCENT_STATES
+        and is_hex_color(accent)
+    ):
+        return accent.lower()
     colors = STATE_COLORS_BY_THEME.get(theme, STATE_COLORS)
     return colors.get(state, DEFAULT_COLOR)
 

@@ -74,6 +74,10 @@ class IslandProcess:
         """Switch the colour theme. Ignored when the island is not running."""
         self._send_word("theme", theme)
 
+    def set_accent(self, accent: str) -> None:
+        """Send the Windows accent ('#rrggbb'). Ignored when the island is not running."""
+        self._send_word("accent", accent)
+
     def set_look(self, look: str) -> None:
         """Switch the look of the icon (dot, eyes, equalizer). Ignored when not running."""
         self._send_word("look", look)
