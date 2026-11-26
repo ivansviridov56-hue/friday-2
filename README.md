@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-31 done). It already works as a voice
+**Status:** early development (stages 0-32 done). It already works as a voice
 chat with a desktop window: hold the mouse side button X2 (or say "Пятница"),
 speak, hear the answer. It can also control Yandex Music, remember facts and
 describe the screen. Not a finished product yet.
@@ -27,6 +27,7 @@ describe the screen. Not a finished product yet.
 - Play a song or a whole artist in Yandex Music by name (needs `YM_TOKEN` in `.env`)
 - Start My Wave in Yandex Music by voice: "включи мою волну" (works when the app is closed or minimized; if it is open on another page, open My Wave first)
 - My Wave by mood: "включи мою спокойную волну" (active, fun, calm, sad)
+- Start a My Wave card by its title: "включи волну <название>" (open My Wave in the app first)
 - Describe the screen by voice: "что на экране" (the screenshot is sent to a cloud vision model)
 - Frameless desktop window (PyWebView) with the chat, a state indicator and the cover of the current Yandex Music track
 - Colour themes: classic, windows, black and win11 (a real blurred window background, the accent follows Windows)

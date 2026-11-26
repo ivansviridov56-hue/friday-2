@@ -15,6 +15,7 @@ COMMAND_ORDER = (
     "memory",
     "screen",
     "wave_mood",
+    "wave_card",
     "wave",
     "play",
     "artist",

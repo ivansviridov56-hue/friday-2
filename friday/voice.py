@@ -31,6 +31,8 @@ from friday.screen_capture import capture_screen
 from friday.screen_handler import make_screen_handler
 from friday.vision import build_vision_client, describe
 from friday.wave_handler import make_wave_handler
+from friday.wave_card_handler import make_wave_card_handler
+from friday.wave_card_ui import build_launcher as build_wave_card_launcher
 from friday.wave_mood_handler import make_wave_mood_handler
 from friday.wave_mood_ui import build_launcher as build_wave_mood_launcher
 from friday.wave_ui import build_launcher as build_wave_launcher
@@ -144,6 +146,7 @@ def _start_assistant(
                         announce=speak,
                     ),
                     "wave_mood": make_wave_mood_handler(build_wave_mood_launcher()),
+                    "wave_card": make_wave_card_handler(build_wave_card_launcher()),
                     "wave": make_wave_handler(build_wave_launcher()),
                     "play": make_play_handler(TrackSearch(token), build_launcher()),
                     "artist": make_artist_handler(

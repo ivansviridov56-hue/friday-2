@@ -876,7 +876,7 @@
   - The "TypeError: Cannot read property ... of null" lines on exit of the standalone island
     (python -m friday.island_quick) are noise: backend disappears before QML stops reading it.
 
-- My Wave by mood (stage 14, in progress). API route rejected: the API sets seeds of
+- My Wave by mood (stage 14, done). API route rejected: the API sets seeds of
   a new-style wave (settingMoodEnergy:active|fun|calm|sad) but the desktop app ignores them.
   UI route works, checked on Yandex Music 5.128.0, all by invoke(), no mouse:
   * panel opens with the button "Настроить Мою волну" (it sits in the tree with size 0x0
@@ -916,6 +916,26 @@
 
 - [x] README (en, ru) updated: status 0-31, full feature list (text input, My Wave by mood, themes with win11,
   transparency, settings, tray, island), exit through the tray menu.
+
+- [x] Stage 32: start a My Wave card by its title ("включи волну русский поп-рок"), 1599 tests,
+  checked by voice
+  - friday/wave_cards.py (card names, request parsing, best match), wave_card_launcher.py,
+    wave_card_ui.py (UI Automation, invoke() only), wave_card_handler.py; handler "wave_card"
+    stands between "wave_mood" and "wave" in COMMAND_ORDER.
+  - Cards are Group / Button controls anywhere in the window with a name starting "Моя волна"
+    (there are non-breaking spaces). A card can have several copies; only the one with a non-zero
+    size is in view. invoke() on a hidden copy only scrolls the carousel, so it is pressed again
+    once visible (checked live). The card set changes, so it is read on every command.
+  - A song / band / album marker BEFORE the wave word is not a card request
+    ("включи песню морская волна").
+  - Overlap with the plain wave: if nothing was pressed (no window, no cards, no match) and the
+    phrase is also a plain wave request, the handler returns None and the plain wave takes over.
+  - Probe kept: ym_wave_cards_scan_probe (read-only).
+  - Postponed: 32d, a fallback through search when the card is not in the carousel.
+  - Open: it is sometimes a bit slower than usual (not measured; each UI call walks the window
+    twice). is_playing is a weak confirmation when music was already playing. The very first read
+    of the cards once returned an empty list. The card launcher does not start a closed Yandex
+    Music.
     
 
 ## Notes
@@ -1059,4 +1079,4 @@
 
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

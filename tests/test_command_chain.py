@@ -22,6 +22,7 @@ def test_command_order_has_every_handler() -> None:
         "memory",
         "screen",
         "wave_mood",
+        "wave_card",
         "wave",
         "play",
         "artist",
@@ -93,8 +94,13 @@ def test_answer_stops_the_chain() -> None:
     handlers["wave"] = wave
     chain = build_command_chain(handlers)
     assert chain("включи мою волну") is reply
-    assert asked == ["memory", "screen", "wave_mood", "wave"]
+    assert asked == ["memory", "screen", "wave_mood", "wave_card", "wave"]
 
 
 def test_wave_mood_is_asked_before_plain_wave() -> None:
     assert COMMAND_ORDER.index("wave_mood") < COMMAND_ORDER.index("wave")
+
+
+def test_wave_card_is_between_mood_and_plain_wave() -> None:
+    order = COMMAND_ORDER.index
+    assert order("wave_mood") < order("wave_card") < order("wave")
