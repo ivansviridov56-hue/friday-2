@@ -1042,7 +1042,7 @@
   then the wave is already playing (ALREADY_PLAYING).
 - Yandex Music gives its cover through SMTC as a 150x150 PNG (about 52 KB), also while paused. The cover is read only when the track (title + artist) changes. Animations of the circle are postponed by the user.
 - Circles: the equalizer and dots are drawn at the right edge of the window (cx = width - 30). Loudness reaches them only in the LISTENING state; her own voice does not move them yet. The blobs look uses blur(48px) on big shapes: watch for lag on weaker machines.
-- Known small issue (postponed by the user): the window jitters slightly when it appears at start. Idea for later: smooth fade-in or a start animation of the window.
+- The window jitter at start (postponed earlier) is solved in stage 33.
 - Themes: the idle colours of the circles come from --idle-1/2/3 of the theme; the other states set --c1/--c2/--c3 per state (per theme in themes/*.css). The same THEME / CIRCLES pair will move into an in-app settings screen later.
 - Settings: only theme and circles look for now; new options go into CHOICES in settings_store.py, the service and the panel. The blobs look is very bright in the black theme (screen blending of a light grey): to be softened when the looks are tuned.
 - Backdrop: Mica and Acrylic (DwmSetWindowAttribute) turn flat when the window is inactive and
@@ -1078,5 +1078,26 @@
   also works. The file grows on every run: delete it when it is not needed.
 
 
+## Stage 33: smooth window appearance (done, checked live)
+- The page fades in once the theme arrives (opacity instead of visibility, tests/test_ui_fade_in.py).
+- At start the window is DWM-cloaked in before_show and revealed when the page, the theme and the
+  backdrop are ready (friday/window_reveal.py, friday/win_cloak.py). Safety timeout 8 s; the tray
+  "Открыть" reveals at once; if cloaking fails, the window opens as before.
+- The whole window (blur included) fades in at start and from the tray, and fades out on X / Alt+F4
+  (friday/window_fade.py, friday/win_fade.py, 0.35 s, WinForms Opacity).
+- show() / hide() of the fade return at once: the closing event runs while the interface thread waits,
+  and changing the opacity needs that thread. Never wait for an animation there.
+- pywebview 6.2.1: hidden=True does not work with transparent=True (on_navigation_start calls
+  form.Show()), hence the cloak. The taskbar icon appears before the window (left so by the user).
+- In progress next: Windows-like minimize. Probes with changed window styles (not committed):
+  WS_MINIMIZEBOX|WS_SYSMENU gave taskbar-click minimize without animation; adding WS_CAPTION gave the
+  animation but showed a frame and lost the blur, also with WM_NCCALCSIZE handled (the frame showed
+  and then was no longer visible, no blur). Header drag failed with changed styles and works without.
+  The cause is not established. Next try (chosen by the user): add the style only for the time of
+  minimize / restore. If it fails, offer an own animation based on the fade.
+- Open: the black tint is #0E0E0E in backdrop_logic.py, while the older notes say #010101; ask the
+  user whether this was on purpose.
+
+
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); smooth appearance of the window (it jitters slightly at start); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: finish the Windows-like minimize (see stage 33). Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

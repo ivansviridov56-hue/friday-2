@@ -367,7 +367,9 @@ body.state-idle, body.state-loading { --c1: var(--idle-1); --c2: var(--idle-2); 
 
 /* Until the theme is chosen the page stays hidden on a neutral background, so there is no colour flash at start. */
 :root:not([data-theme]) { --bg: #14161a; }
-:root:not([data-theme]) body { visibility: hidden; }
+:root:not([data-theme]) body { opacity: 0; }
+body { transition: opacity 0.5s ease; }
+
 
 
 /* Settings panel: slides in from the right, uses the theme variables. */

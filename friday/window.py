@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 
 from friday.window_lifecycle import WindowLifecycle
+from friday.window_fade import WindowFade
+from friday.window_reveal import WindowReveal
 from friday.backdrop_tint import BackdropTint
 from friday.text_input import TextInput
 from friday.window_api import WindowApi
@@ -41,6 +43,8 @@ def run_window(
     """Show the window and block until it is closed. Must run on the main thread."""
     import webview
     from friday.win_backdrop import Backdrop
+    from friday.win_cloak import WindowCloak
+    from friday.win_fade import FormOpacity
 
     window = webview.create_window(
         TITLE,
@@ -61,12 +65,24 @@ def run_window(
             lifecycle.hide if lifecycle is not None else window.destroy,
             window.resize,
         )
+    cloak = WindowCloak(window)
+    fade = WindowFade(FormOpacity(window), window.show, window.hide)
+    reveal = WindowReveal(lambda: fade.appear(cloak.uncloak))
+
+    def on_before_show() -> None:
+        reveal.arm(cloak.cloak())
+
+    def show_window() -> None:
+        reveal.reveal()  # the tray "open" must work even before the window is ready
+        fade.show()
+
+    window.events.before_show += on_before_show
     if lifecycle is not None:
-        lifecycle.bind(window.show, window.hide, window.destroy)
+        lifecycle.bind(show_window, fade.hide, window.destroy)
         window.events.closing += lifecycle.on_closing
     bridge = UiBridge(window.evaluate_js)
     bus.subscribe(bridge.on_event)
-    backdrop = Backdrop(window, TITLE)
+    backdrop = Backdrop(window, TITLE, on_ready=reveal.ready)
     tint = BackdropTint(backdrop.set_tint)
     bus.subscribe(tint.on_event)
     window.events.loaded += bridge.mark_ready
@@ -74,6 +90,8 @@ def run_window(
     try:
         webview.start()
     finally:
+        reveal.close()
+        fade.close()
         bus.unsubscribe(bridge.on_event)
         bus.unsubscribe(tint.on_event)
         if controls is not None:

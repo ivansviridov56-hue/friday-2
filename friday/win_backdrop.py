@@ -7,6 +7,8 @@ import logging
 import sys
 import threading
 
+from collections.abc import Callable
+
 from friday.backdrop_logic import (
     CHANGE_STEPS,
     DEFAULT_OPACITY,
@@ -111,7 +113,13 @@ def _apply_once(title: str, extend: bool, color: str, opacity: float) -> bool:
 class Backdrop:
     """The blurred window background; its tint can change while the window runs."""
 
-    def __init__(self, window: object, title: str) -> None:
+    def __init__(
+        self,
+        window: object,
+        title: str,
+        on_ready: Callable[[], object] | None = None,
+    ) -> None:
+        self._on_ready = on_ready
         self._window = window
         self._title = title
         self._lock = threading.Lock()
@@ -157,6 +165,8 @@ class Backdrop:
         log.info("backdrop: %s", "on" if enabled else "off (plain window)")
         with self._lock:
             self._enabled = enabled
+        if self._on_ready is not None:
+            self._on_ready()  # also when the blur is off: the window must appear
         self._change_loop()
 
     def _change_loop(self) -> None:

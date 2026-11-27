@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1599 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1626 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -61,6 +61,9 @@ Stage 32 done: start a My Wave card by its title ("включи волну <name
 wave_card_launcher.py, wave_card_ui.py, wave_card_handler.py; handler "wave_card" stands between
 "wave_mood" and "wave". Checked by voice. 32d (search fallback) is postponed. Details and open
 points are in PROGRESS.md.
+Stage 33 done (checked live): the window is cloaked until it is ready and fades in; it fades out on X
+and fades in from the tray (window_reveal.py, win_cloak.py, window_fade.py, win_fade.py).
+Next: Windows-like minimize (see PROGRESS.md, stage 33).
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -193,3 +196,5 @@ points are in PROGRESS.md.
   nothing was pressed and the phrase is a plain wave request, start the plain wave. Accepted cost:
   a missing card in "включи мою волну <name>" silently starts the plain wave.
 - 32d (search fallback) postponed by the user; the voice command (32e) was built first.
+- Window appearance (33, user): variant "A3": the whole window dissolves in at start and from the tray
+  and dissolves out on X. The early taskbar icon stays (variant A).
