@@ -1089,15 +1089,22 @@
   and changing the opacity needs that thread. Never wait for an animation there.
 - pywebview 6.2.1: hidden=True does not work with transparent=True (on_navigation_start calls
   form.Show()), hence the cloak. The taskbar icon appears before the window (left so by the user).
-- In progress next: Windows-like minimize. Probes with changed window styles (not committed):
-  WS_MINIMIZEBOX|WS_SYSMENU gave taskbar-click minimize without animation; adding WS_CAPTION gave the
-  animation but showed a frame and lost the blur, also with WM_NCCALCSIZE handled (the frame showed
-  and then was no longer visible, no blur). Header drag failed with changed styles and works without.
-  The cause is not established. Next try (chosen by the user): add the style only for the time of
-  minimize / restore. If it fails, offer an own animation based on the fade.
 - Open: the black tint is #0E0E0E in backdrop_logic.py, while the older notes say #010101; ask the
   user whether this was on purpose.
 
+## Stage 34: own minimize animation (done, checked live)
+- The minimize button and a click on the taskbar icon fade the window out while it slides 40 px down
+  (0.35 s), then minimize it; on restore it rises and fades in (friday/window_fade.py,
+  friday/win_minimize.py). The tray "Открыть" also restores a minimized window.
+- win_minimize.py subclasses the window: it takes over SC_MINIMIZE and keeps WS_MINIMIZEBOX in
+  WM_STYLECHANGING (a precaution for WinForms style rebuilds). If this fails, minimize is plain.
+- Use a private ctypes.WinDLL("user32"). Argument types set on the shared ctypes.windll.user32 break
+  pywebview's SetWindowPos (header drag). This mistake in the probes first looked like a style problem.
+- Rejected: the native Windows animation (needs WS_CAPTION). A permanent caption showed a frame and
+  no blur; a temporary one worked, but the window was opaque and another colour during the animation.
+- Known and accepted for now: the taskbar thumbnail of the minimized window is empty (the window stays
+  fully transparent). Trying to bring the picture back is postponed by the user.
+
 
 ## Next
-Candidates (ask the user): FIRST: finish the Windows-like minimize (see stage 33). Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Postponed: the empty taskbar thumbnail (stage 34). Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.

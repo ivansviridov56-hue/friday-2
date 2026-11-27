@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-33 done). It already works as a voice
+**Status:** early development (stages 0-34 done). It already works as a voice
 chat with a desktop window: hold the mouse side button X2 (or say "Пятница"),
 speak, hear the answer. It can also control Yandex Music, remember facts and
 describe the screen. Not a finished product yet.
@@ -35,7 +35,7 @@ describe the screen. Not a finished product yet.
 - Switchable look of the background circles (classic, blobs, equalizer, dots)
 - Settings panel (gear in the header): theme, transparency, circles look and island icon, saved between runs (`THEME` and `CIRCLES` in `.env` are only the starting values)
 - Tray icon: closing the window hides it to the tray, voice keeps working; exit through the tray menu
-- Smooth window: it appears only when ready and fades in and out
+- Smooth window: it appears only when ready, fades in and out, and has its own minimize animation
 - Island at the top edge of the screen: shows her state and reveals the answer word by word in step with her voice; four icon looks (dot, eyes, equalizer, blobs)
 
 ## Privacy

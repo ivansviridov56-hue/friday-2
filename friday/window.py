@@ -45,6 +45,7 @@ def run_window(
     from friday.win_backdrop import Backdrop
     from friday.win_cloak import WindowCloak
     from friday.win_fade import FormOpacity
+    from friday.win_minimize import WindowMotion
 
     window = webview.create_window(
         TITLE,
@@ -59,18 +60,27 @@ def run_window(
     )
     if window is None:
         raise RuntimeError("could not create the window")
+
+    def minimize_window() -> None:
+        if motion.attached:
+            fade.minimize()
+        else:
+            window.minimize()
+
     if controls is not None:
         controls.bind(
-            window.minimize,
+            minimize_window,
             lifecycle.hide if lifecycle is not None else window.destroy,
             window.resize,
         )
     cloak = WindowCloak(window)
-    fade = WindowFade(FormOpacity(window), window.show, window.hide)
+    motion = WindowMotion(window)
+    fade = WindowFade(FormOpacity(window), window.show, window.hide, motion=motion)
     reveal = WindowReveal(lambda: fade.appear(cloak.uncloak))
 
     def on_before_show() -> None:
         reveal.arm(cloak.cloak())
+        motion.attach(fade.minimize)
 
     def show_window() -> None:
         reveal.reveal()  # the tray "open" must work even before the window is ready
