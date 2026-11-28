@@ -1105,6 +1105,40 @@
 - Known and accepted for now: the taskbar thumbnail of the minimized window is empty (the window stays
   fully transparent). Trying to bring the picture back is postponed by the user.
 
+## Stage 35: tray icon redesign (done)
+- friday/tray_icon.py (pure Pillow, no Windows/pystray dependency, CI-tested): renders a 4x
+  supersampled RGBA icon (`make_tray_icon`, default 64x64): deep dark-glass orb with diagonal
+  cyan-cobalt-violet aura, outer vignette, top specular highlight, luminous rim, and three rounded
+  white voice bars with soft backlight glow. Uses precomputed LUTs for `Image.point` and
+  `Image.Resampling.LANCZOS`.
+- Palettes for all states (`idle`, `loading`, `listening`, `thinking`, `speaking`, `error`) and
+  optional Windows hex accent (`idle` / `loading`) are built into `tray_icon.py` (`palette_for`).
+- friday/tray.py (`_make_image`) now calls `make_tray_icon()`. Kept static for now (user chose
+  variant A).
+- Tests: 23 new tests in tests/test_tray_icon.py (1663 passed).
+- Checked live: tray icon visual in the Windows taskbar (sharp and legible at tray size).
+- Open / postponed: wiring `Tray` to `UiEventBus` for live state / Windows accent colours (variant B);
+  setting the same icon on the main window (taskbar / Alt+Tab).
+
+## Stage 36: the island's bottom edge moves with the music (done, checked live)
+- While Yandex Music plays (SMTC status, make_is_any_playing), the sound going to the speakers is
+  captured (WASAPI loopback, pyaudiowpatch), split into 16 log-spaced bands and sent to the island
+  as "eq 0 12 100 ..." lines about 30 times a second. The island blends its wavy bottom edge into an
+  equalizer (smooth between bands, fades to zero at the corners); on pause it returns to the wave.
+- New modules: eq_bands.py (band edges, band levels, EqSmoother with auto gain), spectrum.py
+  (PCM to mono, Hann window, FFT magnitudes; numpy), eq_engine.py (ties them, noise gate, tilt),
+  eq_protocol.py (the "eq" line), island_eq.py (edge shape), loopback.py (capture, live-checked),
+  eq_publisher.py (starts the capture only while Music plays; started from voice.main).
+- Edited: island_shape.py (eq and eq_mix arguments), island_model.py (set_eq, eq_mix, fade in/out),
+  island_process.py (set_eq), island_quick.py (the "eq" command), voice.py (_start_equalizer).
+- Tests: 1740 in total. numpy-dependent tests skip themselves when numpy is missing (light CI).
+- Audio never leaves the machine and is never saved; only 16 numbers per frame go to the island.
+- Open: tune TILT and COMPRESS in eq_engine.py on real music (left bars may be too strong or right
+  ones too weak); the capture follows the default speakers chosen when the music starts, so a switch
+  of the output device is picked up only on the next play.
+- Idea for later (user): make the island wider to show the lyrics of the current song; the source of
+  the lyrics is not decided yet. The edge may then get more bands.
+
 
 ## Next
-Candidates (ask the user): FIRST: ask the user what is next. Postponed: the empty taskbar thumbnail (stage 34). Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.
+Candidates (ask the user): FIRST: ask the user what is next. Postponed: the empty taskbar thumbnail (stage 34); dynamic tray icon colour (state / Windows accent) and setting the icon on the main window (stage 35). Stage 32 follow-ups: speed up the wave cards, 32d (search fallback). Island: settings for the island (text on/off, attachment style), a second colour for the blobs look (now one colour, like the other looks), then 19b and the rest. Also decide what the minimize button does once the island exists. tune each circles look one by one (size, position, brightness, speed, reaction to the voice; the blobs in the black theme are too bright); Stage 19b: control by the music circle (click = pause / resume through MusicController, name and artist on hover); more options in the settings panel (wake word on / off, voice, and others); animations of the music circle, the island and the settings panel; circles reacting to her own voice while she speaks; a window or area screenshot instead of the whole screen; shorter spoken answers (screen descriptions and "tell me about ..." take 17-45 s to speak; the user left it as is for now). X2 push-to-talk stays in any case.Possible follow-ups: tune the equalizer balance (TILT, COMPRESS); a wider island with song lyrics.

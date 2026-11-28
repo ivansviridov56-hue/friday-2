@@ -227,6 +227,27 @@ def _start_assistant(
             recorder.close()
 
 
+def _start_equalizer(island: IslandProcess):
+    """The island's bottom edge moves with the music; None if it cannot be set up."""
+    try:
+        from friday.eq_engine import EqEngine
+        from friday.eq_publisher import EqPublisher
+        from friday.loopback import LoopbackCapture
+        from friday.playback_check import make_is_any_playing
+
+        publisher = EqPublisher(
+            make_is_any_playing(list_sessions),
+            LoopbackCapture,
+            EqEngine,
+            island.set_eq,
+        )
+        publisher.start()
+        return publisher
+    except Exception:
+        log.exception("island equalizer is not available, continuing without it")
+        return None
+
+
 def main() -> None:
     from dotenv import load_dotenv
 
@@ -252,9 +273,11 @@ def main() -> None:
     tray.start()
     island = IslandProcess()
     island_bridge = None
+    eq_publisher = None
     if island.start():
         island_bridge = IslandBridge(bus, island)
         island_bridge.start()
+        eq_publisher = _start_equalizer(island)
     else:
         log.warning("island is not available, continuing without it")
     worker = threading.Thread(
@@ -271,6 +294,8 @@ def main() -> None:
     finally:
         if island_bridge is not None:
             island_bridge.close()
+        if eq_publisher is not None:
+            eq_publisher.close()
         island.stop()
         tray.close()
         stop.set()

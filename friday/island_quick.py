@@ -42,6 +42,7 @@ from PySide6.QtGui import (
 from PySide6.QtQuick import QQuickView
 
 from friday.island_logic import WAVE_PAD
+from friday.eq_protocol import parse_eq
 from friday.island_looks import is_soft_look
 from friday.island_model import (
     CAP_H,
@@ -105,8 +106,11 @@ class IslandBackend(QObject):
     def _publish(self) -> None:
         m = self._model
         args = (WINDOW_W, m.body_w, m.body_h, m.wave_amplitude, m.wave_spatial, m.phase)
-        self._outline = [QPointF(x, y) for x, y in body_outline(*args)]
-        self._line = [QPointF(x, y) for x, y in light_line(*args)]
+        levels, mix = m.eq_levels, m.eq_mix
+        outline = body_outline(*args, eq=levels, eq_mix=mix)
+        line = light_line(*args, eq=levels, eq_mix=mix)
+        self._outline = [QPointF(x, y) for x, y in outline]
+        self._line = [QPointF(x, y) for x, y in line]
         shapes = m.icon_shapes
         self._icon = [v for shape in shapes for v in shape]
         if len(shapes) != self._icon_n:
@@ -147,6 +151,9 @@ class IslandBackend(QObject):
 
     def finish_reveal(self) -> None:
         self._model.finish_reveal()
+
+    def set_eq(self, levels: list) -> None:
+        self._model.set_eq(levels, time.monotonic())
 
     # ---- properties read by the page (names are camelCase on purpose) ----
     @Property(int, constant=True)
@@ -260,6 +267,7 @@ class _Commands(QObject):
     reveal = Signal(str)
     chunk = Signal(int, int, float)
     done = Signal()
+    eq = Signal(list)
     quit_ = Signal()
 
 
@@ -298,6 +306,10 @@ def _read_stdin(commands: _Commands) -> None:
                 commands.chunk.emit(int(first), int(last), float(seconds))
             except ValueError:
                 pass
+        elif name == "eq" and arg:
+            levels = parse_eq(arg)
+            if levels is not None:
+                commands.eq.emit(levels)
         elif name == "done":
             commands.done.emit()
         elif name == "quit":
@@ -369,6 +381,7 @@ def main() -> None:
     commands.reveal.connect(backend.start_reveal)
     commands.chunk.connect(backend.reveal_chunk)
     commands.done.connect(backend.finish_reveal)
+    commands.eq.connect(backend.set_eq)
     commands.quit_.connect(app.quit)
     threading.Thread(target=_read_stdin, args=(commands,), daemon=True).start()
 

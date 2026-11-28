@@ -7,6 +7,7 @@ measure(text) -> (width, height) of the text wrapped at WRAP_W.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from typing import Callable
 
 from friday.island_logic import (
@@ -46,6 +47,9 @@ COLOR_SECONDS = 0.35
 PULSE_SECONDS = 1.3
 PULSING = frozenset({"listening", "speaking"})
 MAX_TICK = 0.1  # a longer pause between ticks counts as this long
+EQ_TIMEOUT = 0.4  # no new levels for this long: the edge goes back to the wave
+EQ_FADE_SECONDS = 0.4
+EQ_DECAY_RATE = 8.0  # 1/s, how fast frozen levels sink when the stream stops
 
 
 def _lerp(a: float, b: float, t: float) -> float:
@@ -101,6 +105,9 @@ class IslandModel:
         self._now = 0.0
         self._look = DEFAULT_LOOK
         self._icon_t = 0.0
+        self._eq_levels: list[float] = []
+        self._eq_at = -1e9
+        self._eq_p = 0.0
 
     # ---- what the window draws ----
     @property
@@ -179,6 +186,14 @@ class IslandModel:
     def icon_shapes(self) -> list[Shape]:
         return look_shapes(self._look, self._state, self._icon_t, self.pulse)
 
+    @property
+    def eq_levels(self) -> list[float]:
+        return list(self._eq_levels)
+
+    @property
+    def eq_mix(self) -> float:
+        return smoothstep(self._eq_p)
+
     # ---- commands ----
     def set_state(self, state: str) -> None:
         was_pulsing = self._state in PULSING
@@ -202,6 +217,13 @@ class IslandModel:
 
     def set_look(self, name: str) -> None:
         self._look = look_or_default(name)
+
+    def set_eq(self, levels: Sequence[float], now: float) -> None:
+        """Levels 0..1 per band, from the music; the bottom edge turns into an equalizer."""
+        if not levels:
+            return
+        self._eq_levels = [min(max(float(v), 0.0), 1.0) for v in levels]
+        self._eq_at = now
 
     def show_text(self, text: str) -> None:
         self._spans = []
@@ -260,6 +282,7 @@ class IslandModel:
         self._phase += dt * self._wave.speed
         self._pulse_t += dt
         self._icon_t += dt
+        self._step_eq(dt)
         self._color_t = min(1.0, self._color_t + dt / COLOR_SECONDS)
         self._step_expand(dt)
         self._update_reveal(now)
@@ -274,6 +297,15 @@ class IslandModel:
         )
 
     # ---- inside ----
+    def _step_eq(self, dt: float) -> None:
+        active = bool(self._eq_levels) and self._now - self._eq_at <= EQ_TIMEOUT
+        self._eq_p = step_toward(
+            self._eq_p, 1.0 if active else 0.0, dt, EQ_FADE_SECONDS
+        )
+        if not active and self._eq_levels:
+            decay = math.exp(-EQ_DECAY_RATE * dt)
+            self._eq_levels = [v * decay for v in self._eq_levels]
+
     def _step_expand(self, dt: float) -> None:
         if self._expand_p == self._expand_target:
             return

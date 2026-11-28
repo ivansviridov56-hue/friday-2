@@ -1,7 +1,7 @@
 # Handoff (read this first in a new chat)
 
 1. Read CLAUDE.md, then PROGRESS.md.
-2. Ask the user to run `pytest` and paste the result (expect 1640 passed).
+2. Ask the user to run `pytest` and paste the result (expect 1740 passed).
 3. Continue from the "Next" section of PROGRESS.md.
 4. At the end of the session, update PROGRESS.md and this file.
 
@@ -65,6 +65,11 @@ Stage 33 done (checked live): the window is cloaked until it is ready and fades 
 and fades in from the tray (window_reveal.py, win_cloak.py, window_fade.py, win_fade.py).
 Stage 34 done (checked live): own minimize animation (fade and slide down) from the button and the
 taskbar icon (window_fade.py, win_minimize.py). Next: ask the user.
+Stage 35 done (tray look checked live): anti-aliased tray icon (friday/tray_icon.py, Pillow 4x
+supersampling: dark glass orb with cyan-blue-violet aura, specular rim, and three white voice
+bars; static for now, state and Windows accent palettes already built in for later). Wired into
+friday/tray.py; 23 tests in tests/test_tray_icon.py. Next: ask the user.
+Stage 36 done (checked live): the island's bottom edge moves with the music while Yandex Music plays (loopback capture, 16 bands, friday/eq_*.py, loopback.py, island_eq.py). Open: tune TILT/COMPRESS in eq_engine.py live. Wish: a wider island with song lyrics later. Next: ask the user.
 
 ## Decisions made
 - Name: Friday 2.0, folder `Friday2`, public GitHub repo, MIT license.
@@ -201,3 +206,7 @@ taskbar icon (window_fade.py, win_minimize.py). Next: ask the user.
   and dissolves out on X. The early taskbar icon stays (variant A).
 - Minimize (34, user): the native Windows animation was rejected (opaque window while animating);
   own animation chosen (variant B), 40 px and 0.35 s. The empty thumbnail is left for later.
+- Tray icon (35, chosen by Claude on the user's "делай как лучше и красивее"): dark glass sphere
+  with cyan-blue-violet aura, specular highlight, and three white voice bars, 4x supersampled in
+  Pillow (friday/tray_icon.py). Static in the tray for now (variant A, chosen by the user); dynamic
+  state / Windows accent updates and using the icon on the main window stay as optional later steps.

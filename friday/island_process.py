@@ -10,6 +10,7 @@ import threading
 import base64
 from collections.abc import Callable
 from typing import Any
+from friday.eq_protocol import format_eq
 
 log = logging.getLogger(__name__)
 
@@ -81,6 +82,12 @@ class IslandProcess:
     def set_look(self, look: str) -> None:
         """Switch the look of the icon (dot, eyes, equalizer). Ignored when not running."""
         self._send_word("look", look)
+
+    def set_eq(self, levels: list[float]) -> None:
+        """Send equalizer levels (0..1 per band). Ignored when not running."""
+        if not levels:
+            return
+        self._send(f"eq {format_eq(levels)}\n")
 
     def show_text(self, text: str) -> None:
         """Show the answer text (sent as base64, never logged). Ignored when not running."""

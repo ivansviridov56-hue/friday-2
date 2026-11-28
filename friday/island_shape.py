@@ -6,8 +6,10 @@ The window only draws these points; the rules of the shape live here, so tests c
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 
 from friday.island_logic import edge_gap, wave_offset
+from friday.island_eq import eq_offset
 
 FLARE = 10  # the concave curve that joins the island to the top edge of the screen
 RADIUS = 14  # rounding of the bottom corners
@@ -42,6 +44,22 @@ def _edge_segments(edge_w: float) -> int:
     return n + (n % 2)  # an even count keeps the middle point and the symmetry
 
 
+def _edge_shift(
+    u: float,
+    edge_w: float,
+    phase: float,
+    amplitude: float,
+    spatial: float,
+    eq: Sequence[float],
+    eq_mix: float,
+) -> float:
+    """Shift of the bottom edge: the wave, blended into the equalizer by eq_mix (0..1)."""
+    wave = wave_offset(u, edge_w, phase, amplitude, spatial)
+    if eq_mix <= 0 or not eq:
+        return wave
+    return wave + (eq_offset(u, edge_w, eq) - wave) * min(eq_mix, 1.0)
+
+
 def body_outline(
     window_w: float,
     body_w: float,
@@ -49,6 +67,8 @@ def body_outline(
     amplitude: float,
     spatial: float,
     phase: float,
+    eq: Sequence[float] = (),
+    eq_mix: float = 0.0,
 ) -> list[Point]:
     """Closed outline of the island body, from the left flare round to the right flare."""
     _check(window_w, body_w)
@@ -65,9 +85,8 @@ def body_outline(
     n = _edge_segments(edge_w)
     for i in range(1, n):
         u = edge_w * i / n
-        points.append(
-            (edge_x0 + u, body_h + wave_offset(u, edge_w, phase, amplitude, spatial))
-        )
+        shift = _edge_shift(u, edge_w, phase, amplitude, spatial, eq, eq_mix)
+        points.append((edge_x0 + u, body_h + shift))
     for m in range(ARC_STEPS + 1):
         b = (math.pi / 2) - (math.pi / 2) * m / ARC_STEPS
         points.append(
@@ -86,6 +105,8 @@ def light_line(
     amplitude: float,
     spatial: float,
     phase: float,
+    eq: Sequence[float] = (),
+    eq_mix: float = 0.0,
 ) -> list[Point]:
     """The thin light line under the wavy edge, a little later in phase and above the edge."""
     _check(window_w, body_w)
@@ -95,6 +116,6 @@ def light_line(
     points = []
     for i in range(n + 1):
         u = edge_w * i / n
-        shift = wave_offset(u, edge_w, phase - WAVE_LAG, amplitude, spatial)
+        shift = _edge_shift(u, edge_w, phase - WAVE_LAG, amplitude, spatial, eq, eq_mix)
         points.append((edge_x0 + u, body_h + shift - edge_gap(u, edge_w)))
     return points

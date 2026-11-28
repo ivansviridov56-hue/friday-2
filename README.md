@@ -2,7 +2,7 @@
 
 An open-source, test-driven voice assistant for Windows, written in Python.
 
-**Status:** early development (stages 0-34 done). It already works as a voice
+**Status:** early development (stages 0-36 done). It already works as a voice
 chat with a desktop window: hold the mouse side button X2 (or say "Пятница"),
 speak, hear the answer. It can also control Yandex Music, remember facts and
 describe the screen. Not a finished product yet.
@@ -37,6 +37,7 @@ describe the screen. Not a finished product yet.
 - Tray icon: closing the window hides it to the tray, voice keeps working; exit through the tray menu
 - Smooth window: it appears only when ready, fades in and out, and has its own minimize animation
 - Island at the top edge of the screen: shows her state and reveals the answer word by word in step with her voice; four icon looks (dot, eyes, equalizer, blobs)
+- While Yandex Music plays, the bottom edge of the island moves like an equalizer in time with the music (the sound going to the speakers is analysed on your machine)
 
 ## Privacy
 
@@ -56,6 +57,7 @@ on the first start by the `silero` package and is not part of this repository. T
 published under a non-commercial licence (CC BY-NC, see https://github.com/snakers4/silero-models),
 so they are fine for personal use but not for commercial use. For a commercial setup, use
 `TTS_ENGINE=edge` or another voice.
+While Yandex Music plays, the sound going to your speakers is read (WASAPI loopback) and turned into 16 numbers per frame to move the island. It is analysed on your machine, never saved and never sent anywhere. When the music is paused, nothing is captured.
 
 ## Development
 
