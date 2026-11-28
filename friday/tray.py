@@ -11,14 +11,9 @@ TITLE = "Пятница"
 
 
 def _make_image():
-    from PIL import Image, ImageDraw
+    from friday.tray_icon import make_tray_icon
 
-    size = 64
-    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
-    draw.ellipse((4, 4, size - 4, size - 4), fill=(47, 94, 241, 255))
-    draw.ellipse((20, 20, size - 20, size - 20), fill=(209, 217, 255, 255))
-    return image
+    return make_tray_icon()
 
 
 class Tray:
