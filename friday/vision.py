@@ -5,6 +5,8 @@ from __future__ import annotations
 import base64
 import logging
 
+from typing import Protocol
+
 from friday.llm import CF_URL, OPENROUTER_URL, Endpoint, LLMClient, Reply
 from friday.screen_capture import Screenshot
 
@@ -43,6 +45,16 @@ VISION_CHAIN = [
 ]
 
 
+class Asker(Protocol):
+    def ask(
+        self,
+        messages: list[dict],
+        *,
+        timeout: float | None = None,
+        max_tokens: int | None = None,
+    ) -> Reply: ...
+
+
 def build_messages(screenshot: Screenshot, question: str) -> list[dict]:
     """Chat messages with the screenshot attached as a data URL."""
     text = question.strip() or DEFAULT_QUESTION
@@ -65,7 +77,7 @@ def build_vision_client() -> LLMClient:
     return LLMClient(chain=VISION_CHAIN)
 
 
-def describe(client: LLMClient, screenshot: Screenshot, question: str) -> Reply:
+def describe(client: Asker, screenshot: Screenshot, question: str) -> Reply:
     """Ask the vision chain about the screenshot; raises AllProvidersFailed."""
     return client.ask(
         build_messages(screenshot, question),
